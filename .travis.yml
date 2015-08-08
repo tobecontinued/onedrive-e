@@ -1,0 +1,24 @@
+language: python
+
+python:
+  - "3.2"
+  - "3.3"
+  - "3.4"
+  - "3.5-dev"
+  - "nightly"
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - python3-dev
+    - python3-setuptools
+
+install:
+  - python3 setup.py install
+
+before_script:
+    - python3 --version
+
+script: "python3 setup.py test"
