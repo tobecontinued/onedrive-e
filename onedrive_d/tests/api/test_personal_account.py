@@ -48,7 +48,7 @@ class TestPersonalAccount(unittest.TestCase):
                 }
             mock.post(re.compile('//login\.live\.com\.*'), json=callback)
             client = get_sample_client()
-            self.assertRaises(ValueError, accounts.get_personal_account, client, uri='http://foo/bar?error=123')
+            self.assertRaises(ValueError, accounts.get_personal_account, client, uri='http://foo/bar?code=123')
 
     def test_get_account_success_by_code(self, args=DEFAULT_CALL_ARGS):
         """

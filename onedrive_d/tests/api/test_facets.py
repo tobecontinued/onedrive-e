@@ -40,21 +40,21 @@ class TestFileSystemInfoFacet(unittest.TestCase):
         }
         self.facet = facets.FileSystemInfoFacet(self.data)
 
+    def assert_timestamp(self, obj, attr_name, dict_name, time_str):
+        timestamp = ciso8601.parse_datetime(time_str)
+        setattr(obj, attr_name, timestamp)
+        self.assertEqual(timestamp, getattr(obj, attr_name, None))  # Attribute was properly set.
+        self.assertEqual(time_str, self.data[dict_name])  # Verify that original dict was updated.
+
     def test_parse(self):
         self.assertEqual(ciso8601.parse_datetime(self.data['createdDateTime']), self.facet.created_time)
         self.assertEqual(ciso8601.parse_datetime(self.data['lastModifiedDateTime']), self.facet.modified_time)
 
     def test_set_created_time(self):
-        timestamp = ciso8601.parse_datetime('2020-04-05T06:08:10Z')
-        self.facet.created_time = timestamp
-        self.assertEqual(timestamp, self.facet.created_time)
-        self.assertEqual('2020-04-05T06:08:10Z', self.data['createdDateTime'])
+        self.assert_timestamp(self.facet, 'created_time', 'createdDateTime', '2020-04-05T06:08:10Z')
 
     def test_set_modified_time(self):
-        timestamp = ciso8601.parse_datetime('2019-04-05T09:08:11Z')
-        self.facet.modified_time = timestamp
-        self.assertEqual(timestamp, self.facet.modified_time)
-        self.assertEqual('2019-04-05T09:08:11Z', self.data['lastModifiedDateTime'])
+        self.assert_timestamp(self.facet, 'modified_time', 'lastModifiedDateTime', '2019-04-05T09:08:11Z')
 
 
 if __name__ == '__main__':

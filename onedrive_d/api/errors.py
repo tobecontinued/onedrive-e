@@ -9,6 +9,8 @@ class OneDriveError(Exception):
             self.strerror = error_with_description['error']['message']
             if self.errno == 'request_token_expired':
                 self.__class__ = OneDriveTokenExpiredError
+            elif self.errno == 'server_internal_error':
+                self.__class__ = OneDriveServerInternalError
         else:
             raise ValueError('Unknown OneDrive error format - ' + str(error_with_description))
 
@@ -17,4 +19,8 @@ class OneDriveError(Exception):
 
 
 class OneDriveTokenExpiredError(OneDriveError):
+    pass
+
+
+class OneDriveServerInternalError(OneDriveError):
     pass

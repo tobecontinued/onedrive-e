@@ -1,0 +1,9 @@
+{
+  "error": {
+    "code": "invalidRange",
+    "message": "Uploaded fragment overlaps with existing data.",
+    "innererror": {
+      "code": "fragmentOverlap"
+    }
+  }
+}
