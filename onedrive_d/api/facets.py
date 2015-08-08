@@ -22,6 +22,16 @@ class FileSystemInfoFacet:
         self._created_time = parse_datetime(data['createdDateTime'])
         self._modified_time = parse_datetime(data['lastModifiedDateTime'])
 
+    def set_datetime(self, prop, key, value):
+        """
+        Used internally to set a datetime property.
+        :param str prop: Object property name.
+        :param str key: Dictionary key name.
+        :param datetime.datetime value: A UTC datetime object denoting when the file was created on a client.
+        """
+        setattr(self, prop, value)
+        self._data[key] = value.isoformat() + 'Z'
+
     @property
     def created_time(self):
         """
@@ -34,8 +44,7 @@ class FileSystemInfoFacet:
         """
         :param datetime.datetime value: A UTC datetime object denoting when the file was created on a client.
         """
-        self._data['createdDateTime'] = value.isoformat() + 'Z'
-        self._created_time = value
+        self.set_datetime('_created_time', 'createdDateTime', value)
 
     @property
     def modified_time(self):
@@ -49,8 +58,7 @@ class FileSystemInfoFacet:
         """
         :param datetime.datetime value: A UTC datetime object denoting when the item was last modified on a client.
         """
-        self._data['lastModifiedDateTime'] = value.isoformat() + 'Z'
-        self._modified_time = value
+        self.set_datetime('_modified_time', 'lastModifiedDateTime', value)
 
 
 class HashFacet:
