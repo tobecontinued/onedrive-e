@@ -16,9 +16,16 @@ addons:
     - python3-setuptools
 
 install:
+  - pip install coverage
+  - pip install coveralls
   - python3 setup.py install
 
 before_script:
-    - python3 --version
+  - python3 --version
 
-script: "python3 setup.py test"
+script:
+  - coverage3 run --source=onedrive_d setup.py test
+
+after_success:
+  coveralls
+
