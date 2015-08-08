@@ -16,6 +16,10 @@ class TestPersonalAccount(unittest.TestCase):
     # Sample data acquired from
     # https://github.com/OneDrive/onedrive-api-docs/blob/master/auth/msa_oauth.md
 
+    DEFAULT_CALL_ARGS = {
+        'code': '123'
+    }
+
     def assert_account(self, account):
         """
         :param onedrive_d.api.accounts.PersonalAccount account:
@@ -29,11 +33,11 @@ class TestPersonalAccount(unittest.TestCase):
         self.assertIn('onedrive.readwrite', account.scope)
         self.assertGreater(account.expires_at, data['expires_in'])
 
-    def test_get_account_fail_nocode(self):
+    def test_get_account_fail_no_code(self):
         client = get_sample_client()
         self.assertRaises(ValueError, accounts.get_personal_account, client, uri='http://foo/bar?error=123')
 
-    def test_get_account_fail_badcode(self):
+    def test_get_account_fail_bad_code(self):
         with requests_mock.Mocker() as mock:
             def callback(request, context):
                 self.assertIn('code=123', request.text)
@@ -46,26 +50,28 @@ class TestPersonalAccount(unittest.TestCase):
             client = get_sample_client()
             self.assertRaises(ValueError, accounts.get_personal_account, client, uri='http://foo/bar?error=123')
 
-    def test_get_account_by_code(self):
+    def test_get_account_success_by_code(self, args=DEFAULT_CALL_ARGS):
+        """
+        Test get_personal_account() by passing it a code.
+        :param dict[str, str] args: Arguments to pass to get_personal_account().
+        """
         with requests_mock.Mocker() as mock:
             def callback(request, context):
                 self.assertIn('code=123', request.text)
                 return data
             mock.post(re.compile('//login\.live\.com\.*'), json=callback, status_code=requests.codes.ok)
             client = get_sample_client()
-            account = accounts.get_personal_account(client, code='123')
+            account = accounts.get_personal_account(client, **args)
             self.assert_account(account)
 
-    def test_get_account_by_uri(self):
-        with requests_mock.Mocker() as mock:
-            def callback(request, context):
-                self.assertIn('code=123', request.text)
-                return data
-
-            mock.post(re.compile('//login\.live\.com\.*'), json=callback, status_code=requests.codes.ok)
-            client = get_sample_client()
-            account = accounts.get_personal_account(client, uri='http://foo/bar?code=123')
-            self.assert_account(account)
+    def test_get_account_success_by_uri(self):
+        """
+        Test get_personal_account() by passing it a URL which contains a code in query string.
+        """
+        args = {
+            'uri': 'http://foo/bar?code=123'
+        }
+        self.test_get_account_success_by_code(args)
 
     def test_parse_expire_time(self):
         expires_at = 1234
