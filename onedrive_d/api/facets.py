@@ -5,7 +5,6 @@ timestamp strings.
 https://github.com/OneDrive/onedrive-api-docs/tree/master/facets
 """
 
-from datetime import datetime
 from ciso8601 import parse_datetime
 
 
@@ -26,32 +25,32 @@ class FileSystemInfoFacet:
     @property
     def created_time(self):
         """
-        :return int: The UNIX timestamp the file was created on a client.
+        :return datetime.datetime: The datetime object in UTC denoting when the file was created on a client.
         """
         return self._created_time
 
     @created_time.setter
     def created_time(self, value):
         """
-        :param int value: A UNIX timestamp.
+        :param datetime.datetime value: A UTC datetime object denoting when the file was created on a client.
         """
-        self._data['createdDateTime'] = datetime.utcfromtimestamp(value)
+        self._data['createdDateTime'] = value.isoformat() + 'Z'
         self._created_time = value
 
     @property
     def modified_time(self):
         """
-        :return int: The UNIX timestamp the file was last modified on a client.
+        :return datetime.datetime: The datetime object in UTC denoting when the file was last modified on a client.
         """
         return self._modified_time
 
     @modified_time.setter
     def modified_time(self, value):
         """
-        :param int value: A UNIX timestamp.
+        :param datetime.datetime value: A UTC datetime object denoting when the item was last modified on a client.
         """
-        self._data['lastModifiedDateTime'] = datetime.utcfromtimestamp(value)
-        self.modified_time = value
+        self._data['lastModifiedDateTime'] = value.isoformat() + 'Z'
+        self._modified_time = value
 
 
 class HashFacet:
