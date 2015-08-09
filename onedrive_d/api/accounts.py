@@ -8,7 +8,6 @@ from urllib import parse
 
 import requests
 
-from . import errors
 from . import restapi
 from ..common import logger_factory
 
@@ -94,9 +93,7 @@ class PersonalAccount:
             'refresh_token': self.refresh_token,
             'grant_type': 'refresh_token'
         }
-        request = self.session.post(self.client.OAUTH_TOKEN_URI, data=params, auto_renew=False)
-        if request.status_code != requests.codes.ok:
-            raise errors.OneDriveError(request.json())
+        request = self.session.post(self.client.OAUTH_TOKEN_URI, data=params,  auto_renew=False)
         session_info = request.json()
         self.expires_at = time.time() + session_info['expires_in']
         self.load_session(session_info)
@@ -104,8 +101,7 @@ class PersonalAccount:
     def sign_out(self):
         uri = '{0}?client_id={1}&redirect_uri={2}'.format(
             self.client.OAUTH_SIGN_OUT_URI, self.client.client_id, self.client.redirect_uri)
-        request = self.session.get(uri)
-        return request.status_code == requests.codes.ok
+        self.session.get(uri)
 
     def dump(self):
         """

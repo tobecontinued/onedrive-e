@@ -17,7 +17,12 @@ class OneDriveItemTypes:
 
 class OneDriveItem:
 
-    def __init__(self, data):
+    def __init__(self, drive, data):
+        """
+        :param onedrive_d.api.drives.DriveObject drive: The parent drive object.
+        :param dict[str, T] data: JSON response for an Item resource.
+        """
+        self.drive = drive
         self._data = data
         if 'fileSystemInfo' in data:
             self._fs_info = facets.FileSystemInfoFacet(data['fileSystemInfo'])
@@ -134,10 +139,7 @@ class OneDriveItem:
     @property
     def children(self):
         if not hasattr(self, '_children'):
-            children = self._children = {}
-            for i in self._data['children']:
-                item = OneDriveItem(i)
-                children[item.id] = item
+            self._children = {d['id']: OneDriveItem(self.drive, d) for d in self._data['children']}
         return self._children
 
     @property

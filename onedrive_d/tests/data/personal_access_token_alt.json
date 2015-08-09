@@ -1,0 +1,7 @@
+{
+  "access_token": "whatever",
+  "expires_in": 7200,
+  "refresh_token": "whatever_refresh",
+  "scope": "a b c",
+  "token_type": "bearer2"
+}

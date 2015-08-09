@@ -200,6 +200,7 @@ class FolderFacet:
     def __init__(self, data):
         self._data = data
 
+    @property
     def child_count(self):
         """
         :return int: Number of children contained immediately within this container.

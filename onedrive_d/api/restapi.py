@@ -25,10 +25,10 @@ class ManagedRESTClient:
         self.account = account
         self.proxies = proxies
 
-    def get(self, url, params=None, ok_status_code=requests.codes.ok, auto_renew=True):
+    def request(self, method, url, params, ok_status_code, auto_renew):
         while True:
             try:
-                request = self.session.get(url, params=params, proxies=self.proxies)
+                request = getattr(self.session, method)(url, **params)
                 if request.status_code != ok_status_code:
                     raise errors.OneDriveError(request.json())
                 return request
@@ -40,23 +40,30 @@ class ManagedRESTClient:
                 else:
                     raise e
 
-    def post(self, url, data=None, ok_status_code=requests.codes.ok, auto_renew=True):
-        while True:
-            try:
-                request = self.session.post(url, data=data, proxies=self.proxies)
-                if request.status_code != ok_status_code:
-                    raise errors.OneDriveError(request.json())
-                return request
-            except requests.ConnectionError:
-                self.net_mon.suspend_caller()
-            except errors.OneDriveTokenExpiredError as e:
-                if auto_renew:
-                    self.account.renew_tokens()
-                else:
-                    raise e
+    def get(self, url, params=None, ok_status_code=requests.codes.ok, auto_renew=True):
+        return self.request(
+            'get', url, {'params': params, 'proxies': self.proxies},
+            ok_status_code=ok_status_code, auto_renew=auto_renew)
+
+    def post(self, url, data=None, json=None, ok_status_code=requests.codes.ok, auto_renew=True):
+        params = {
+            'proxies': self.proxies
+        }
+        if json is not None:
+            params['json'] = json
+        else:
+            params['data'] = data
+        return self.request('post', url, params,
+                            ok_status_code=ok_status_code, auto_renew=auto_renew)
 
     def put(self, url, data, ok_status_code=requests.codes.ok, auto_renew=True):
-        pass
+        params = {
+            'proxies': self.proxies,
+            'data': data
+        }
+        return self.request('delete', url, params=params,
+                            ok_status_code=ok_status_code, auto_renew=auto_renew)
 
-    def delete(self, url, data, ok_status_code=requests.codes.ok, auto_renew=True):
-        pass
+    def delete(self, url, ok_status_code=requests.codes.ok, auto_renew=True):
+        return self.request('delete', url, {'proxies': self.proxies},
+                            ok_status_code=ok_status_code, auto_renew=auto_renew)
