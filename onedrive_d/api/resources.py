@@ -3,10 +3,18 @@ class ItemReferenceResource:
     https://github.com/OneDrive/onedrive-api-docs/blob/master/resources/itemReference.md
     """
 
-    def __init__(self, data):
+    def __init__(self, data=None, drive_id=None, id=None, path=None):
         """
         :param dict[str, str] data: Deserialized JSON dict of ItemReference resource.
         """
+        if data is None:
+            data = {}
+            if drive_id is not None:
+                data['driveId'] = drive_id
+            if id is not None:
+                data['id'] = id
+            if path is not None:
+                data['path'] = path
         self._data = data
 
     @property
@@ -25,13 +33,6 @@ class ItemReferenceResource:
         """
         return self._data['id']
 
-    @id.setter
-    def id(self, value):
-        """
-        :param str value: The string to change ID to.
-        """
-        self._data['id'] = value
-
     @property
     def path(self):
         """
@@ -39,10 +40,3 @@ class ItemReferenceResource:
         :rtype: str
         """
         return self._data['path']
-
-    @path.setter
-    def path(self, value):
-        """
-        :param str value: The string to change path to.
-        """
-        self._data['path'] = value

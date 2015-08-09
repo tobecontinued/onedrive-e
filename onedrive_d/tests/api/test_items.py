@@ -50,8 +50,9 @@ class TestImageItem(unittest.TestCase):
     def test_parse_last_modified_facet(self):
         last_modified_by = self.item.last_modified_by
         self.assertIsInstance(last_modified_by, identities.IdentitySet)
-        self.assertEqual(self.data['lastModifiedBy']['user']['displayName'], last_modified_by.user.display_name)
-        self.assertEqual(self.data['lastModifiedBy']['user']['id'], last_modified_by.user.id)
+        user = last_modified_by.user
+        self.assertEqual(self.data['lastModifiedBy']['user']['displayName'], user.display_name)
+        self.assertEqual(self.data['lastModifiedBy']['user']['id'], user.id)
         self.assertIsNone(last_modified_by.application)
         self.assertIsNone(last_modified_by.device)
 
@@ -61,8 +62,10 @@ class TestImageItem(unittest.TestCase):
         self.assertEqual(self.data['file']['mimeType'], file_facet.mime_type)
         hashes = file_facet.hashes
         self.assertIsInstance(hashes, facets.HashFacet)
-        self.assertEqual(self.data['file']['hashes']['crc32Hash'], file_facet.hashes.crc32)
-        self.assertEqual(self.data['file']['hashes']['sha1Hash'], file_facet.hashes.sha1)
+        self.assertDictEqual(
+            self.data['file']['hashes'],
+            {'crc32Hash': file_facet.hashes.crc32,
+             'sha1Hash': file_facet.hashes.sha1})
 
 
 if __name__ == '__main__':

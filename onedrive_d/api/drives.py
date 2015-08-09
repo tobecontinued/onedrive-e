@@ -126,8 +126,8 @@ class DriveObject:
         """
         Create a new directory under the specified parent directory.
         :param str name: Name of the new directory.
-        :param str parent_id: (Optional) ID of the parent directory item.
-        :param str parent_path: (Optional) Path to the parent directory item.
+        :param str | None parent_id: (Optional) ID of the parent directory item.
+        :param str | None parent_path: (Optional) Path to the parent directory item.
         :param str conflict_behavior: (Optional) What to do if name exists. One value from options.nameConflictBehavior.
         :return onedrive_d.api.items.OneDriveItem: The newly created directory item.
         """
@@ -143,18 +143,73 @@ class DriveObject:
     def upload_file(self):
         pass
 
+    def download_item(self, item_id=None, item_path=None, range_bytes=None, file=None, chunk_size=524288):
+        """
+        Download the content of an item.
+        :param str | None item_id: ID of the target item.
+        :param str | None item_path: Path to the target item.
+        :param [int, int] | None range_bytes: Range of the bytes to download.
+        :param file | None file: An opened file object. If set, write the content there. Otherwise return the content.
+        :param int chunk_size: (Required if file is set.) Write content by chunks.
+        :return bytes: The downloaded content.
+        """
+        uri = self.get_item_uri(item_id, item_path) + '/content'
+        if range_bytes is None:
+            headers = None
+            ok_status_code = requests.codes.ok
+        else:
+            headers = {'Range': 'bytes=%d-%d' % range_bytes}
+            ok_status_code = requests.codes.partial
+        request = self.root.account.session.get(uri, headers=headers, ok_status_code=ok_status_code)
+        if file is not None:
+            for chunk in request.iter_content(chunk_size):
+                file.write(chunk)
+        else:
+            return request.content
+
     def delete_item(self, item_id=None, item_path=None):
         """
         https://github.com/OneDrive/onedrive-api-docs/blob/master/items/delete.md
+        Delete the specified item on OneDrive server.
+        :param str | None item_id:  ID of the item. Required if item_path is None.
+        :param str | None item_path: Path to the item relative to drive root. Required if item_id is None.
         """
         uri = self.get_item_uri(item_id, item_path)
         self.root.account.session.delete(uri, ok_status_code=requests.codes.no_content)
 
-    def patch_item(self):
-        pass
-
-    def move_item(self):
-        pass
+    def update_item(self, item_id=None, item_path=None,
+                    new_name=None,
+                    new_description=None,
+                    new_parent_reference=None,
+                    new_file_system_info=None):
+        """
+        Update the metadata of the specified item.
+        :param str | None item_id: (Optional) ID of the target item.
+        :param str | None item_path: (Optional) Path to the target item.
+        :param str | None new_name: (Optional) If set, update the item metadata with the new name.
+        :param str | None new_description: (Optional) If set, update the item metadata with the new description.
+        :param onedrive_d.api.resources.ItemReferenceResource | None new_parent_reference: (Optional) If set,
+        move the item.
+        :param onedrive_d.api.facets.FileSystemInfoFacet | None new_file_system_info: (Optional) If set, update the
+        client-wise timestamps.
+        :return onedrive_d.api.items.OneDriveItem: The updated item.
+        """
+        if item_id is None and item_path is None:
+            raise ValueError('Root is immutable. A specific item is required.')
+        data = {}
+        if new_name is not None:
+            data['name'] = new_name
+        if new_description is not None:
+            data['description'] = new_description
+        if new_parent_reference is not None:
+            data['parentReference'] = new_parent_reference._data
+        if new_file_system_info is not None:
+            data['fileSystemInfo'] = new_file_system_info._data
+        if len(data) == 0:
+            raise ValueError('Nothing is to change.')
+        uri = self.get_item_uri(item_id, item_path)
+        request = self.root.account.session.patch(uri, data)
+        return items.OneDriveItem(self, request.json())
 
     def copy_item(self):
         pass

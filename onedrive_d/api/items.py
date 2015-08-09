@@ -20,7 +20,7 @@ class OneDriveItem:
     def __init__(self, drive, data):
         """
         :param onedrive_d.api.drives.DriveObject drive: The parent drive object.
-        :param dict[str, T] data: JSON response for an Item resource.
+        :param dict[str, str | int | T] data: JSON response for an Item resource.
         """
         self.drive = drive
         self._data = data
@@ -59,26 +59,12 @@ class OneDriveItem:
         """
         return self._data['name']
 
-    @name.setter
-    def name(self, value):
-        """
-        :param str value: New name for the item.
-        """
-        self._data['name'] = value
-
     @property
     def description(self):
         """
         :return str: Provide a user-visible description of the item. Read-write.
         """
         return self._data['description']
-
-    @description.setter
-    def description(self, value):
-        """
-        :param str value: New description for the item.
-        """
-        self._data['description'] = value
 
     @property
     def e_tag(self):
@@ -120,7 +106,9 @@ class OneDriveItem:
         """
         :return onedrive_d.api.resources.ItemReferenceResource: Parent information, if the item has a parent.
         """
-        return resources.ItemReferenceResource(self._data['parentReference'])
+        if not hasattr(self, '_parent_reference'):
+            self._parent_reference = resources.ItemReferenceResource(self._data['parentReference'])
+        return self._parent_reference
 
     @property
     def web_url(self):
@@ -134,7 +122,9 @@ class OneDriveItem:
         """
         :return onedrive_d.api.facets.FolderFacet: Folder metadata, if the item is a folder. Read-only.
         """
-        return facets.FolderFacet(self._data['folder'])
+        if not hasattr(self, '_folder_props'):
+            self._folder_props = facets.FolderFacet(self._data['folder'])
+        return self._folder_props
 
     @property
     def children(self):
@@ -147,21 +137,27 @@ class OneDriveItem:
         """
         :return onedrive_d.api.facets.FileFacet: File metadata, if the item is a file. Read-only.
         """
-        return facets.FileFacet(self._data['file'])
+        if not hasattr(self, '_file_props'):
+            self._file_props = facets.FileFacet(self._data['file'])
+        return self._file_props
 
     @property
     def image_props(self):
         """
         :return onedrive_d.api.facets.ImageFacet: Image metadata, if the item is an image. Read-only.
         """
-        return facets.ImageFacet(self._data['image'])
+        if not hasattr(self, '_image_props'):
+            self._image_props = facets.ImageFacet(self._data['image'])
+        return self._image_props
 
     @property
     def photo_props(self):
         """
         :return onedrive_d.api.facets.PhotoFacet: Photo metadata, if the item is a photo. Read-only.
         """
-        return facets.PhotoFacet(self._data['photo'])
+        if not hasattr(self, '_photo_props'):
+            self._photo_props = facets.PhotoFacet(self._data['photo'])
+        return self._photo_props
 
     @property
     def audio_props(self):

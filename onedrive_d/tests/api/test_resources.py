@@ -14,9 +14,10 @@ class TestItemReferenceResource(unittest.TestCase):
         self.assertEqual(self.data['driveId'], ref.drive_id)
         self.assertEqual(self.data['id'], ref.id)
         self.assertEqual(self.data['path'], ref.path)
-        ref.id = 'AnotherValue'
+
+    def test_construct(self):
+        ref = resources.ItemReferenceResource(id='AnotherValue', path='/foo/bar')
         self.assertEqual('AnotherValue', ref.id)
-        ref.path = '/foo/bar'
         self.assertEqual('/foo/bar', ref.path)
 
 

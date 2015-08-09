@@ -1,11 +1,14 @@
 import unittest
+from ciso8601 import parse_datetime
 
 import requests
 import requests_mock
 
 from onedrive_d.api import drives
+from onedrive_d.api import facets
 from onedrive_d.api import items
 from onedrive_d.api import options
+from onedrive_d.api import resources
 from onedrive_d.tests import get_data
 from onedrive_d.tests.api import drive_factory
 
@@ -78,6 +81,50 @@ class TestDriveObject(unittest.TestCase):
         with requests_mock.Mocker() as mock:
             mock.delete(self.drive.get_item_uri(None, None), status_code=requests.codes.no_content)
             self.drive.delete_item()
+
+    def test_update_root(self):
+        self.assertRaises(ValueError, self.drive.update_item, None, None)
+
+    def test_update_item(self):
+        new_params = {
+            'item_id': '123',
+            'new_name': 'whatever.doc',
+            'new_description': 'This is a dummy description.',
+            'new_parent_reference': resources.ItemReferenceResource(drive_id='aaa', id='012'),
+            'new_file_system_info': facets.FileSystemInfoFacet(
+                created_time=parse_datetime('1971-01-01T02:03:04Z'),
+                modified_time=parse_datetime('2008-01-02T03:04:05.06Z'))
+        }
+        with requests_mock.Mocker() as mock:
+            def callback(request, context):
+                json = request.json()
+                self.assertEqual(json['name'], new_params['new_name'])
+                self.assertEqual(json['description'], new_params['new_description'])
+                self.assertDictEqual(json['parentReference'], new_params['new_parent_reference']._data)
+                self.assertDictEqual(json['fileSystemInfo'], new_params['new_file_system_info']._data)
+                return get_data('image_item.json')
+
+            mock.patch(self.drive.get_item_uri(new_params['item_id'], None), json=callback)
+            self.drive.update_item(**new_params)
+
+    def mock_download_item(self, range_bytes=None):
+        with requests_mock.Mocker() as mock:
+            def callback(request, context):
+                if range_bytes is not None:
+                    self.assertEqual(request.headers['range'], 'bytes=%d-%d' % range_bytes)
+                    context.status_code = requests.codes.partial
+                else:
+                    context.status_code = requests.codes.ok
+                return b'hel'
+
+            mock.get(self.drive.get_item_uri(item_id='123', item_path=None) + '/content', content=callback)
+            self.drive.download_item(item_id='123', range_bytes=range_bytes)
+
+    def test_download_partial_item(self):
+        self.mock_download_item(range_bytes=(0, 4))
+
+    def test_download_full_item(self):
+        self.mock_download_item()
 
 
 if __name__ == '__main__':

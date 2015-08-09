@@ -17,10 +17,23 @@ class FileSystemInfoFacet:
     https://github.com/OneDrive/onedrive-api-docs/blob/master/facets/filesysteminfo_facet.md
     """
 
-    def __init__(self, data):
-        self._data = data
-        self._created_time = parse_datetime(data['createdDateTime'])
-        self._modified_time = parse_datetime(data['lastModifiedDateTime'])
+    def __init__(self, data=None, created_time=None, modified_time=None):
+        """
+        :param dict[str, str] | None data: A JSON dictionary of FileSystemInfoFacet.
+        :param datetime.datetime | None created_time: A datetime object for creation time.
+        :param datetime.datetime | None modified_time: A datetime object for last modification time.
+        :return:
+        """
+        if data is None:
+            self._data = {}
+            if created_time is not None:
+                self.set_datetime('_created_time', 'lastModifiedDateTime', created_time)
+            if modified_time is not None:
+                self.set_datetime('_modified_time', 'lastModifiedDateTime', modified_time)
+        else:
+            self._created_time = parse_datetime(data['createdDateTime'])
+            self._modified_time = parse_datetime(data['lastModifiedDateTime'])
+            self._data = data
 
     def set_datetime(self, prop, key, value):
         """
@@ -39,26 +52,12 @@ class FileSystemInfoFacet:
         """
         return self._created_time
 
-    @created_time.setter
-    def created_time(self, value):
-        """
-        :param datetime.datetime value: A UTC datetime object denoting when the file was created on a client.
-        """
-        self.set_datetime('_created_time', 'createdDateTime', value)
-
     @property
     def modified_time(self):
         """
         :return datetime.datetime: The datetime object in UTC denoting when the file was last modified on a client.
         """
         return self._modified_time
-
-    @modified_time.setter
-    def modified_time(self, value):
-        """
-        :param datetime.datetime value: A UTC datetime object denoting when the item was last modified on a client.
-        """
-        self.set_datetime('_modified_time', 'lastModifiedDateTime', value)
 
 
 class HashFacet:

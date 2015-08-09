@@ -40,10 +40,13 @@ class ManagedRESTClient:
                 else:
                     raise e
 
-    def get(self, url, params=None, ok_status_code=requests.codes.ok, auto_renew=True):
-        return self.request(
-            'get', url, {'params': params, 'proxies': self.proxies},
-            ok_status_code=ok_status_code, auto_renew=auto_renew)
+    def get(self, url, params=None, headers=None, ok_status_code=requests.codes.ok, auto_renew=True):
+        args = {'proxies': self.proxies}
+        if params is not None:
+            args['params'] = params
+        if headers is not None:
+            args['headers'] = headers
+        return self.request('get', url, args, ok_status_code=ok_status_code, auto_renew=auto_renew)
 
     def post(self, url, data=None, json=None, ok_status_code=requests.codes.ok, auto_renew=True):
         params = {
@@ -53,8 +56,14 @@ class ManagedRESTClient:
             params['json'] = json
         else:
             params['data'] = data
-        return self.request('post', url, params,
-                            ok_status_code=ok_status_code, auto_renew=auto_renew)
+        return self.request('post', url, params, ok_status_code=ok_status_code, auto_renew=auto_renew)
+
+    def patch(self, url, json, ok_status_code=requests.codes.ok, auto_renew=True):
+        params = {
+            'proxies': self.proxies,
+            'json': json
+        }
+        return self.request('patch', url, params, ok_status_code=ok_status_code, auto_renew=auto_renew)
 
     def put(self, url, data, ok_status_code=requests.codes.ok, auto_renew=True):
         params = {
