@@ -1,3 +1,4 @@
+import io
 import unittest
 from ciso8601 import parse_datetime
 
@@ -90,7 +91,7 @@ class TestDriveObject(unittest.TestCase):
             'item_id': '123',
             'new_name': 'whatever.doc',
             'new_description': 'This is a dummy description.',
-            'new_parent_reference': resources.ItemReferenceResource(drive_id='aaa', id='012'),
+            'new_parent_reference': resources.ItemReference(drive_id='aaa', id='012'),
             'new_file_system_info': facets.FileSystemInfoFacet(
                 created_time=parse_datetime('1971-01-01T02:03:04Z'),
                 modified_time=parse_datetime('2008-01-02T03:04:05.06Z'))
@@ -107,7 +108,7 @@ class TestDriveObject(unittest.TestCase):
             mock.patch(self.drive.get_item_uri(new_params['item_id'], None), json=callback)
             self.drive.update_item(**new_params)
 
-    def mock_download_item(self, range_bytes=None):
+    def mock_download_file(self, range_bytes=None):
         with requests_mock.Mocker() as mock:
             def callback(request, context):
                 if range_bytes is not None:
@@ -118,13 +119,64 @@ class TestDriveObject(unittest.TestCase):
                 return b'hel'
 
             mock.get(self.drive.get_item_uri(item_id='123', item_path=None) + '/content', content=callback)
-            self.drive.download_item(item_id='123', range_bytes=range_bytes)
+            self.drive.download_file(item_id='123', range_bytes=range_bytes)
 
-    def test_download_partial_item(self):
-        self.mock_download_item(range_bytes=(0, 4))
+    def test_download_partial_file(self):
+        self.mock_download_file(range_bytes=(0, 4))
 
-    def test_download_full_item(self):
-        self.mock_download_item()
+    def test_download_full_file(self):
+        self.mock_download_file()
+
+    def test_upload_small_file(self):
+        self.drive.MAX_PUT_SIZE = 10
+        input = io.BytesIO(b'12345')
+        with requests_mock.Mocker() as mock:
+            def callback(request, context):
+                name = request.path_url.split('/')[-2][:-1]
+                data = {
+                    'id': 'abc',
+                    'name': name,
+                    'size': 5,
+                    'file': {},
+                }
+                context.status_code = requests.codes.created
+                return data
+
+            mock.put(self.drive.get_item_uri('123', None) + ':/test:/content?@', json=callback)
+            item = self.drive.upload_file('test', data=input, size=5, parent_id='123')
+            self.assertEqual('test', item.name)
+            self.assertEqual(5, item.size)
+
+    def test_upload_large_file(self):
+        self.drive.MAX_PUT_SIZE = 2
+        session_url = 'https://foo/bar/accept_data'
+        input = io.BytesIO(b'12345')
+        output = io.BytesIO()
+        expected_ranges = ['0-1/5', '2-3/5', '4-4/5']
+        with requests_mock.Mocker() as mock:
+            def create_session(request, context):
+                context.status_code = requests.codes.ok
+                return {
+                    'uploadUrl': session_url,
+                    'expirationDateTime': '2020-01-01T00:00:00.0Z',
+                    'nextExpectedRanges': ['0-']
+                }
+
+            def accept_data(request, context):
+                self.assertEqual(expected_ranges.pop(0), request.headers['Content-Range'])
+                self.assertLessEqual(len(request.body), self.drive.MAX_PUT_SIZE)
+                output.write(request.body)
+                context.status_code = requests.codes.accepted
+                return {
+                    'uploadUrl': session_url,
+                    'expirationDateTime': '2020-01-01T00:00:00.0Z',
+                }
+
+            mock.post(self.drive.get_item_uri(item_id='123', item_path=None) + ':/test:/upload.createSession',
+                      json=create_session)
+            mock.put(session_url, json=accept_data)
+            self.drive.upload_file('test', data=input, size=5, parent_id='123')
+            self.assertEqual(input.getvalue(), output.getvalue())
 
 
 if __name__ == '__main__':

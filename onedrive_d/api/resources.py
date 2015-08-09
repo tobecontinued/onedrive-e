@@ -1,4 +1,7 @@
-class ItemReferenceResource:
+from ciso8601 import parse_datetime
+
+
+class ItemReference:
     """
     https://github.com/OneDrive/onedrive-api-docs/blob/master/resources/itemReference.md
     """
@@ -40,3 +43,28 @@ class ItemReferenceResource:
         :rtype: str
         """
         return self._data['path']
+
+
+class UploadSession:
+    """
+    https://github.com/OneDrive/onedrive-api-docs/blob/master/resources/uploadSession.md
+    """
+
+    def __init__(self, data):
+        self.update(data)
+
+    def update(self, data):
+        if 'uploadUrl' in data:
+            self.upload_url = data['uploadUrl']
+        if 'expirationDateTime' in data:
+            self.expires_at = parse_datetime(data['expirationDateTime'])
+        self.next_ranges = []
+        if 'nextExpectedRanges' in data:
+            for s in data['nextExpectedRanges']:
+                f, t = s.split('-', 1)
+                f = int(f)
+                if t == '':
+                    t = None
+                else:
+                    t = int(t)
+                self.next_ranges.append((f, t))

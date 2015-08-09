@@ -65,12 +65,14 @@ class ManagedRESTClient:
         }
         return self.request('patch', url, params, ok_status_code=ok_status_code, auto_renew=auto_renew)
 
-    def put(self, url, data, ok_status_code=requests.codes.ok, auto_renew=True):
+    def put(self, url, data, headers=None, ok_status_code=requests.codes.ok, auto_renew=True):
         params = {
             'proxies': self.proxies,
             'data': data
         }
-        return self.request('delete', url, params=params,
+        if headers is not None:
+            params['headers'] = headers
+        return self.request('put', url, params=params,
                             ok_status_code=ok_status_code, auto_renew=auto_renew)
 
     def delete(self, url, ok_status_code=requests.codes.ok, auto_renew=True):

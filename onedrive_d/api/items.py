@@ -104,7 +104,7 @@ class OneDriveItem:
     @property
     def parent_reference(self):
         """
-        :return onedrive_d.api.resources.ItemReferenceResource: Parent information, if the item has a parent.
+        :return onedrive_d.api.resources.ItemReference: Parent information, if the item has a parent.
         """
         if not hasattr(self, '_parent_reference'):
             self._parent_reference = resources.ItemReferenceResource(self._data['parentReference'])
