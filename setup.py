@@ -47,6 +47,7 @@ setup(
         'onedrive_d': ['lang/*.json'],
         'onedrive_d.tests': ['data/*.json']
     },
+    setup_requires=setup_requires,
     install_requires=install_requires,
     tests_require=test_requires,
     test_suite='onedrive_d.tests',
