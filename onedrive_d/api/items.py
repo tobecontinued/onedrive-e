@@ -15,12 +15,37 @@ class OneDriveItemTypes:
     ALL = [FOLDER, IMAGE, PHOTO, AUDIO, VIDEO, FILE]  # Order matters.
 
 
+class ItemCollection:
+    def __init__(self, drive, data):
+        self._drive = drive
+        self._data = data
+        self._page_count = 0
+
+    @property
+    def has_next(self):
+        """
+        :return True | False: Whether or not there are more sets to fetch.
+        """
+        return '@odata.nextLink' in self._data
+
+    def get_next(self):
+        """
+        :return [onedrive_d.api.items.OneDriveItem]: Assuming there is at least one more set, return a list of
+        OneDriveItems.
+        """
+        if self._page_count > 0:
+            request = self._drive.root.account.session.get(self._data['@odata.nextLink'])
+            self._data = request.json()
+        self._page_count += 1
+        return [OneDriveItem(self._drive, d) for d in self._data['value']]
+
+
 class OneDriveItem:
 
     def __init__(self, drive, data):
         """
         :param onedrive_d.api.drives.DriveObject drive: The parent drive object.
-        :param dict[str, str | int | T] data: JSON response for an Item resource.
+        :param dict[str, str | int | dict] data: JSON response for an Item resource.
         """
         self.drive = drive
         self._data = data

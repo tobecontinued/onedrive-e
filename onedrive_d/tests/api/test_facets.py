@@ -57,9 +57,9 @@ class TestFileSystemInfoFacet(unittest.TestCase):
 
 class TestHashFacet(unittest.TestCase):
     def test_parse_malformed(self):
-        hash = facets.HashFacet({})
-        self.assertIsNone(hash.crc32)
-        self.assertIsNone(hash.sha1)
+        h = facets.HashFacet({})
+        self.assertIsNone(h.crc32)
+        self.assertIsNone(h.sha1)
 
 
 if __name__ == '__main__':

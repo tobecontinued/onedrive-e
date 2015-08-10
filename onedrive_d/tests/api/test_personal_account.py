@@ -115,9 +115,9 @@ class TestPersonalAccount(unittest.TestCase):
         account = get_sample_account()
         dump = account.dump()
         self.assertIsInstance(dump, str)
-        data = json.loads(dump)
-        data['client'] = account.client
-        account_restore = accounts.PersonalAccount(**data)
+        d = json.loads(dump)
+        d['client'] = account.client
+        account_restore = accounts.PersonalAccount(**d)
         self.assertEqual(account.access_token, account_restore.access_token)
         self.assertEqual(account.refresh_token, account_restore.refresh_token)
         self.assertEqual(account.expires_at, account_restore.expires_at)
