@@ -94,6 +94,12 @@ class DriveObject:
         del new_drive
 
     def get_item_uri(self, item_id=None, item_path=None):
+        """
+        Generate URL to the specified item. If both item_id and item_path are None, return root item.
+        :param str | None item_id: (Optional) ID of the specified item.
+        :param str | None item_path: (Optional) Path to the specified item.
+        :rtype: str
+        """
         uri = self.drive_uri
         if item_id is not None:
             uri += '/items/' + item_id
@@ -124,7 +130,7 @@ class DriveObject:
         Assuming the target item is a directory, return a collection of all its children items.
         :param str | None item_id: (Optional) ID of the target directory.
         :param str | None item_path: (Optional) Path to the target directory.
-        :return onedrive_d.api.items.ItemCollection: An ItemCollection object.
+        :rtype: onedrive_d.api.items.ItemCollection
         """
         uri = self.get_item_uri(item_id, item_path)
         append = '/children'
@@ -142,7 +148,7 @@ class DriveObject:
         :param str | None parent_id: (Optional) ID of the parent directory item.
         :param str | None parent_path: (Optional) Path to the parent directory item.
         :param str conflict_behavior: (Optional) What to do if name exists. One value from options.nameConflictBehavior.
-        :return onedrive_d.api.items.OneDriveItem: The newly created directory item.
+        :rtype: onedrive_d.api.items.OneDriveItem
         """
         data = {
             'name': name,
@@ -163,7 +169,7 @@ class DriveObject:
         :param str | None parent_id: (Optional) ID of the parent directory.
         :param str | None parent_path: (Optional) Path to the parent directory.
         :param str conflict_behavior: (Optional) Specify the behavior to use if the file already exists.
-        :return onedrive_d.api.items.OneDriveItem: Metadata for the newly uploaded file item.
+        :rtype: onedrive_d.api.items.OneDriveItem
         """
         if size <= self.MAX_PUT_SIZE:
             return self.put_file(filename, data, parent_id, parent_path, conflict_behavior)
@@ -181,7 +187,7 @@ class DriveObject:
         :param str | None parent_id: (Optional) ID of the parent directory.
         :param str | None parent_path: (Optional) Path to the parent directory.
         :param str conflict_behavior: (Optional) Specify the behavior to use if the file already exists.
-        :return onedrive_d.api.items.OneDriveItem: Metadata for the newly uploaded file item.
+        :rtype: onedrive_d.api.items.OneDriveItem
         """
         # Create an upload session.
         if parent_id is not None:
@@ -224,7 +230,7 @@ class DriveObject:
         :param str | None parent_id: (Optional) ID of the parent directory.
         :param str | None parent_path: (Optional) Path to the parent directory.
         :param str conflict_behavior: (Optional) Specify the behavior to use if the file already exists.
-        :return onedrive_d.api.items.OneDriveItem: Metadata for the newly uploaded file item.
+        :rtype: onedrive_d.api.items.OneDriveItem
         """
         if parent_id is not None:
             parent_id += ':'
@@ -263,7 +269,7 @@ class DriveObject:
         :param (int, int) | None range_bytes: Range of the bytes to download.
         :param file | None file: An opened file object. If set, write the content there. Otherwise return the content.
         :param int chunk_size: (Required if file is set.) Write content by chunks.
-        :return bytes: The downloaded content.
+        :rtype: bytes
         """
         uri = self.get_item_uri(item_id, item_path) + '/content'
         if range_bytes is None:
@@ -304,7 +310,7 @@ class DriveObject:
         move the item.
         :param onedrive_d.api.facets.FileSystemInfoFacet | None new_file_system_info: (Optional) If set, update the
         client-wise timestamps.
-        :return onedrive_d.api.items.OneDriveItem: The updated item.
+        :rtype: onedrive_d.api.items.OneDriveItem
         """
         if item_id is None and item_path is None:
             raise ValueError('Root is immutable. A specific item is required.')
@@ -314,17 +320,38 @@ class DriveObject:
         if new_description is not None:
             data['description'] = new_description
         if new_parent_reference is not None:
-            data['parentReference'] = new_parent_reference._data
+            data['parentReference'] = new_parent_reference.data
         if new_file_system_info is not None:
-            data['fileSystemInfo'] = new_file_system_info._data
+            data['fileSystemInfo'] = new_file_system_info.data
         if len(data) == 0:
             raise ValueError('Nothing is to change.')
         uri = self.get_item_uri(item_id, item_path)
         request = self.root.account.session.patch(uri, data)
         return items.OneDriveItem(self, request.json())
 
-    def copy_item(self):
-        raise NotImplementedError('The API feature is not used yet.')
+    def copy_item(self, dest_reference, item_id=None, item_path=None, new_name=None):
+        """
+        Copy an item (including any children) on OneDrive under a new parent.
+        :param onedrive_d.api.resources.ItemReference dest_reference: Reference to new parent.
+        :param str | None item_id: (Optional) ID of the source item. Required if item_path is None.
+        :param str | None item_path: (Optional) Path to the source item. Required if item_id is None.
+        :param str | None new_name: (Optional) If set, use this name for the copied item.
+        :rtype: onedrive_d.api.resources.AsyncCopySession
+        """
+        if not isinstance(dest_reference, resources.ItemReference):
+            raise ValueError('Destination should be an ItemReference object.')
+        if item_id is None and item_path is None:
+            raise ValueError('Source of copy must be specified.')
+        uri = self.get_item_uri(item_id, item_path)
+        if item_path is not None:
+            uri += ':'
+        uri += '/action.copy'
+        data = {'parentReference': dest_reference.data}
+        if new_name is not None:
+            data['name'] = new_name
+        headers = {'Prefer': 'respond-async'}
+        request = self.root.account.session.post(uri, json=data, headers=headers)
+        return resources.AsyncCopySession(self, request.headers)
 
     def get_thumbnail(self):
         raise NotImplementedError('The API feature is not used yet.')

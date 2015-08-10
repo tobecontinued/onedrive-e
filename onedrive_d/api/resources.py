@@ -6,19 +6,11 @@ class ItemReference:
     https://github.com/OneDrive/onedrive-api-docs/blob/master/resources/itemReference.md
     """
 
-    def __init__(self, data=None, drive_id=None, id=None, path=None):
+    def __init__(self, data):
         """
         :param dict[str, str] data: Deserialized JSON dict of ItemReference resource.
         """
-        if data is None:
-            data = {}
-            if drive_id is not None:
-                data['driveId'] = drive_id
-            if id is not None:
-                data['id'] = id
-            if path is not None:
-                data['path'] = path
-        self._data = data
+        self.data = data
 
     @property
     def drive_id(self):
@@ -26,7 +18,7 @@ class ItemReference:
         Unique identifier for the Drive that contains the item.
         :rtype: str
         """
-        return self._data['driveId']
+        return self.data['driveId']
 
     @property
     def id(self):
@@ -34,7 +26,7 @@ class ItemReference:
         Unique identifier for the item.
         :rtype: str
         """
-        return self._data['id']
+        return self.data['id']
 
     @property
     def path(self):
@@ -42,7 +34,27 @@ class ItemReference:
         Path that used to navigate to the item.
         :rtype: str
         """
-        return self._data['path']
+        return self.data['path']
+
+    @classmethod
+    def build(cls, drive_id=None, id=None, path=None):
+        """
+        Build a ItemReference object from parameters.
+        :param str | None drive_id: (Optional) ID of the root drive.
+        :param str | None id: (Optional) ID of the item.
+        :param str | None path: (Optional) Path to the item relative to drive root.
+        :rtype: ItemReference
+        """
+        if id is None and path is None:
+            raise ValueError('id and path cannot be both None.')
+        data = {}
+        if drive_id is not None:
+            data['driveId'] = drive_id
+        if id is not None:
+            data['id'] = id
+        if path is not None:
+            data['path'] = path
+        return ItemReference(data)
 
 
 class UploadSession:
@@ -68,3 +80,13 @@ class UploadSession:
                 else:
                     t = int(t)
                 self.next_ranges.append((f, t))
+
+
+class AsyncCopySession:
+    """
+    Track the state of an async copy request.
+    """
+
+    def __init__(self, drive, headers):
+        self.drive = drive
+        self.url = headers['Location']

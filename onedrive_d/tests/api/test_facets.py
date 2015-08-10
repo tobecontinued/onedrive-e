@@ -40,19 +40,20 @@ class TestFileSystemInfoFacet(unittest.TestCase):
         }
         self.facet = facets.FileSystemInfoFacet(self.data)
 
-    def assert_timestamp(self, attr_name, time_str):
+    def assert_timestamp(self, attr_name, dict_key, time_str):
         obj = facets.FileSystemInfoFacet(**{attr_name: parse_datetime(time_str)})
         self.assertEqual(parse_datetime(time_str), getattr(obj, attr_name, None))
+        self.assertEqual(time_str, obj.data[dict_key])
 
     def test_parse(self):
         self.assertEqual(parse_datetime(self.data['createdDateTime']), self.facet.created_time)
         self.assertEqual(parse_datetime(self.data['lastModifiedDateTime']), self.facet.modified_time)
 
     def test_construct_ctime(self):
-        self.assert_timestamp('created_time', '2020-04-05T06:08:10Z')
+        self.assert_timestamp('created_time', 'createdDateTime', '2020-04-05T06:08:10Z')
 
     def test_construct_mtime(self):
-        self.assert_timestamp('modified_time', '2019-04-05T09:08:11Z')
+        self.assert_timestamp('modified_time', 'lastModifiedDateTime', '2019-04-05T09:08:11Z')
 
 
 class TestHashFacet(unittest.TestCase):
@@ -60,6 +61,14 @@ class TestHashFacet(unittest.TestCase):
         h = facets.HashFacet({})
         self.assertIsNone(h.crc32)
         self.assertIsNone(h.sha1)
+
+
+class TestLocationFacet(unittest.TestCase):
+    def test_parse(self):
+        data = get_data('location_facet.json')
+        facet = facets.LocationFacet(data)
+        for k, v in data.items():
+            self.assertEqual(v, getattr(facet, k), 'Property %s is wrong.' % k)
 
 
 if __name__ == '__main__':

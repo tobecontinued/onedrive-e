@@ -78,12 +78,17 @@ class TestPhotoItem(unittest.TestCase):
     def setUp(self):
         self.data = get_data('image_item.json')
         self.data['photo'] = get_data('photo_facet.json')
+        self.data['location'] = get_data('location_facet.json')
         del self.data['image']
         self.item = items.OneDriveItem(drive=get_sample_drive_object(), data=self.data)
 
     def test_photo_facet(self):
         facet = self.item.photo_props
         self.assertIsInstance(facet, facets.PhotoFacet)
+
+    def test_location_facet(self):
+        facet = self.item.location_props
+        self.assertIsInstance(facet, facets.LocationFacet)
 
 
 if __name__ == '__main__':

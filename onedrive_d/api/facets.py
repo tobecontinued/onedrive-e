@@ -22,18 +22,17 @@ class FileSystemInfoFacet:
         :param dict[str, str] | None data: A JSON dictionary of FileSystemInfoFacet.
         :param datetime.datetime | None created_time: A datetime object for creation time.
         :param datetime.datetime | None modified_time: A datetime object for last modification time.
-        :return:
         """
         if data is None:
-            self._data = {}
+            self.data = {}
             if created_time is not None:
-                self.set_datetime('_created_time', 'lastModifiedDateTime', created_time)
+                self.set_datetime('_created_time', 'createdDateTime', created_time)
             if modified_time is not None:
                 self.set_datetime('_modified_time', 'lastModifiedDateTime', modified_time)
         else:
             self._created_time = parse_datetime(data['createdDateTime'])
             self._modified_time = parse_datetime(data['lastModifiedDateTime'])
-            self._data = data
+            self.data = data
 
     def set_datetime(self, prop, key, value):
         """
@@ -43,19 +42,19 @@ class FileSystemInfoFacet:
         :param datetime.datetime value: A UTC datetime object denoting when the file was created on a client.
         """
         setattr(self, prop, value)
-        self._data[key] = value.isoformat() + 'Z'
+        self.data[key] = value.isoformat() + 'Z'
 
     @property
     def created_time(self):
         """
-        :return datetime.datetime: The datetime object in UTC denoting when the file was created on a client.
+        :rtype: datetime.datetime
         """
         return self._created_time
 
     @property
     def modified_time(self):
         """
-        :return datetime.datetime: The datetime object in UTC denoting when the file was last modified on a client.
+        :rtype: datetime.datetime
         """
         return self._modified_time
 
@@ -105,14 +104,14 @@ class FileFacet:
     @property
     def mime_type(self):
         """
-        :return str: The MIME type for the file. Determined by logic on the server.
+        :rtype: str
         """
         return self._data['mimeType']
 
     @property
     def hashes(self):
         """
-        :return HashFacet: Hashes of the file's binary content, if available.
+        :rtype: HashFacet
         """
         return HashFacet(self._data['hashes'])
 
@@ -141,56 +140,56 @@ class PhotoFacet:
     @property
     def taken_time(self):
         """
-        :return int: A UNIX timestamp representing the date and time the photo was taken.
+        :rtype: int
         """
         return parse_datetime(self._data['takenDateTime'])
 
     @property
     def camera_make(self):
         """
-        :return str: Camera manufacturer.
+        :rtype: str
         """
         return self._data['cameraMake']
 
     @property
     def camera_model(self):
         """
-        :return str: Camera model.
+        :rtype: str
         """
         return self._data['cameraModel']
 
     @property
     def f_number(self):
         """
-        :return float: The F-stop value from the camera.
+        :rtype: float
         """
         return self._data['fNumber']
 
     @property
     def exposure_denominator(self):
         """
-        :return float: The denominator for the exposure time fraction from the camera.
+        :rtype: float
         """
         return self._data['exposureDenominator']
 
     @property
     def exposure_numerator(self):
         """
-        :return float: The numerator for the exposure time fraction from the camera.
+        :rtype: float
         """
         return self._data['exposureNumerator']
 
     @property
     def focal_length(self):
         """
-        :return float: The focal length from the camera.
+        :rtype: float
         """
         return self._data['focalLength']
 
     @property
     def iso(self):
         """
-        :return float: The ISO value from the camera.
+        :rtype: float
         """
         return self._data['iso']
 
@@ -202,7 +201,7 @@ class FolderFacet:
     @property
     def child_count(self):
         """
-        :return int: Number of children contained immediately within this container.
+        :rtype: int
         """
         return self._data['childCount']
 
@@ -250,3 +249,32 @@ class QuotaFacet:
         :rtype: str
         """
         return self._data['state']
+
+
+class LocationFacet:
+    def __init__(self, data):
+        """
+        :param dict[str, float] data: JSON deserialized location facet dict.
+        """
+        self._data = data
+
+    @property
+    def altitude(self):
+        """
+        :rtype: float
+        """
+        return self._data['altitude']
+
+    @property
+    def latitude(self):
+        """
+        :rtype: float
+        """
+        return self._data['latitude']
+
+    @property
+    def longitude(self):
+        """
+        :rtype: float
+        """
+        return self._data['longitude']

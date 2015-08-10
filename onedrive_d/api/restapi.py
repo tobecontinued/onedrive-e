@@ -31,6 +31,16 @@ class ManagedRESTClient:
         self.proxies = proxies
 
     def request(self, method, url, params, ok_status_code, auto_renew):
+        """
+        Perform a HTTP request call. Do auto-recover as fits.
+        :param str method: One of {GET, POST, PATCH, PUT, DELETE}.
+        :param str url: URL of the HTTP request.
+        :param dict[str, str | dict | bytes] params: Params to send to the request call.
+        :param int ok_status_code: Expected status code for HTTP response.
+        :param True | False auto_renew: If True, auto recover the expired token.
+        :rtype: requests.Response
+        :raise errors.OneDriveError:
+        """
         while True:
             try:
                 request = getattr(self.session, method)(url, **params)
@@ -52,6 +62,15 @@ class ManagedRESTClient:
                     raise e
 
     def get(self, url, params=None, headers=None, ok_status_code=requests.codes.ok, auto_renew=True):
+        """
+        Perform a HTTP GET request.
+        :param str url: URL of the HTTP request.
+        :param dict[str, T] | None params: (Optional) Dictionary to construct query string.
+        :param dict | None headers: (Optional) Additional headers for the HTTP request.
+        :param int ok_status_code: (Optional) Expected status code for the HTTP response.
+        :param True | False auto_renew: (Optional) If True, auto recover from expired token error or Internet failure.
+        :rtype: requests.Response
+        """
         args = {'proxies': self.proxies}
         if params is not None:
             args['params'] = params
@@ -59,7 +78,17 @@ class ManagedRESTClient:
             args['headers'] = headers
         return self.request('get', url, args, ok_status_code=ok_status_code, auto_renew=auto_renew)
 
-    def post(self, url, data=None, json=None, ok_status_code=requests.codes.ok, auto_renew=True):
+    def post(self, url, data=None, json=None, headers=None, ok_status_code=requests.codes.ok, auto_renew=True):
+        """
+        Perform a HTTP POST request.
+        :param str url: URL of the HTTP request.
+        :param dict | None data: (Optional) Data in POST body of the request.
+        :param dict | None json: (Optional) Send the dictionary as JSON content in POST body and set proper headers.
+        :param dict | None headers: (Optional) Additional headers for the HTTP request.
+        :param int ok_status_code: (Optional) Expected status code for the HTTP response.
+        :param True | False auto_renew: (Optional) If True, auto recover from expired token error or Internet failure.
+        :rtype: requests.Response
+        """
         params = {
             'proxies': self.proxies
         }
@@ -67,9 +96,19 @@ class ManagedRESTClient:
             params['json'] = json
         else:
             params['data'] = data
+        if headers is not None:
+            params['headers'] = headers
         return self.request('post', url, params, ok_status_code=ok_status_code, auto_renew=auto_renew)
 
     def patch(self, url, json, ok_status_code=requests.codes.ok, auto_renew=True):
+        """
+        Perform a HTTP PATCH request.
+        :param str url: URL of the HTTP request.
+        :param dict json: Send the dictionary as JSON content in POST body and set proper headers.
+        :param int ok_status_code: (Optional) Expected status code for the HTTP response.
+        :param True | False auto_renew: (Optional) If True, auto recover from expired token error or Internet failure.
+        :rtype: requests.Response
+        """
         params = {
             'proxies': self.proxies,
             'json': json
@@ -77,6 +116,15 @@ class ManagedRESTClient:
         return self.request('patch', url, params, ok_status_code=ok_status_code, auto_renew=auto_renew)
 
     def put(self, url, data, headers=None, ok_status_code=requests.codes.ok, auto_renew=True):
+        """
+        Perform a HTTP PUT request.
+        :param str url: URL of the HTTP request.
+        :param bytes | None data: Binary data to send in the request body.
+        :param dict | None headers: Additional headers for the HTTP request.
+        :param int ok_status_code: (Optional) Expected status code for the HTTP response.
+        :param True | False auto_renew: (Optional) If True, auto recover from expired token error or Internet failure.
+        :rtype: requests.Response
+        """
         params = {
             'proxies': self.proxies,
             'data': data
@@ -87,5 +135,12 @@ class ManagedRESTClient:
                             ok_status_code=ok_status_code, auto_renew=auto_renew)
 
     def delete(self, url, ok_status_code=requests.codes.ok, auto_renew=True):
+        """
+        Perform a HTTP DELETE request on the specified URL.
+        :param str url: URL of the HTTP request.
+        :param int ok_status_code: (Optional) Expected status code for the HTTP response.
+        :param True | False auto_renew: (Optional) If True, auto recover from expired token error or Internet failure.
+        :rtype: requests.Response
+        """
         return self.request('delete', url, {'proxies': self.proxies},
                             ok_status_code=ok_status_code, auto_renew=auto_renew)

@@ -70,8 +70,10 @@ class TestPersonalAccount(unittest.TestCase):
         with requests_mock.Mocker() as mock:
             def callback(request, context):
                 self.assertIn('code=123', request.text)
+                context.status_code = requests.codes.ok
                 return data
-            mock.post(re.compile('//login\.live\.com\.*'), json=callback, status_code=requests.codes.ok)
+
+            mock.post(re.compile('//login\.live\.com\.*'), json=callback)
             client = get_sample_client()
             account = accounts.get_personal_account(client, **args)
             self.assert_account(account)

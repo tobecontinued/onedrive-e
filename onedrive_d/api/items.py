@@ -57,7 +57,7 @@ class OneDriveItem:
     @property
     def id(self):
         """
-        :return str: The unique identifier of the item within the Drive. Read-only.
+        :rtype: str
         """
         return self._data['id']
 
@@ -71,7 +71,7 @@ class OneDriveItem:
     @property
     def type(self):
         """
-        :return str: The type of the item, represented by a string in OneDriveItemTypes.
+        :rtype: str
         """
         for x in OneDriveItemTypes.ALL:
             if x in self._data:
@@ -80,56 +80,56 @@ class OneDriveItem:
     @property
     def name(self):
         """
-        :return str: The name of the item (filename and extension). Read-write.
+        :rtype: str
         """
         return self._data['name']
 
     @property
     def description(self):
         """
-        :return str: Provide a user-visible description of the item. Read-write.
+        :rtype: str
         """
         return self._data['description']
 
     @property
     def e_tag(self):
         """
-        :return str: eTag for the entire item (metadata + content). Read-only.
+        :rtype: str
         """
         return self._data['eTag']
 
     @property
     def c_tag(self):
         """
-        :return str: An eTag for the content of the item. This eTag is not changed if only the metadata is changed.
+        :rtype: str
         """
         return self._data['cTag']
 
     @property
     def created_by(self):
         """
-        :return onedrive_d.api.identities.IdentitySet: Identity of the user, device, and app which created the item.
+        :rtype: onedrive_d.api.identities.IdentitySet
         """
         return identities.IdentitySet(self._data['createdBy'])
 
     @property
     def last_modified_by(self):
         """
-        :return onedrive_d.api.identities.IdentitySet: Identity of the user, device, and app which created the item.
+        :rtype: onedrive_d.api.identities.IdentitySet
         """
         return identities.IdentitySet(self._data['lastModifiedBy'])
 
     @property
     def size(self):
         """
-        :return int: Size of the item in bytes. Read-only.
+        :rtype: int
         """
         return self._data['size']
 
     @property
     def parent_reference(self):
         """
-        :return onedrive_d.api.resources.ItemReference: Parent information, if the item has a parent.
+        :rtype: onedrive_d.api.resources.ItemReference
         """
         if not hasattr(self, '_parent_reference'):
             self._parent_reference = resources.ItemReferenceResource(self._data['parentReference'])
@@ -138,14 +138,14 @@ class OneDriveItem:
     @property
     def web_url(self):
         """
-        :return str: URL that displays the resource in the browser. Read-only.
+        :rtype: str
         """
         return self._data['webUrl']
 
     @property
     def folder_props(self):
         """
-        :return onedrive_d.api.facets.FolderFacet: Folder metadata, if the item is a folder. Read-only.
+        :rtype: onedrive_d.api.facets.FolderFacet
         """
         if not hasattr(self, '_folder_props'):
             self._folder_props = facets.FolderFacet(self._data['folder'])
@@ -160,7 +160,7 @@ class OneDriveItem:
     @property
     def file_props(self):
         """
-        :return onedrive_d.api.facets.FileFacet: File metadata, if the item is a file. Read-only.
+        :rtype: onedrive_d.api.facets.FileFacet
         """
         if not hasattr(self, '_file_props'):
             self._file_props = facets.FileFacet(self._data['file'])
@@ -169,7 +169,7 @@ class OneDriveItem:
     @property
     def image_props(self):
         """
-        :return onedrive_d.api.facets.ImageFacet: Image metadata, if the item is an image. Read-only.
+        :rtype: onedrive_d.api.facets.ImageFacet
         """
         if not hasattr(self, '_image_props'):
             self._image_props = facets.ImageFacet(self._data['image'])
@@ -178,7 +178,7 @@ class OneDriveItem:
     @property
     def photo_props(self):
         """
-        :return onedrive_d.api.facets.PhotoFacet: Photo metadata, if the item is a photo. Read-only.
+        :rtype: onedrive_d.api.facets.PhotoFacet
         """
         if not hasattr(self, '_photo_props'):
             self._photo_props = facets.PhotoFacet(self._data['photo'])
@@ -187,7 +187,7 @@ class OneDriveItem:
     @property
     def audio_props(self):
         """
-        :return onedrive_d.api.facets.AudioFacet: Audio metadata, if the item is an audio file. Read-only.
+        :rtype: onedrive_d.api.facets.AudioFacet
         """
         # TODO: finish AudioFacet
         raise NotImplementedError("Not implemented yet.")
@@ -195,7 +195,7 @@ class OneDriveItem:
     @property
     def video_props(self):
         """
-        :return onedrive_d.api.facets.VideoFacet: Video metadata, if the item is a video file. Read-only.
+        :rtype: onedrive_d.api.facets.VideoFacet
         """
         # TODO: finish VideoFacet
         raise NotImplementedError("Not implemented yet.")
@@ -203,15 +203,16 @@ class OneDriveItem:
     @property
     def location_props(self):
         """
-        :return onedrive_d.api.facets.LocationFacet: Location metadata, if the item has location data. Read-only.
+        :rtype: onedrive_d.api.facets.LocationFacet
         """
-        # TODO: finish LocationFacet
-        raise NotImplementedError("Not implemented yet.")
+        if not hasattr(self, '_location_props'):
+            self._location_pros = facets.LocationFacet(self._data['location'])
+        return self._location_pros
 
     @property
     def deletion_props(self):
         """
-        :return onedrive_d.api.facets.DeletedFacet: Information about the deleted state of the item. Read-only.
+        :rtype: onedrive_d.api.facets.DeletedFacet
         """
         # TODO: finish DeletedFacet
         raise NotImplementedError("Not implemented yet.")
@@ -226,7 +227,7 @@ class OneDriveItem:
     @property
     def created_time(self):
         """
-        :return int: A UNIX timestamp representing the time when the item was created. Client timestamp preferred.
+        :rtype: int
         """
         if self._fs_info is not None:
             return self._fs_info.created_time
@@ -235,7 +236,7 @@ class OneDriveItem:
     @property
     def modified_time(self):
         """
-        :return int: A UNIX timestamp representing the time when the item was last modified. Client timestamp preferred.
+        :rtype: int
         """
         if self._fs_info is not None:
             return self._fs_info.modified_time

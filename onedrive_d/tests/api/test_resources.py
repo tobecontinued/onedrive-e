@@ -17,7 +17,7 @@ class TestItemReference(unittest.TestCase):
         self.assertEqual(self.data['path'], ref.path)
 
     def test_construct(self):
-        ref = resources.ItemReference(id='AnotherValue', path='/foo/bar')
+        ref = resources.ItemReference.build(id='AnotherValue', path='/foo/bar')
         self.assertEqual('AnotherValue', ref.id)
         self.assertEqual('/foo/bar', ref.path)
 

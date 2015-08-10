@@ -24,10 +24,9 @@ class TestDriveRoot(unittest.TestCase):
         with requests_mock.Mocker() as mock:
             def callback(request, context):
                 response_drives = [get_data('drive.json'), get_data('drive.json')]
-                i = 0
-                for x in response_drives:
-                    x['id'] = str(i)
-                    i += 1
+                ids = [str(i) for i in range(0, 2)]
+                for d in response_drives:
+                    d['id'] = ids.pop(0)
                 context.status_code = codes.ok
                 return {'value': response_drives}
 
@@ -40,7 +39,10 @@ class TestDriveRoot(unittest.TestCase):
                 all_ids.remove(i)
             self.assertEqual(0, len(all_ids))
 
-    def test_get_drive(self, drive_id='123'):
+    def run_get_drive(self, drive_id):
+        """
+        :param str | None drive_id:
+        """
         with requests_mock.Mocker() as mock:
             path = '/drive'
             if drive_id is not None:
@@ -52,8 +54,11 @@ class TestDriveRoot(unittest.TestCase):
                 drive = self.root.get_default_drive()
             self.assertIsInstance(drive, drives.DriveObject)
 
+    def test_get_drive(self):
+        self.run_get_drive('123')
+
     def test_get_default_drive(self):
-        self.test_get_drive(None)
+        self.run_get_drive(None)
 
 
 class TestDriveObject(unittest.TestCase):
@@ -145,7 +150,7 @@ class TestDriveObject(unittest.TestCase):
             'item_id': '123',
             'new_name': 'whatever.doc',
             'new_description': 'This is a dummy description.',
-            'new_parent_reference': resources.ItemReference(drive_id='aaa', id='012'),
+            'new_parent_reference': resources.ItemReference.build(drive_id='aaa', id='012'),
             'new_file_system_info': facets.FileSystemInfoFacet(
                 created_time=parse_datetime('1971-01-01T02:03:04Z'),
                 modified_time=parse_datetime('2008-01-02T03:04:05.06Z'))
@@ -155,12 +160,16 @@ class TestDriveObject(unittest.TestCase):
                 json = request.json()
                 self.assertEqual(json['name'], new_params['new_name'])
                 self.assertEqual(json['description'], new_params['new_description'])
-                self.assertDictEqual(json['parentReference'], new_params['new_parent_reference']._data)
-                self.assertDictEqual(json['fileSystemInfo'], new_params['new_file_system_info']._data)
+                self.assertDictEqual(json['parentReference'], new_params['new_parent_reference'].data)
+                self.assertDictEqual(json['fileSystemInfo'], new_params['new_file_system_info'].data)
                 return get_data('image_item.json')
 
             mock.patch(self.drive.get_item_uri(new_params['item_id'], None), json=callback)
             self.drive.update_item(**new_params)
+
+    def test_update_item_errors(self):
+        self.assertRaises(ValueError, self.drive.update_item, None, None)  # Error when no specific item is target.
+        self.assertRaises(ValueError, self.drive.update_item, None, 'foo')  # Error when nothing is set.
 
     def test_get_file_content(self):
         with requests_mock.Mocker() as mock:
@@ -207,6 +216,10 @@ class TestDriveObject(unittest.TestCase):
         with requests_mock.Mocker() as mock:
             def callback(request, context):
                 name = request.path_url.split('/')[-2][:-1]
+                self.assertEqual('test', name)
+                self.assertEqual(5, len(request.body.getvalue()))
+                qs = request.path_url.split('?', 1)[1]
+                self.assertEqual('@name.conflictBehavior=' + options.NameConflictBehavior.FAIL, qs)
                 data = {
                     'id': 'abc',
                     'name': name,
@@ -216,10 +229,10 @@ class TestDriveObject(unittest.TestCase):
                 context.status_code = codes.created
                 return data
 
-            mock.put(self.drive.get_item_uri('123', None) + ':/test:/content?@', json=callback)
-            item = self.drive.upload_file('test', data=in_fd, size=5, parent_id='123')
-            self.assertEqual('test', item.name)
-            self.assertEqual(5, item.size)
+            mock.put(self.drive.get_item_uri('123', None) + ':/test:/content', json=callback)
+            item = self.drive.upload_file('test', data=in_fd, size=5, parent_id='123',
+                                          conflict_behavior=options.NameConflictBehavior.FAIL)
+            self.assertIsInstance(item, items.OneDriveItem)
 
     def test_upload_large_file(self):
         self.drive.MAX_PUT_SIZE = 2
@@ -229,6 +242,9 @@ class TestDriveObject(unittest.TestCase):
         expected_ranges = ['0-1/5', '2-3/5', '4-4/5']
         with requests_mock.Mocker() as mock:
             def create_session(request, context):
+                body = request.json()['item']
+                self.assertEqual('test', body['name'])
+                self.assertEqual(options.NameConflictBehavior.RENAME, body['@name.conflictBehavior'])
                 context.status_code = codes.ok
                 return {
                     'uploadUrl': session_url,
@@ -249,9 +265,39 @@ class TestDriveObject(unittest.TestCase):
             mock.post(self.drive.get_item_uri(item_id='123', item_path=None) + ':/test:/upload.createSession',
                       json=create_session)
             mock.put(session_url, json=accept_data)
-            self.drive.upload_file('test', data=input, size=5, parent_id='123')
+            self.drive.upload_file('test', data=input, size=5, parent_id='123',
+                                   conflict_behavior=options.NameConflictBehavior.RENAME)
             self.assertEqual(input.getvalue(), output.getvalue())
 
+    def test_copy_item(self):
+        new_parent = resources.ItemReference.build(id='123abc', path='/foo/bar')
+        new_name = '456.doc'
+        with requests_mock.Mocker() as mock:
+            def callback(request, context):
+                # Verify that necessary headers are properly set.
+                headers = request.headers
+                self.assertIn('Content-Type', headers)
+                self.assertEqual('application/json', headers['Content-Type'])
+                self.assertIn('Prefer', headers)
+                self.assertEqual('respond-async', headers['Prefer'])
+                # Verify that request body is correct.
+                body = request.json()
+                self.assertEqual(new_name, body['name'])
+                self.assertDictEqual(new_parent.data, body['parentReference'])
+                # Set response.
+                context.status_code = codes.ok
+                context.headers['Location'] = 'https://foo.bar/monitor'
+                return None
+
+            mock.post(self.drive.get_item_uri(None, '123') + ':/action.copy', content=callback)
+            session = self.drive.copy_item(new_parent, item_path='123', new_name=new_name)
+            self.assertIsInstance(session, resources.AsyncCopySession)
+
+    def test_copy_item_errors(self):
+        self.assertRaises(ValueError, self.drive.copy_item, {}, item_path='foo')
+        self.assertRaises(ValueError, self.drive.copy_item,
+                          resources.ItemReference.build(id='123abc', path='/foo/bar'),
+                          None, None)
 
 if __name__ == '__main__':
     unittest.main()
