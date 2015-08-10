@@ -4,12 +4,17 @@ connection error is detected, the caller thread is suspended and managed by
 network monitor.
 """
 
+import time
+
 import requests
 
 from . import errors
 
 
 class ManagedRESTClient:
+    AUTO_RETRY_SECONDS = 30
+    RECOVERABLE_STATUS_CODES = {500, 502, 503, 504}
+
     def __init__(self, session, net_mon, account, proxies=None):
         """
         :param session: Dictate a requests Session object.
@@ -30,10 +35,16 @@ class ManagedRESTClient:
             try:
                 request = getattr(self.session, method)(url, **params)
                 if request.status_code != ok_status_code:
+                    if request.status_code == requests.codes.too_many:
+                        raise errors.OneDriveRecoverableError(int(request.headers['Retry-After']))
+                    elif request.status_code in self.RECOVERABLE_STATUS_CODES:
+                        raise errors.OneDriveRecoverableError(self.AUTO_RETRY_SECONDS)
                     raise errors.OneDriveError(request.json())
                 return request
             except requests.ConnectionError:
                 self.net_mon.suspend_caller()
+            except errors.OneDriveRecoverableError as e:
+                time.sleep(e.retry_after_seconds)
             except errors.OneDriveTokenExpiredError as e:
                 if auto_renew:
                     self.account.renew_tokens()

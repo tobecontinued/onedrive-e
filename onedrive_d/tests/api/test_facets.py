@@ -55,5 +55,12 @@ class TestFileSystemInfoFacet(unittest.TestCase):
         self.assert_timestamp('modified_time', '2019-04-05T09:08:11Z')
 
 
+class TestHashFacet(unittest.TestCase):
+    def test_parse_malformed(self):
+        hash = facets.HashFacet({})
+        self.assertIsNone(hash.crc32)
+        self.assertIsNone(hash.sha1)
+
+
 if __name__ == '__main__':
     unittest.main()

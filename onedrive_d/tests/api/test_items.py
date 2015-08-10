@@ -67,6 +67,24 @@ class TestImageItem(unittest.TestCase):
             {'crc32Hash': file_facet.hashes.crc32,
              'sha1Hash': file_facet.hashes.sha1})
 
+    def test_image_facet(self):
+        image_facet = self.item.image_props
+        image_data = self.data['image']
+        self.assertEqual(image_data['height'], image_facet.height)
+        self.assertEqual(image_data['width'], image_facet.width)
+
+
+class TestPhotoItem(unittest.TestCase):
+    def setUp(self):
+        self.data = get_data('image_item.json')
+        self.data['photo'] = get_data('photo_facet.json')
+        del self.data['image']
+        self.item = items.OneDriveItem(drive=get_sample_drive_object(), data=self.data)
+
+    def test_photo_facet(self):
+        facet = self.item.photo_props
+        self.assertIsInstance(facet, facets.PhotoFacet)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -24,3 +24,9 @@ class OneDriveTokenExpiredError(OneDriveError):
 
 class OneDriveServerInternalError(OneDriveError):
     pass
+
+
+class OneDriveRecoverableError(Exception):
+    def __init__(self, retry_after_seconds):
+        super().__init__()
+        self.retry_after_seconds = retry_after_seconds

@@ -127,7 +127,7 @@ class ImageFacet:
         :param dict[str, int] data: A dictionary representing the dimension of the image
         """
         self.height = data['height']
-        self.weight = data['weight']
+        self.width = data['width']
 
 
 class PhotoFacet:

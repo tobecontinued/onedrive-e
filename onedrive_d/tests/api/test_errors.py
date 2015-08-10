@@ -33,5 +33,11 @@ class TestOneDriveTokenErrorConversion(unittest.TestCase):
         self.raise_error('error_server_internal.json', errors.OneDriveServerInternalError)
 
 
+class TestOneDriveRecoverableError(unittest.TestCase):
+    def test_parse(self):
+        error = errors.OneDriveRecoverableError(30)
+        self.assertEqual(30, error.retry_after_seconds)
+
+
 if __name__ == '__main__':
     unittest.main()
