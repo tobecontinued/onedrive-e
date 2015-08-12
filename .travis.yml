@@ -12,11 +12,13 @@ addons:
   apt:
     packages:
     - python3-dev
-    - python3-setuptools
 
 install:
+  - pip install -U pip
+  - pip install -U setuptools
   - pip install coverage
   - pip install coveralls
+  - pip install mock
   - python3 setup.py install
 
 before_script:
