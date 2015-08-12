@@ -2,42 +2,31 @@ import unittest
 from ciso8601 import parse_datetime
 
 from onedrive_d.api import facets
+from onedrive_d.api import resources
 from onedrive_d.tests import get_data
+from onedrive_d.tests import to_underscore_name
 
 
-class TestQuotaFacet(unittest.TestCase):
-    data = get_data('quota_facet.json')
-
-    def test_parse(self):
-        quota = facets.QuotaFacet(self.data)
-        self.assertEqual(self.data['total'], quota.total)
-        self.assertEqual(self.data['used'], quota.used)
-        self.assertEqual(self.data['remaining'], quota.remaining)
-        self.assertEqual(self.data['deleted'], quota.deleted)
-        self.assertEqual(self.data['state'], quota.state)
-
-
-class TestPhotoFacet(unittest.TestCase):
-    data = get_data('photo_facet.json')
-
-    def test_parse(self):
-        photo = facets.PhotoFacet(self.data)
-        self.assertEqual(parse_datetime(self.data['takenDateTime']), photo.taken_time)
-        self.assertEqual(self.data['cameraMake'], photo.camera_make)
-        self.assertEqual(self.data['cameraModel'], photo.camera_model)
-        self.assertEqual(self.data['fNumber'], photo.f_number)
-        self.assertEqual(self.data['exposureDenominator'], photo.exposure_denominator)
-        self.assertEqual(self.data['exposureNumerator'], photo.exposure_numerator)
-        self.assertEqual(self.data['focalLength'], photo.focal_length)
-        self.assertEqual(self.data['iso'], photo.iso)
+def assert_properties(test, data, obj):
+    """
+    Assuming data uses camelCase and obj properties uses underscored lowercase, test if the property in obj matches the
+    value in data.
+    :param unittest.TestCase test:
+    :param dict[str, T] data:
+    :param T obj:
+    """
+    for k, v in data.items():
+        if 'DateTime' in k:
+            k = k.replace('DateTime', 'Time')
+            v = parse_datetime(v)
+        if 'lastModified' in k:
+            k = k.replace('lastModified', 'modified')
+        test.assertEqual(v, getattr(obj, to_underscore_name(k)), 'The property %s does not match data.' % k)
 
 
 class TestFileSystemInfoFacet(unittest.TestCase):
     def setUp(self):
-        self.data = {
-            'createdDateTime': '2011-01-02T03:45:56Z',
-            'lastModifiedDateTime': '2011-01-02T04:45:56Z'
-        }
+        self.data = get_data('facets/filesysteminfo_facet.json')
         self.facet = facets.FileSystemInfoFacet(self.data)
 
     def assert_timestamp(self, attr_name, dict_key, time_str):
@@ -63,12 +52,65 @@ class TestHashFacet(unittest.TestCase):
         self.assertIsNone(h.sha1)
 
 
-class TestLocationFacet(unittest.TestCase):
-    def test_parse(self):
-        data = get_data('location_facet.json')
-        facet = facets.LocationFacet(data)
-        for k, v in data.items():
-            self.assertEqual(v, getattr(facet, k), 'Property %s is wrong.' % k)
+class TestFacets(unittest.TestCase):
+    def assert_facet(self, filename, facet):
+        data = get_data('facets/' + filename)
+        obj = facet(data)
+        assert_properties(self, data, obj)
+        return obj
+
+    def test_audio_facet(self):
+        self.assert_facet('audio_facet.json', facets.AudioFacet)
+
+    def test_deleted_facet(self):
+        self.assert_facet('deleted_facet.json', facets.DeletedFacet)
+
+    def test_location_facet(self):
+        self.assert_facet('location_facet.json', facets.LocationFacet)
+
+    def test_video_facet(self):
+        self.assert_facet('video_facet.json', facets.VideoFacet)
+
+    def test_quota_facet(self):
+        self.assert_facet('quota_facet.json', facets.QuotaFacet)
+
+    def test_photo_facet(self):
+        self.assert_facet('photo_facet.json', facets.PhotoFacet)
+
+    def test_special_folder_facet(self):
+        self.assert_facet('specialfolder_facet.json', facets.SpecialFolderFacet)
+
+
+class TestPermissionFacet(unittest.TestCase):
+    """
+    A combination test suie for PermissionFacet and SharingLinkFacet.
+    """
+
+    def setUp(self):
+        self.data = get_data('facets/permission_facet.json')
+        self.facet = facets.PermissionFacet(self.data)
+
+    def test_permission_facet(self):
+        self.assertEqual(self.data['id'], self.facet.id)
+        self.assertListEqual(self.data['roles'], self.facet.roles)
+        self.assertTrue(self.facet.can_read)
+        self.assertTrue(self.facet.can_write)
+
+    def test_sharing_link_facet(self):
+        data = self.data['link']
+        link = self.facet.link
+        self.assertEqual(data['token'], link.token)
+        self.assertEqual(data['type'], link.type)
+        self.assertEqual(data['webUrl'], link.web_url)
+        self.assertFalse(link.read_only)
+        self.assertTrue(link.read_write)
+        self.assertIsInstance(link.application, resources.Identity)
+        assert_properties(self, data['application'], link.application)
+
+    def test_inherited_from(self):
+        inheritance = self.facet.inherited_from
+        self.assertIsInstance(inheritance, resources.ItemReference)
+        assert_properties(self, self.data['inheritedFrom'], inheritance)
 
 
 if __name__ == '__main__':

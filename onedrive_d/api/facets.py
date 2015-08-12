@@ -7,6 +7,8 @@ https://github.com/OneDrive/onedrive-api-docs/tree/master/facets
 
 from ciso8601 import parse_datetime
 
+from . import resources
+
 
 class FileSystemInfoFacet:
     """
@@ -140,6 +142,7 @@ class PhotoFacet:
     @property
     def taken_time(self):
         """
+        Represents the date and time the photo was taken.
         :rtype: int
         """
         return parse_datetime(self._data['takenDateTime'])
@@ -147,6 +150,7 @@ class PhotoFacet:
     @property
     def camera_make(self):
         """
+        Camera manufacturer.
         :rtype: str
         """
         return self._data['cameraMake']
@@ -154,6 +158,7 @@ class PhotoFacet:
     @property
     def camera_model(self):
         """
+        Camera model.
         :rtype: str
         """
         return self._data['cameraModel']
@@ -161,6 +166,7 @@ class PhotoFacet:
     @property
     def f_number(self):
         """
+        The F-stop value from the camera.
         :rtype: float
         """
         return self._data['fNumber']
@@ -168,6 +174,7 @@ class PhotoFacet:
     @property
     def exposure_denominator(self):
         """
+        The denominator for the exposure time fraction from the camera.
         :rtype: float
         """
         return self._data['exposureDenominator']
@@ -175,6 +182,7 @@ class PhotoFacet:
     @property
     def exposure_numerator(self):
         """
+        The numerator for the exposure time fraction from the camera.
         :rtype: float
         """
         return self._data['exposureNumerator']
@@ -182,6 +190,7 @@ class PhotoFacet:
     @property
     def focal_length(self):
         """
+        The focal length from the camera.
         :rtype: float
         """
         return self._data['focalLength']
@@ -189,6 +198,7 @@ class PhotoFacet:
     @property
     def iso(self):
         """
+        The ISO value from the camera.
         :rtype: float
         """
         return self._data['iso']
@@ -201,9 +211,189 @@ class FolderFacet:
     @property
     def child_count(self):
         """
+        Number of children contained immediately within this container.
         :rtype: int
         """
         return self._data['childCount']
+
+
+class AudioFacet:
+    def __init__(self, data):
+        self._data = data
+
+    @property
+    def album(self):
+        """
+        The title of the album for this audio file.
+        :rtype: str
+        """
+        return self._data['album']
+
+    @property
+    def album_artist(self):
+        """
+        The artist named on the album for the audio file.
+        :rtype: str
+        """
+        return self._data['albumArtist']
+
+    @property
+    def artist(self):
+        """
+        The performing artist for the audio file.
+        :rtype: str
+        """
+        return self._data['artist']
+
+    @property
+    def bitrate(self):
+        """
+        Bitrate expressed in kbps.
+        :rtype: int
+        """
+        return self._data['bitrate']
+
+    @property
+    def composers(self):
+        """
+        The name of the composer of the audio file.
+        :rtype: str
+        """
+        return self._data['composers']
+
+    @property
+    def copyright(self):
+        """
+        Copyright information for the audio file.
+        :rtype: str
+        """
+        return self._data['copyright']
+
+    @property
+    def disc(self):
+        """
+        The number of the disc this audio file came from.
+        :rtype: int
+        """
+        return self._data['disc']
+
+    @property
+    def disc_count(self):
+        """
+        The total number of discs in this album.
+        :rtype: int
+        """
+        return self._data['discCount']
+
+    @property
+    def duration(self):
+        """
+        Duration of the audio file, expressed in milliseconds
+        :rtype: int
+        """
+        return self._data['duration']
+
+    @property
+    def genre(self):
+        """
+        The genre of this audio file.
+        :rtype: str
+        """
+        return self._data['genre']
+
+    @property
+    def has_drm(self):
+        """
+        Indicates if the file is protected with digital rights management.
+        :rtype: True | False
+        """
+        return self._data['hasDrm']
+
+    @property
+    def is_variable_bitrate(self):
+        """
+        Indicates if the file is encoded with a variable bitrate.
+        :rtype: True | False
+        """
+        return self._data['isVariableBitrate']
+
+    @property
+    def title(self):
+        """
+        The title of the audio file.
+        :rtype: str
+        """
+        return self._data['title']
+
+    @property
+    def track(self):
+        """
+        The number of the track on the original disc for this audio file.
+        :rtype: int
+        """
+        return self._data['track']
+
+    @property
+    def track_count(self):
+        """
+        The total number of tracks on the original disc for this audio file.
+        :rtype: int
+        """
+        return self._data['trackCount']
+
+    @property
+    def year(self):
+        """
+        The year the audio file was recorded.
+        :rtype: int
+        """
+        return self._data['year']
+
+
+class VideoFacet:
+    def __init__(self, data):
+        self._data = data
+
+    @property
+    def bitrate(self):
+        """
+        Bit rate of the video in bits per second.
+        :rtype: int
+        """
+        return self._data['bitrate']
+
+    @property
+    def duration(self):
+        """
+        Duration of the file in milliseconds.
+        :rtype: int
+        """
+        return self._data['duration']
+
+    @property
+    def height(self):
+        """
+        Height of the video, in pixels.
+        :rtype: int
+        """
+        return self._data['height']
+
+    @property
+    def width(self):
+        """
+        Width of the video, in pixels.
+        :rtype: int
+        """
+        return self._data['width']
+
+
+class DeletedFacet:
+    """
+    Indicates that the item on OneDrive has been deleted. OneDrive API v1.0 has no properties in it.
+    """
+
+    def __init__(self, data):
+        self._data = data
 
 
 class QuotaFacet:
@@ -278,3 +468,125 @@ class LocationFacet:
         :rtype: float
         """
         return self._data['longitude']
+
+
+class SharingLinkFacet:
+    def __init__(self, data):
+        self._data = data
+
+    @property
+    def token(self):
+        """
+        The access token that represents the current link permission. You can use this in place of
+        other authentication tokens to access the resource the current permission is set for.
+        :rtype: str
+        """
+        return self._data['token']
+
+    @property
+    def web_url(self):
+        """
+        A URL that opens the item in the browser on the OneDrive website.
+        :rtype: str
+        """
+        return self._data['webUrl']
+
+    @property
+    def type(self):
+        """
+        The type of the link created.
+        :rtype: str
+        """
+        return self._data['type']
+
+    @property
+    def read_only(self):
+        """
+        A view-only sharing link, allowing read-only access.
+        :rtype: True | False
+        """
+        return self.type == 'view'
+
+    @property
+    def read_write(self):
+        """
+        An edit sharing link, allowing read-write access.
+        :rtype: True | False
+        """
+        return self.type == 'edit'
+
+    @property
+    def application(self):
+        """
+        The app the link is associated with. The value is missing or `null` if the link is
+        associated with an official Microsoft app.
+        :rtype: resources.Identity
+        """
+        return resources.Identity(self._data['application'])
+
+
+class PermissionFacet:
+    def __init__(self, data):
+        self._data = data
+
+    @property
+    def id(self):
+        """
+        The unique identifier of the permission among all permissions on the item.
+        :rtype: str
+        """
+        return self._data['id']
+
+    @property
+    def roles(self):
+        """
+        The type of permission. A sublist of {read, write}
+        :rtype: [str]
+        """
+        return self._data['roles']
+
+    @property
+    def can_read(self):
+        """
+        If the permission allows for reading.
+        :rtype: True | False
+        """
+        return 'read' in self._data['roles']
+
+    @property
+    def can_write(self):
+        """
+        If the permission allows for writing.
+        :rtype: True | False
+        """
+        return 'write' in self._data['roles']
+
+    @property
+    def link(self):
+        """
+        Provides the link details of the current permission, if it is a link type permissions.
+        :rtype: SharingLinkFacet
+        """
+        return SharingLinkFacet(self._data['link'])
+
+    @property
+    def inherited_from(self):
+        """
+        Provides a reference to the ancestor of the current permission, if it is inherited from an
+        ancestor.
+        :rtype: resources.ItemReference
+        """
+        return resources.ItemReference(self._data['inheritedFrom'])
+
+
+class SpecialFolderFacet:
+    def __init__(self, data):
+        self._data = data
+
+    @property
+    def name(self):
+        """
+        The unique identifier for this item in the `/drive/special` collection
+        :rtype: str
+        """
+        return self._data['name']

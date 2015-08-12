@@ -4,8 +4,8 @@ from ciso8601 import parse_datetime
 import unittest
 
 from onedrive_d.api import facets
-from onedrive_d.api import identities
 from onedrive_d.api import items
+from onedrive_d.api import resources
 from onedrive_d.tests import get_data
 from onedrive_d.tests.api.drive_factory import get_sample_drive_object
 
@@ -49,7 +49,7 @@ class TestImageItem(unittest.TestCase):
 
     def test_parse_last_modified_facet(self):
         last_modified_by = self.item.last_modified_by
-        self.assertIsInstance(last_modified_by, identities.IdentitySet)
+        self.assertIsInstance(last_modified_by, resources.IdentitySet)
         user = last_modified_by.user
         self.assertEqual(self.data['lastModifiedBy']['user']['displayName'], user.display_name)
         self.assertEqual(self.data['lastModifiedBy']['user']['id'], user.id)
@@ -77,8 +77,9 @@ class TestImageItem(unittest.TestCase):
 class TestPhotoItem(unittest.TestCase):
     def setUp(self):
         self.data = get_data('image_item.json')
-        self.data['photo'] = get_data('photo_facet.json')
-        self.data['location'] = get_data('location_facet.json')
+        self.data['photo'] = get_data('facets/photo_facet.json')
+        self.data['location'] = get_data('facets/location_facet.json')
+        self.data['parentReference'] = get_data('item_reference.json')
         del self.data['image']
         self.item = items.OneDriveItem(drive=get_sample_drive_object(), data=self.data)
 
@@ -89,6 +90,10 @@ class TestPhotoItem(unittest.TestCase):
     def test_location_facet(self):
         facet = self.item.location_props
         self.assertIsInstance(facet, facets.LocationFacet)
+
+    def test_parent_reference(self):
+        ref = self.item.parent_reference
+        self.assertIsInstance(ref, resources.ItemReference)
 
 
 if __name__ == '__main__':

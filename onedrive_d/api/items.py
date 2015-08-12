@@ -1,6 +1,5 @@
 from ciso8601 import parse_datetime
 
-from . import identities
 from . import resources
 from . import facets
 
@@ -41,7 +40,6 @@ class ItemCollection:
 
 
 class OneDriveItem:
-
     def __init__(self, drive, data):
         """
         :param onedrive_d.api.drives.DriveObject drive: The parent drive object.
@@ -108,16 +106,16 @@ class OneDriveItem:
     @property
     def created_by(self):
         """
-        :rtype: onedrive_d.api.identities.IdentitySet
+        :rtype: resources.IdentitySet
         """
-        return identities.IdentitySet(self._data['createdBy'])
+        return resources.IdentitySet(self._data['createdBy'])
 
     @property
     def last_modified_by(self):
         """
-        :rtype: onedrive_d.api.identities.IdentitySet
+        :rtype: resources.IdentitySet
         """
-        return identities.IdentitySet(self._data['lastModifiedBy'])
+        return resources.IdentitySet(self._data['lastModifiedBy'])
 
     @property
     def size(self):
@@ -132,7 +130,7 @@ class OneDriveItem:
         :rtype: onedrive_d.api.resources.ItemReference
         """
         if not hasattr(self, '_parent_reference'):
-            self._parent_reference = resources.ItemReferenceResource(self._data['parentReference'])
+            self._parent_reference = resources.ItemReference(self._data['parentReference'])
         return self._parent_reference
 
     @property
