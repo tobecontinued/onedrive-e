@@ -2,7 +2,11 @@ __author__ = 'xb'
 
 import unittest
 
-from mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
+
 import requests
 from requests_mock import Mocker
 
