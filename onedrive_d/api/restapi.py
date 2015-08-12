@@ -25,8 +25,6 @@ class ManagedRESTClient:
         :param dict[str, str] proxies: (Optional) A dictionary of protocol-host pairs.
         :return: No return value.
         """
-        if session is None:
-            session = requests.Session()
         self.session = session
         self.net_mon = net_mon
         self.account = account

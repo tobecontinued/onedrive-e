@@ -21,6 +21,7 @@ install_requires = [
 
 test_requires = [
     'requests-mock>=0.6',
+    'mock>=1.3.0',
     'coverage>=3.7.1'
 ]
 
