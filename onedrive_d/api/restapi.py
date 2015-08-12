@@ -14,7 +14,7 @@ from ..common import logger_factory
 
 class ManagedRESTClient:
     AUTO_RETRY_SECONDS = 30
-    RECOVERABLE_STATUS_CODES = {500, 502, 503, 504}
+    RECOVERABLE_STATUS_CODES = {requests.codes.too_many, 500, 502, 503, 504}
     logger = logger_factory.get_logger('RESTClient')
 
     def __init__(self, session, net_mon, account, proxies=None):
@@ -45,12 +45,14 @@ class ManagedRESTClient:
             try:
                 request = getattr(self.session, method)(url, **params)
                 if request.status_code != ok_status_code:
-                    if request.status_code == requests.codes.too_many:
-                        retry_after_seconds = int(request.headers['Retry-After'])
-                        self.logger.info('Server reported too many requests. Retry in %d seconds.', retry_after_seconds)
+                    if request.status_code in self.RECOVERABLE_STATUS_CODES:
+                        if 'Retry-After' in request.headers:
+                            retry_after_seconds = int(request.headers['Retry-After'])
+                        else:
+                            retry_after_seconds = self.AUTO_RETRY_SECONDS
+                        self.logger.info('Server returned code %d which is assumed recoverable. Retry in %d seconds',
+                                         request.status_code, retry_after_seconds)
                         raise errors.OneDriveRecoverableError(retry_after_seconds)
-                    elif request.status_code in self.RECOVERABLE_STATUS_CODES:
-                        raise errors.OneDriveRecoverableError(self.AUTO_RETRY_SECONDS)
                     raise errors.OneDriveError(request.json())
                 return request
             except requests.ConnectionError:
