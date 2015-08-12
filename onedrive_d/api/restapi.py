@@ -15,7 +15,7 @@ from ..common import logger_factory
 class ManagedRESTClient:
     AUTO_RETRY_SECONDS = 30
     RECOVERABLE_STATUS_CODES = {requests.codes.too_many, 500, 502, 503, 504}
-    logger = logger_factory.get_logger('RESTClient')
+    logger = logger_factory.get_logger(__name__)
 
     def __init__(self, session, net_mon, account, proxies=None):
         """
