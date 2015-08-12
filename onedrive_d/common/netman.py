@@ -24,6 +24,7 @@ class NetworkMonitor(threading.Thread):
         """
         super().__init__()
         self.name = NetworkMonitor.THREAD_NAME
+        self.daemon = True
         self.test_uri = test_uri
         self.retry_delay = retry_delay_sec
         self.proxies = proxies
@@ -42,7 +43,7 @@ class NetworkMonitor(threading.Thread):
         cond.wait()
         # Thread is waken up by manager
         cond.release()
-        del self.conditions[me]
+        del self.conditions[me.ident]
         self.logger.info("Resumed.")
 
     def is_connected(self):
@@ -65,4 +66,3 @@ class NetworkMonitor(threading.Thread):
             self.conditions[th.ident].acquire()
             self.conditions[th.ident].notify()
             self.conditions[th.ident].release()
-        self.logger.info("Exit.")
