@@ -1,10 +1,10 @@
 language: python
 
 python:
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "3.5-dev"
+  - 3.2
+  - 3.3
+  - 3.4
+  - 3.5-dev
 
 sudo: false
 
@@ -12,11 +12,14 @@ addons:
   apt:
     packages:
     - python3-dev
-    - python3-setuptools
 
 install:
-  - pip install coverage
-  - pip install coveralls
+  - pip install -U pip
+  - pip3 install -U setuptools
+  - pip3 install coverage
+  - pip3 install coveralls
+  # Python 3.2 does not have mock library built-in.
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then pip3 install mock; fi
   - python3 setup.py install
 
 before_script:
@@ -27,4 +30,3 @@ script:
 
 after_success:
   coveralls
-
