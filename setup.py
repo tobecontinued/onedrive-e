@@ -10,6 +10,8 @@ A Microsoft OneDrive client for Linux.
 :license: GPL 3.0
 """
 
+import sys
+
 from setuptools import setup
 
 setup_requires = []
@@ -21,9 +23,16 @@ install_requires = [
 
 test_requires = [
     'requests-mock>=0.6',
-    'mock>=1.3.0',
     'coverage>=3.7.1'
 ]
+
+python_version = sys.version_info
+
+if python_version[0] < 3:
+    raise Exception('This package does not support Python 2.x. Please run with Python 3.x and newer instead.')
+
+if python_version[0] == 3 and python_version[1] == 2:
+    test_requires.append('mock>=1.3.0')
 
 setup(
     name='onedrive_d',
