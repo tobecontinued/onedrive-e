@@ -32,7 +32,13 @@ To check if you have the correct Python interpreter, run
 $ python3 --version
 ```
 
-Because the CLI runs as a Linux daemon, some system-level packages are required: `python3-dev`.
+Because the CLI runs as a Linux daemon and some dependency packages are written in CPython, some system-level packages are required: `python3-dev`. If you do not have `gcc` installed, for example, on Debian 8, you may also need to install the package `gcc`.
+
+It is suggested that you install the latest version of `pip3` and `setuptools`:
+```bash
+wget -O- https://bootstrap.pypa.io/get-pip.py | sudo python3
+sudo pip3 install --upgrade setuptools
+```
 
 ## Install
 
