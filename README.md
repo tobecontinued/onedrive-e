@@ -28,7 +28,7 @@ Python versions: `3.2`, `3.3`, `3.4`, `3.5-dev`.
 
 To check if you have the correct Python interpreter, run
 
-```
+```bash
 $ python3 --version
 ```
 
@@ -36,15 +36,18 @@ Because the CLI runs as a Linux daemon and some dependency packages are written 
 
 It is suggested that you install the latest version of `pip3` and `setuptools`:
 ```bash
-wget -O- https://bootstrap.pypa.io/get-pip.py | sudo python3
-sudo pip3 install --upgrade setuptools
+# Download the latest pip package from source
+$ wget -O- https://bootstrap.pypa.io/get-pip.py | sudo python3
+
+# Use pip3 to upgrade setuptools
+$ sudo pip3 install --upgrade setuptools
 ```
 
 ## Install
 
 After properly setting up pre-requisites, run the following command to install the package:
 
-```
+```bash
 # use sudo to install the package system-wide
 
 # Install onedrive-d with no GUI support
