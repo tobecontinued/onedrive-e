@@ -18,7 +18,8 @@ setup_requires = []
 
 install_requires = [
     'ciso8601>=1.0.1',
-    'requests>=2.0'
+    'requests>=2.0',
+    'zgitignore>=0.6'
 ]
 
 test_requires = [
