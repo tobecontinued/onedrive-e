@@ -43,7 +43,7 @@ class OneDriveItem:
     def __init__(self, drive, data):
         """
         :param onedrive_d.api.drives.DriveObject drive: The parent drive object.
-        :param dict[str, str | int | dict] data: JSON response for an Item resource.
+        :param dict[str, str | int | dict[str, str | int | dict]] data: JSON response for an Item resource.
         """
         self.drive = drive
         self._data = data
@@ -124,14 +124,17 @@ class OneDriveItem:
         """
         return self._data['size']
 
+    def _get_prop(self, prop, key, type):
+        if not hasattr(self, prop):
+            setattr(self, prop, type(self._data[key]))
+        return getattr(self, prop)
+
     @property
     def parent_reference(self):
         """
         :rtype: onedrive_d.api.resources.ItemReference
         """
-        if not hasattr(self, '_parent_reference'):
-            self._parent_reference = resources.ItemReference(self._data['parentReference'])
-        return self._parent_reference
+        return self._get_prop('_parent_reference', 'parentReference', resources.ItemReference)
 
     @property
     def web_url(self):
@@ -145,9 +148,7 @@ class OneDriveItem:
         """
         :rtype: onedrive_d.api.facets.FolderFacet
         """
-        if not hasattr(self, '_folder_props'):
-            self._folder_props = facets.FolderFacet(self._data['folder'])
-        return self._folder_props
+        return self._get_prop('_folder_props', 'folder', facets.FolderFacet)
 
     @property
     def children(self):
@@ -160,60 +161,56 @@ class OneDriveItem:
         """
         :rtype: onedrive_d.api.facets.FileFacet
         """
-        if not hasattr(self, '_file_props'):
-            self._file_props = facets.FileFacet(self._data['file'])
-        return self._file_props
+        return self._get_prop('_file_props', 'file', facets.FileFacet)
 
     @property
     def image_props(self):
         """
         :rtype: onedrive_d.api.facets.ImageFacet
         """
-        if not hasattr(self, '_image_props'):
-            self._image_props = facets.ImageFacet(self._data['image'])
-        return self._image_props
+        return self._get_prop('_image_props', 'image', facets.ImageFacet)
 
     @property
     def photo_props(self):
         """
         :rtype: onedrive_d.api.facets.PhotoFacet
         """
-        if not hasattr(self, '_photo_props'):
-            self._photo_props = facets.PhotoFacet(self._data['photo'])
-        return self._photo_props
+        return self._get_prop('_photo_props', 'photo', facets.PhotoFacet)
 
     @property
     def audio_props(self):
         """
         :rtype: onedrive_d.api.facets.AudioFacet
         """
-        # TODO: finish AudioFacet
-        raise NotImplementedError("Not implemented yet.")
+        return self._get_prop('_audio_props', 'audio', facets.AudioFacet)
 
     @property
     def video_props(self):
         """
         :rtype: onedrive_d.api.facets.VideoFacet
         """
-        # TODO: finish VideoFacet
-        raise NotImplementedError("Not implemented yet.")
+        return self._get_prop('_video_props', 'video', facets.VideoFacet)
 
     @property
     def location_props(self):
         """
         :rtype: onedrive_d.api.facets.LocationFacet
         """
-        if not hasattr(self, '_location_props'):
-            self._location_pros = facets.LocationFacet(self._data['location'])
-        return self._location_pros
+        return self._get_prop('_location_props', 'location', facets.LocationFacet)
 
     @property
-    def deletion_props(self):
+    def deleted_props(self):
         """
         :rtype: onedrive_d.api.facets.DeletedFacet
         """
-        # TODO: finish DeletedFacet
-        raise NotImplementedError("Not implemented yet.")
+        return self._get_prop('_deleted_props', 'deleted', facets.DeletedFacet)
+
+    @property
+    def special_folder_props(self):
+        """
+        :rtype: onedrive_d.api.facets.DeletedFacet
+        """
+        return self._get_prop('_special_folder_props', 'specialFolder', facets.SpecialFolderFacet)
 
     @property
     def fs_info(self):

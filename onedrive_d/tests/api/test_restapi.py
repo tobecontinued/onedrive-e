@@ -25,7 +25,7 @@ class TestManagedRESTClient(unittest.TestCase):
         rest_client = restapi.ManagedRESTClient(session=requests.Session(), net_mon=None, account=None, proxies=None)
         status_codes = [status_code, requests.codes.ok]
 
-        def callback(request, context):
+        def callback(req, context):
             context.status_code = status_codes.pop(0)
             if context.status_code == status_code:
                 if retry_after_seconds is not None:

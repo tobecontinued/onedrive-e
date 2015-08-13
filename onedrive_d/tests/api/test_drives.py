@@ -63,7 +63,13 @@ class TestDriveRoot(unittest.TestCase):
 
 class TestDriveObject(unittest.TestCase):
     def setUp(self):
-        self.drive = drive_factory.get_sample_drive_object()
+        self.data = get_data('drive.json')
+        self.drive = drive_factory.get_sample_drive_object(self.data)
+
+    def test_parse(self):
+        self.assertEqual(self.data['id'], self.drive.id)
+        self.assertEqual(self.data['driveType'], self.drive.type)
+        self.assertIsInstance(self.drive.quota, facets.QuotaFacet)
 
     def test_get_root(self):
         with requests_mock.Mocker() as mock:

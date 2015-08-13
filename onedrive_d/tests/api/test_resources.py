@@ -24,6 +24,7 @@ class TestItemReference(unittest.TestCase):
     def test_build_errors(self):
         self.assertRaises(ValueError, resources.ItemReference.build, id=None, path=None)
 
+
 class TestUploadSession(unittest.TestCase):
     def test_parse(self):
         data = get_data('upload_session.json')

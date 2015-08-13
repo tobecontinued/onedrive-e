@@ -2,7 +2,7 @@
 OneDrive API client abstraction. Each client holds at least one Account typed object.
 """
 
-from urllib import parse
+from urllib.parse import urlencode
 
 
 class PersonalClient:
@@ -46,7 +46,7 @@ class PersonalClient:
             'display': display,
             'locale': locale
         }
-        return self.OAUTH_AUTH_URL + '?' + parse.urlencode(params)
+        return self.OAUTH_AUTH_URL + '?' + urlencode(params)
 
 
 class BusinessClient:

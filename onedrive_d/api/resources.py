@@ -65,6 +65,7 @@ class UploadSession:
     def __init__(self, data):
         self.update(data)
 
+    # noinspection PyAttributeOutsideInit
     def update(self, data):
         if 'uploadUrl' in data:
             self.upload_url = data['uploadUrl']

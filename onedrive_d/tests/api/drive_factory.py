@@ -10,5 +10,5 @@ def get_sample_drive_root():
     return drives.DriveRoot(account)
 
 
-def get_sample_drive_object():
-    return drives.DriveObject(root=get_sample_drive_root(), data=get_data('drive.json'))
+def get_sample_drive_object(data=get_data('drive.json')):
+    return drives.DriveObject(root=get_sample_drive_root(), data=data)
