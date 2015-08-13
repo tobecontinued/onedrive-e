@@ -15,7 +15,7 @@ This section discusses how to write an ignore list file and tell `onedrive-d` to
 The default ignore list is stored as a file in `~/.onedrive/ignore_list_v4.txt`. You can add more
 lists with `onedrive-pref` utility.
 
-### Rule
+### Specify what to ignore
 
 The rules follow [`.gitignore` format](http://git-scm.com/docs/gitignore) but with a few caveats.
 
@@ -23,7 +23,7 @@ Here is a quick reference guide:
 
 __(0) Each line contains a single rule. Lines starting with '#' are comments.__
 
-__(1) Rules are ___case-INsensitive___ to conform to NTFS naming rules.__
+__(1) Rules are case-INsensitive to conform to NTFS naming rules.__
 
 __(2) To ignore an item (i.e., either a file or a directory) called `foo` in ANY directory, add line:__
 
@@ -31,7 +31,7 @@ __(2) To ignore an item (i.e., either a file or a directory) called `foo` in ANY
 foo
 ```
 
-__(3) To ignore a __directory__ called `foo` in ANY directory, add line:__
+__(3) To ignore a directory called `foo` in ANY directory, add line:__
 
 ```sh
 foo/
