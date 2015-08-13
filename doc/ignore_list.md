@@ -105,13 +105,14 @@ This way, files like `/path-ignored/oops` will be ignored but `/path-ignored/kee
 
 Note that if you have a rule to ignore the directory `path-ignored/`, then `onedrive-d` will NOT touch anything in that directory, and therefore, in this case the rule `!path-ignored/keep` will not take effect.
 
-__(10) For files starting with a hashtag `#`, instead of writing a rule like, say, '\#test#' (`.gitignore` format), write it like__
+__(10) For files starting with a hashtag `#`, instead of writing a rule like, say, '\#test' (`.gitignore` format), write it like__
 
 ```sh
 [#]test
 ```
+This is where ignore list differs from `.gitignore` (probably because of [this bug](https://github.com/zb3/zgitignore/issues/2)).
 
-Note that if the line starts with a `#`, it will be ignored as comments.
+Also note that if the line starts with a `#`, it will be ignored as comments.
 
 __(11) You can also embed regular expressions in the rule via `{}`. You can use `\}` to pass `}` to regex and `\\` to pass `\`.__
 
