@@ -59,7 +59,21 @@ $ python3 setup.py install gui # TODO: finish this.
 
 ## Configure
 
+### Authenticate OneDrive accounts
+
 TBA.
+
+### Link local directories
+
+TBA.
+
+### Setup preferemces
+
+TBA.
+
+### Use ignore list
+
+(Refer to this document.)[docs/ignore_list.md]
 
 ## Uninstall
 
