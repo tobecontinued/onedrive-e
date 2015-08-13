@@ -21,37 +21,37 @@ The rules follow [`.gitignore` format](http://git-scm.com/docs/gitignore) but wi
 
 Here is a quick reference guide:
 
-(0) Each line contains a single rule. Lines starting with '#' are comments.
+__(0) Each line contains a single rule. Lines starting with '#' are comments.__
 
-(1) Rules are ___case-INsensitive___ to conform to NTFS naming rules.
+__(1) Rules are ___case-INsensitive___ to conform to NTFS naming rules.__
 
-(2) To ignore an item (i.e., either a file or a directory) called `foo` in ANY directory, add line:
+__(2) To ignore an item (i.e., either a file or a directory) called `foo` in ANY directory, add line:__
 
 ```bash
 foo
 ```
 
-(3) To ignore a directory called `foo` in ANY directory, add line:
+__(3) To ignore a __directory__ called `foo` in ANY directory, add line:__
 
 ```sh
 foo/
 ```
 
-__NOTE: all items under the directory will also be ignored and negation rule (see below) will NOT work.__
+___NOTE: all items under the directory will also be ignored and negation rule (see below) will NOT work.___
 
-(4) To ignore an item called `foo` in root, add line:
+__(4) To ignore an item called `foo` in root, add line:__
 
 ```sh
 /foo
 ```
 
-(5) To ignore an item called `foo` under directory `/Documents` (path relative to local OneDrive repository), add
+__(5) To ignore an item called `foo` under directory `/Documents` (path relative to local OneDrive repository), add__
 
 ```sh
 /Documents/foo
 ```
 
-(6) Use wildcards `*` to match zero or more characters in that path. Matching will not go beyond the inner-most directory.
+__(6) Use single wildcard `*` to match zero or more characters in that path. The matched part will not consist of more than one directory.__
 
 ```sh
 # Ignore any files or directories whose names end with ".swp"
@@ -62,7 +62,9 @@ __NOTE: all items under the directory will also be ignored and negation rule (se
 # This rule is equivalent to "Documents/*.swp"
 ```
 
-(7) Use double stars `**` to mean "whatever can be matched". For example, the rule
+__(7) Use double stars `**` to mean "whatever can be matched".__
+
+For example, the rule
 
 ```
 /Documents/**/resume.txt
@@ -70,7 +72,9 @@ __NOTE: all items under the directory will also be ignored and negation rule (se
 
 ignores all items called `resume.txt` under `/Documents` directory, such as `/Documents/resume.txt`, `/Documents/temp/resume.txt`, `/Documents/foo/bar/resume.txt`, etc.
 
-(8) When a rule contains any `/` except for `/` as the end character, it is automatically relative to root of local OneDrive repository. For example,
+__(8) When a rule contains any `/` except for `/` as the end character, it is automatically relative to root of local OneDrive repository.__
+
+For example,
 
 ```sh
 Documents/*.swp
@@ -90,7 +94,7 @@ build/
 
 matches any directory called `build` in OneDrive repository because the slash is at the end.
 
-(9) If you want to ignore anything inside, say `path-ignored/` directory, but want to keep a file called `keep` in it, use negation rule, which starts with an exclamation mark.
+__(9) If you want to ignore anything inside, say `path-ignored/` directory, but want to keep a file called `keep` in it, use negation rule, which starts with an exclamation mark.__
 
 ```sh
 path-ignored/**
@@ -101,7 +105,7 @@ This way, files like `/path-ignored/oops` will be ignored but `/path-ignored/kee
 
 Note that if you have a rule to ignore the directory `path-ignored/`, then `onedrive-d` will NOT touch anything in that directory, and therefore, in this case the rule `!path-ignored/keep` will not take effect.
 
-(10) For files starting with a hashtag `#`, instead of writing a rule like, say, '\#test#' (`.gitignore` format), write it like
+__(10) For files starting with a hashtag `#`, instead of writing a rule like, say, '\#test#' (`.gitignore` format), write it like__
 
 ```sh
 [#]test
@@ -109,7 +113,9 @@ Note that if you have a rule to ignore the directory `path-ignored/`, then `oned
 
 Note that if the line starts with a `#`, it will be ignored as comments.
 
-(11) You can also embed regular expressions in the rule via `{}`. You can use `\}` to pass `}` to regex and `\\` to pass `\`. For example,
+__(11) You can also embed regular expressions in the rule via `{}`. You can use `\}` to pass `}` to regex and `\\` to pass `\`.__
+
+For example,
 
 ```sh
 # the following rule can match "aaa1256oobbii888"
@@ -121,8 +127,8 @@ aaa{#[0-9a-f]{3,6\}}888
 
 Read [this document](https://github.com/zb3/zgitignore) for more about this feature.
 
-(12) You may want to have a look at the ignore list used for testing `onedrive-d`, which is at
-`onedrive_d/tests/data/ignore_list.txt`.
+__(12) You may want to have a look at the ignore list used for testing `onedrive-d`, which is at
+`onedrive_d/tests/data/ignore_list.txt`.__
 
 ## License
 
