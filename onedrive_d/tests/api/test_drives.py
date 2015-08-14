@@ -185,7 +185,7 @@ class TestDriveObject(unittest.TestCase):
             self.assertEqual(b'hel', data)
 
     def test_download_small_file(self):
-        self.drive.MAX_GET_SIZE = 10
+        self.drive.max_get_size_bytes = 10
         data = b'12345'
         output = io.BytesIO()
         with requests_mock.Mocker() as mock:
@@ -199,7 +199,7 @@ class TestDriveObject(unittest.TestCase):
             self.assertEqual(data, output.getvalue())
 
     def test_download_large_file(self):
-        self.drive.MAX_GET_SIZE = 2
+        self.drive.max_get_size_bytes = 2
         in_data = b'12345'
         output = io.BytesIO()
         expected_ranges = ['0-1', '2-3', '4-4']
@@ -213,11 +213,11 @@ class TestDriveObject(unittest.TestCase):
                 return in_data[int(f): int(t) + 1]
 
             mock.get(self.drive.get_item_uri(item_id='123', item_path=None) + '/content', content=callback)
-            self.drive.download_file(file=output, size=len(in_data), item_id='123', chunk_size=2)
+            self.drive.download_file(file=output, size=len(in_data), item_id='123')
         self.assertEqual(in_data, output.getvalue())
 
     def test_upload_small_file(self):
-        self.drive.MAX_PUT_SIZE = 10
+        self.drive.max_put_size_bytes = 10
         in_fd = io.BytesIO(b'12345')
         with requests_mock.Mocker() as mock:
             def callback(request, context):
@@ -241,7 +241,7 @@ class TestDriveObject(unittest.TestCase):
             self.assertIsInstance(item, items.OneDriveItem)
 
     def test_upload_large_file(self):
-        self.drive.MAX_PUT_SIZE = 2
+        self.drive.max_put_size_bytes = 2
         session_url = 'https://foo/bar/accept_data'
         input = io.BytesIO(b'12345')
         output = io.BytesIO()
@@ -260,7 +260,7 @@ class TestDriveObject(unittest.TestCase):
 
             def accept_data(request, context):
                 self.assertEqual(expected_ranges.pop(0), request.headers['Content-Range'])
-                self.assertLessEqual(len(request.body), self.drive.MAX_PUT_SIZE)
+                self.assertLessEqual(len(request.body), self.drive.max_put_size_bytes)
                 output.write(request.body)
                 context.status_code = codes.accepted
                 return {
