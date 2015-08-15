@@ -17,11 +17,15 @@ class DriveRoot:
     An entry point to get associated drives.
     """
 
-    def __init__(self, account):
+    def __init__(self, account, cached_drives=None):
         """
         :param onedrive_d.api.accounts.PersonalAccount | onedrive_d.api.accounts.BusinessAccount account:
+        :param dict[str, DriveObject] cached_drives:
         """
         self.account = account
+        if cached_drives is None:
+            cached_drives = {}
+        self._cached_drives = cached_drives
 
     def get_all_drives(self):
         """
@@ -32,18 +36,23 @@ class DriveRoot:
         all_drives = {d['id']: DriveObject(self, d) for d in request.json()['value']}
         return all_drives
 
-    def get_default_drive(self, list_children=True):
-        return self.get_drive(list_children=list_children)
+    def get_default_drive(self):
+        """
+        An alias for get_drive(drive_id=None)
+        :return onedrive_d.api.drives.DriveObject:
+        """
+        return self.get_drive(None)
 
-    def get_drive(self, drive_id=None, list_children=True):
+    def get_drive(self, drive_id=None):
         """
         :param str | None drive_id: (Optional) ID of the target Drive. Use None to get default Drive.
+        :return onedrive_d.api.drives.DriveObject:
         """
+        if drive_id in self._cached_drives:
+            return self._cached_drives[drive_id]
         uri = self.account.client.API_URI + '/drive'
         if drive_id is not None:
             uri = uri + 's/' + drive_id
-        if list_children:
-            uri += '?expand=children'
         request = self.account.session.get(uri)
         return DriveObject(self, request.json())
 
@@ -63,6 +72,20 @@ class DriveObject:
         self.drive_uri = root.account.client.API_URI + '/drives/' + data['id']
         self.max_get_size_bytes = max_get_size_bytes
         self.max_put_size_bytes = max_put_size_bytes
+
+    @property
+    def local_root(self):
+        """
+        :return str: Path to the directory set as local repository for the drive.
+        """
+        return self._local_root
+
+    @local_root.setter
+    def local_root(self, path):
+        """
+        :param str path: Path to the directory set as local repository for the drive.
+        """
+        self._local_root = path
 
     @property
     def id(self):
