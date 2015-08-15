@@ -2,8 +2,9 @@ __author__ = 'xb'
 __all__ = ['api', 'common']
 
 import json
-import pkgutil
 import re
+
+from onedrive_d import get_content as get_content_orig
 
 camel_to_underscore = re.compile('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))')
 
@@ -24,10 +25,7 @@ def get_content(file_name, is_text=True):
     :param True | False is_text: True to indicate the text is UTF-8 encoded.
     :return str | bytes: Content of the file.
     """
-    content = pkgutil.get_data('onedrive_d.tests', 'data/' + file_name)
-    if is_text:
-        content = content.decode('utf-8')
-    return content
+    return get_content_orig(file_name, 'onedrive_d.tests', is_text)
 
 
 def to_underscore_name(s):

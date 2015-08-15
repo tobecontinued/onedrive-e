@@ -1,4 +1,73 @@
+__author__ = 'xb'
+
+import json
 from ciso8601 import parse_datetime
+
+
+class UserProfile:
+    VERSION_KEY = '@version'
+    VERSION_VALUE = 1
+
+    def __init__(self, data):
+        self._data = data
+
+    @property
+    def user_id(self):
+        """
+        :rtype: str
+        """
+        return self._data['id']
+
+    @property
+    def gender(self):
+        """
+        :rtype: str | None
+        """
+        return self._data['gender']
+
+    @property
+    def locale(self):
+        """
+        :rtype: str
+        """
+        return self._data['locale']
+
+    @property
+    def first_name(self):
+        """
+        :rtype: str
+        """
+        return self._data['first_name']
+
+    @property
+    def last_name(self):
+        """
+        :rtype: str
+        """
+        return self._data['last_name']
+
+    @property
+    def name(self):
+        """
+        :rtype: str
+        """
+        return self._data['name']
+
+    def dump(self):
+        return json.dumps({'data': self._data, self.VERSION_KEY: self.VERSION_VALUE})
+
+    @classmethod
+    def load(cls, s):
+        """
+        :param str s: Some value previously returned by dump() call.
+        :rtype: onedrive_d.api.resources.UserProfile
+        """
+        data = json.loads(s)
+        if cls.VERSION_KEY not in data:
+            raise ValueError('Unsupported user profile serialization data.')
+        if data[cls.VERSION_KEY] != cls.VERSION_VALUE:
+            raise ValueError('Outdated user profile serialization.')
+        return UserProfile(data['data'])
 
 
 class ItemReference:

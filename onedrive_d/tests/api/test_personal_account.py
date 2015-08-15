@@ -7,8 +7,9 @@ import requests_mock
 
 from onedrive_d.api import accounts
 from onedrive_d.api import errors
+from onedrive_d.api import resources
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api.account_factory import personal_account_data as data
+from onedrive_d.tests.api.account_factory import PERSONAL_ACCOUNT_DATA as data
 from onedrive_d.tests.api.account_factory import get_sample_personal_account as get_sample_account
 from onedrive_d.tests.api.client_factory import get_sample_personal_client as get_sample_client
 
@@ -107,22 +108,42 @@ class TestPersonalAccount(unittest.TestCase):
             self.assert_new_tokens(account)
             self.assertGreater(account.expires_at, old_expire_at)
 
-    def test_renew_session_failure(self):
+    @requests_mock.Mocker()
+    def test_renew_session_failure(self, mock):
         account = get_sample_account()
-        with requests_mock.Mocker() as mock:
-            mock.post(account.client.OAUTH_TOKEN_URI, json=get_data('error_type1.json'), status_code=requests.codes.bad)
-            self.assertRaises(errors.OneDriveError, account.renew_tokens)
+        mock.post(account.client.OAUTH_TOKEN_URI, json=get_data('error_type1.json'), status_code=requests.codes.bad)
+        self.assertRaises(errors.OneDriveError, account.renew_tokens)
+
+    @requests_mock.Mocker()
+    def test_profile(self, mock):
+        account = get_sample_account()
+        mock.get('https://apis.live.net/v5.0/me', json=get_data('user_profile.json'), status_code=requests.codes.ok)
+        profile = account.profile
+        self.assertIsInstance(profile, resources.UserProfile)
+        account.profile = None
+        self.assertIsNone(account.profile)
 
     def test_dump(self):
         account = get_sample_account()
         dump = account.dump()
-        self.assertIsInstance(dump, str)
-        d = json.loads(dump)
-        d['client'] = account.client
-        account_restore = accounts.PersonalAccount(**d)
+        account_restore = accounts.PersonalAccount.load(account.client, dump)
         self.assertEqual(account.access_token, account_restore.access_token)
         self.assertEqual(account.refresh_token, account_restore.refresh_token)
         self.assertEqual(account.expires_at, account_restore.expires_at)
+
+    def test_dump_bad_version(self):
+        account = get_sample_account()
+        d = account.dump()
+        dp = json.loads(d)
+        dp[account.VERSION_KEY] = 'str'
+        self.assertRaises(ValueError, accounts.PersonalAccount.load, None, json.dumps(dp))
+
+    def test_dump_no_version(self):
+        account = get_sample_account()
+        d = account.dump()
+        dp = json.loads(d)
+        del dp[account.VERSION_KEY]
+        self.assertRaises(ValueError, accounts.PersonalAccount.load, None, json.dumps(dp))
 
 
 if __name__ == '__main__':
