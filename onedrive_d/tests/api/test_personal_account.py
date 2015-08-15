@@ -9,7 +9,7 @@ from onedrive_d.api import accounts
 from onedrive_d.api import errors
 from onedrive_d.api import resources
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api.account_factory import personal_account_data as data
+from onedrive_d.tests.api.account_factory import PERSONAL_ACCOUNT_DATA as data
 from onedrive_d.tests.api.account_factory import get_sample_personal_account as get_sample_account
 from onedrive_d.tests.api.client_factory import get_sample_personal_client as get_sample_client
 
