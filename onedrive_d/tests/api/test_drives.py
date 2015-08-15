@@ -3,7 +3,6 @@ import unittest
 from ciso8601 import parse_datetime
 
 import requests_mock
-
 from requests import codes
 
 from onedrive_d.api import drives
@@ -70,6 +69,10 @@ class TestDriveObject(unittest.TestCase):
         self.assertEqual(self.data['id'], self.drive.id)
         self.assertEqual(self.data['driveType'], self.drive.type)
         self.assertIsInstance(self.drive.quota, facets.QuotaFacet)
+
+    def test_map_local(self):
+        self.drive.local_root = '/'
+        self.assertEqual('/', self.drive.local_root)
 
     def test_get_root(self):
         with requests_mock.Mocker() as mock:

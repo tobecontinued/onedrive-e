@@ -7,7 +7,7 @@ https://github.com/OneDrive/onedrive-api-docs/tree/master/facets
 
 from ciso8601 import parse_datetime
 
-from . import resources
+from onedrive_d.api import resources
 
 
 class FileSystemInfoFacet:

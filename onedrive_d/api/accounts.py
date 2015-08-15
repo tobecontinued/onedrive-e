@@ -8,8 +8,8 @@ from urllib import parse
 
 import requests
 
-from . import restapi
-from ..common import logger_factory
+from onedrive_d.api import restapi
+from onedrive_d.common import logger_factory
 
 
 def get_personal_account(client, code=None, uri=None):

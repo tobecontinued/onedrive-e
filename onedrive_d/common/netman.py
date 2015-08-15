@@ -9,7 +9,7 @@ import threading
 
 import requests
 
-from . import logger_factory
+from onedrive_d.common import logger_factory
 
 
 class NetworkMonitor(threading.Thread):

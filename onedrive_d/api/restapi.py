@@ -8,8 +8,8 @@ import time
 
 import requests
 
-from . import errors
-from ..common import logger_factory
+from onedrive_d.api import errors
+from onedrive_d.common import logger_factory
 
 
 class ManagedRESTClient:

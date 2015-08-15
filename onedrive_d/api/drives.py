@@ -6,10 +6,10 @@ https://github.com/OneDrive/onedrive-api-docs#root-resources
 
 import requests
 
-from . import facets
-from . import items
-from . import options
-from . import resources
+from onedrive_d.api import facets
+from onedrive_d.api import items
+from onedrive_d.api import options
+from onedrive_d.api import resources
 
 
 class DriveRoot:

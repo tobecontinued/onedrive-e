@@ -1,7 +1,7 @@
 from ciso8601 import parse_datetime
 
-from . import resources
-from . import facets
+from onedrive_d.api import resources
+from onedrive_d.api import facets
 
 
 class OneDriveItemTypes:
