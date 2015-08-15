@@ -3,6 +3,7 @@ import unittest
 from ciso8601 import parse_datetime
 
 import requests_mock
+
 from requests import codes
 
 from onedrive_d.api import drives
@@ -11,6 +12,7 @@ from onedrive_d.api import items
 from onedrive_d.api import options
 from onedrive_d.api import resources
 from onedrive_d.tests import get_data
+from onedrive_d.tests.api import account_factory
 from onedrive_d.tests.api import drive_factory
 
 
@@ -59,6 +61,22 @@ class TestDriveRoot(unittest.TestCase):
     def test_get_default_drive(self):
         self.run_get_drive(None)
 
+    def test_add_cached_drive_errors(self):
+        account = account_factory.get_sample_personal_account()
+        drive_root = drives.DriveRoot(account)
+        self.assertNotEqual('123', account.profile.user_id)
+        self.assertRaises(ValueError, drive_root.add_cached_drive,
+                          account_id='123', account_type=account.TYPE, drive=None)
+        self.assertRaises(ValueError, drive_root.add_cached_drive,
+                          account_id=account.profile.user_id, account_type='what', drive=None)
+
+    def test_get_drive_from_cache(self):
+        drive = drive_factory.get_sample_drive_object()
+        drive_root = drive.root
+        account = drive_root.account
+        drive_root.add_cached_drive(account.profile.user_id, account.TYPE, drive)
+        self.assertIs(drive_root.get_drive(drive.drive_id, skip_cache=False), drive)
+
 
 class TestDriveObject(unittest.TestCase):
     def setUp(self):
@@ -66,7 +84,7 @@ class TestDriveObject(unittest.TestCase):
         self.drive = drive_factory.get_sample_drive_object(self.data)
 
     def test_parse(self):
-        self.assertEqual(self.data['id'], self.drive.id)
+        self.assertEqual(self.data['id'], self.drive.drive_id)
         self.assertEqual(self.data['driveType'], self.drive.type)
         self.assertIsInstance(self.drive.quota, facets.QuotaFacet)
 
@@ -307,6 +325,14 @@ class TestDriveObject(unittest.TestCase):
         self.assertRaises(ValueError, self.drive.copy_item,
                           resources.ItemReference.build(id='123abc', path='/foo/bar'),
                           None, None)
+
+    def test_load_errors(self):
+        drive = drive_factory.get_sample_drive_object()
+        drive_root = drive.root
+        dump = drive.dump()
+        new_drive = drives.DriveObject.load(drive_root, account_id='123', account_type=drive_root.account.TYPE, s=dump)
+        self.assertIsInstance(new_drive, drives.DriveObject)
+        self.assertEqual(0, len(drive_root._cached_drives))
 
 if __name__ == '__main__':
     unittest.main()

@@ -5,8 +5,8 @@ import zgitignore
 
 class PathFilter(zgitignore.ZgitIgnore):
     """
-    PathFilter parses a gitignore-like file to an ignore list, and then allows for other components to query if a specific
-    path should be ignored.
+    PathFilter parses a gitignore-like file to an ignore list, and then allows for other components to query if a
+    specific path should be ignored.
     """
 
     def __init__(self, rules):

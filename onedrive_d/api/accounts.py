@@ -92,6 +92,7 @@ class PersonalAccount:
         """
         self._profile = value
 
+    # noinspection PyAttributeOutsideInit
     def load_session(self, session_info):
         """Note that it is caller's responsibility to update expires_at."""
         self.access_token = session_info['access_token']
@@ -186,5 +187,5 @@ class BusinessAccount:
         raise NotImplementedError()
 
     @classmethod
-    def load(cls, client):
+    def load(cls, client, s):
         raise NotImplementedError('OneDrive for Business not supported.')

@@ -39,23 +39,23 @@ class AccountStorage:
     def deserialize_account_row(self, account_id, account_type, account_dump, profile_dump, container):
         account_cls, client = self.parse_account_type(account_type)
         if client is None:
-            self.logger.error('Account %s was not loaded since no client of that type provided.', account_id)
+            self.logger.warning('Account %s was not loaded since no client of that type provided.', account_id)
             return
         try:
             account = account_cls.load(client, account_dump)
             container[(account_id, account_type)] = account
         except ValueError as e:
-            self.logger.error('Failed to deserialize account %s: %s', account_id, e)
+            self.logger.warning('Failed to deserialize account %s: %s', account_id, e)
         else:
             try:
                 profile = resources.UserProfile.load(profile_dump)
             except ValueError as e:
-                self.logger.error('Failed to deserialize user profile for account %s: %s', account_id, e)
+                self.logger.warning('Failed to deserialize user profile for account %s: %s', account_id, e)
                 profile = account.profile
             account.profile = profile
 
-    def get_all_accounts(self, client):
-        self._all_accounts.clear()
+    def get_all_accounts(self):
+        self._conn.commit()
         q = self._cursor.execute('SELECT account_id, account_type, account_dump, profile_dump FROM accounts')
         for row in q.fetchall():
             account_id, account_type, account_dump, profile_dump = row

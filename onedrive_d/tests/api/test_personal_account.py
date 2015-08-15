@@ -9,7 +9,7 @@ from onedrive_d.api import accounts
 from onedrive_d.api import errors
 from onedrive_d.api import resources
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api.account_factory import PERSONAL_ACCOUNT_DATA as data
+from onedrive_d.tests.api.account_factory import PERSONAL_ACCOUNT_DATA
 from onedrive_d.tests.api.account_factory import get_sample_personal_account as get_sample_account
 from onedrive_d.tests.api.client_factory import get_sample_personal_client as get_sample_client
 
@@ -29,13 +29,13 @@ class TestPersonalAccount(unittest.TestCase):
         :param onedrive_d.api.accounts.PersonalAccount account:
         """
         self.assertIsInstance(account, accounts.PersonalAccount)
-        self.assertEqual(data['access_token'], account.access_token)
-        self.assertEqual(data['refresh_token'], account.refresh_token)
-        self.assertEqual(data['token_type'], account.token_type)
+        self.assertEqual(PERSONAL_ACCOUNT_DATA['access_token'], account.access_token)
+        self.assertEqual(PERSONAL_ACCOUNT_DATA['refresh_token'], account.refresh_token)
+        self.assertEqual(PERSONAL_ACCOUNT_DATA['token_type'], account.token_type)
         self.assertEqual(2, len(account.scope))
         self.assertIn('wl.basic', account.scope)
         self.assertIn('onedrive.readwrite', account.scope)
-        self.assertGreater(account.expires_at, data['expires_in'])
+        self.assertGreater(account.expires_at, PERSONAL_ACCOUNT_DATA['expires_in'])
 
     def assert_new_tokens(self, account):
         self.assertEqual(self.new_data['access_token'], account.access_token)
@@ -72,7 +72,7 @@ class TestPersonalAccount(unittest.TestCase):
             def callback(request, context):
                 self.assertIn('code=123', request.text)
                 context.status_code = requests.codes.ok
-                return data
+                return PERSONAL_ACCOUNT_DATA
 
             mock.post(re.compile('//login\.live\.com\.*'), json=callback)
             client = get_sample_client()
@@ -91,7 +91,7 @@ class TestPersonalAccount(unittest.TestCase):
     def test_parse_expire_time(self):
         expires_at = 1234
         client = get_sample_client()
-        account = accounts.PersonalAccount(client, data, expires_at)
+        account = accounts.PersonalAccount(client, PERSONAL_ACCOUNT_DATA, expires_at)
         self.assertEqual(expires_at, account.expires_at)
 
     def test_load_session(self):
