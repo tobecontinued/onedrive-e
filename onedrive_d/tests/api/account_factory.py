@@ -5,6 +5,7 @@ from onedrive_d.tests import get_data
 PERSONAL_ACCOUNT_DATA = get_data('personal_access_token.json')
 USER_PROFILE_DATA = get_data('user_profile.json')
 
+
 def get_sample_personal_account(client=None):
     if client is None:
         from . import client_factory

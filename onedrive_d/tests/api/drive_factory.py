@@ -11,4 +11,6 @@ def get_sample_drive_root():
 
 
 def get_sample_drive_object(data=get_data('drive.json')):
-    return drives.DriveObject(root=get_sample_drive_root(), data=data)
+    d = drives.DriveObject(root=get_sample_drive_root(), data=data)
+    d.local_root = '/tmp'
+    return d
