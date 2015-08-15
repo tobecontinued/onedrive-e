@@ -1,11 +1,49 @@
 __author__ = 'xb'
 
+import json
 import unittest
 from ciso8601 import parse_datetime
 
 from onedrive_d.api import resources
 from onedrive_d.tests import get_data
 
+
+class TestUserProfile(unittest.TestCase):
+    def setUp(self):
+        self.data = get_data('user_profile.json')
+        self.props = ['user_id', 'gender', 'locale', 'first_name', 'last_name', 'name']
+        self.props_map = {'user_id': 'id'}
+        self.profile = resources.UserProfile(self.data)
+
+    def assert_properties(self, canonical, target):
+        for k in self.props:
+            if isinstance(canonical, dict):
+                k2 = self.props_map[k] if k in self.props_map else k
+                v = canonical[k2]
+            else:
+                v = getattr(canonical, k)
+            self.assertEqual(v, getattr(target, k), k)
+
+    def test_parse(self):
+        self.assert_properties(self.data, self.profile)
+
+    def test_dump(self):
+        d = self.profile.dump()
+        new_profile = resources.UserProfile.load(d)
+        self.assertIsInstance(new_profile, resources.UserProfile)
+        self.assert_properties(self.profile, new_profile)
+
+    def test_dump_bad_version(self):
+        d = self.profile.dump()
+        dp = json.loads(d)
+        dp[resources.UserProfile.VERSION_KEY] = 'str'
+        self.assertRaises(ValueError, resources.UserProfile.load, json.dumps(dp))
+
+    def test_dump_no_version(self):
+        d = self.profile.dump()
+        dp = json.loads(d)
+        del dp[resources.UserProfile.VERSION_KEY]
+        self.assertRaises(ValueError, resources.UserProfile.load, json.dumps(dp))
 
 class TestItemReference(unittest.TestCase):
     data = get_data('item_reference.json')

@@ -8,8 +8,8 @@ from urllib import parse
 
 import requests
 
+from onedrive_d.api import resources
 from onedrive_d.api import restapi
-from onedrive_d.common import logger_factory
 
 
 def get_personal_account(client, code=None, uri=None):
@@ -59,10 +59,12 @@ class PersonalAccount:
     """Abstraction of a normal account type."""
 
     TYPE = AccountTypes.PERSONAL
-    logger = logger_factory.get_logger('PersonalAccount')
+    VERSION_KEY = '@version'
+    VERSION_VALUE = 1
 
     def __init__(self, client, session_info, expires_at=None):
         """
+        One should use load() to get a deserialized account, or get_personal_account() to get a new account object.
         :param onedrive_d.api.clients.PersonalClient | onedrive_d.api.clients.BusinessClient client: Parent client.
         :param dict[str, str | int] session_info: Raw dictionary of a response to access token request.
         :param int | None expires_at: A timestamp at which the tokens will expire.
@@ -77,7 +79,19 @@ class PersonalAccount:
         self.session = restapi.ManagedRESTClient(
             session=session, account=self, proxies=client.proxies, net_mon=client.net_monitor)
 
-    # noinspection PyAttributeOutsideInit
+    @property
+    def profile(self):
+        if not hasattr(self, '_profile'):
+            self._profile = self.get_profile()
+        return self._profile
+
+    @profile.setter
+    def profile(self, value):
+        """
+        :param onedrive_d.api.resources.UserProfile value: Profile of the account from cache.
+        """
+        self._profile = value
+
     def load_session(self, session_info):
         """Note that it is caller's responsibility to update expires_at."""
         self.access_token = session_info['access_token']
@@ -103,6 +117,14 @@ class PersonalAccount:
             self.client.OAUTH_SIGN_OUT_URI, self.client.client_id, self.client.redirect_uri)
         self.session.get(uri)
 
+    def get_profile(self, account_id='me'):
+        """
+        :param str account_id: ID of the account of interest.
+        :return onedrive_d.resources.UserProfile: Profile of the target user.
+        """
+        request = self.session.get('https://apis.live.net/v5.0/' + account_id)
+        return resources.UserProfile(request.json())
+
     def dump(self):
         """
         :rtype str: A serialized JSON dictionary that can be passed back into __init__.
@@ -114,15 +136,33 @@ class PersonalAccount:
                 'scope': ' '.join(self.scope),
                 'token_type': self.token_type
             },
-            'expires_at': self.expires_at
+            'expires_at': self.expires_at,
+            self.VERSION_KEY: self.VERSION_VALUE
         }
         return json.dumps(data)
+
+    @classmethod
+    def load(cls, client, s):
+        """
+        Load a previously serialized account object.
+        :param onedrive_d.api.clients.PersonalClient: The underlying client object.
+        :param str s: A string returned by a dump() call.
+        :return onedrive_d.api.accounts.PersonalAccount: A deserialized account object.
+        """
+        data = json.loads(s)
+        if cls.VERSION_KEY not in data:
+            raise ValueError('Unsupported serialization data format.')
+        if data[cls.VERSION_KEY] != cls.VERSION_VALUE:
+            raise ValueError('Outdated account serialization data.')
+        return PersonalAccount(client=client, session_info=data['session_info'], expires_at=data['expires_at'])
 
 
 class BusinessAccount:
     """Abstraction of an OneDrive Business account type."""
 
     TYPE = AccountTypes.BUSINESS
+    VERSION_KEY = '@version'
+    VERSION_VALUE = 1
 
     def get_access_token(self):
         pass
@@ -141,3 +181,10 @@ class BusinessAccount:
 
     def refresh_session(self):
         pass
+
+    def dump(self):
+        raise NotImplementedError()
+
+    @classmethod
+    def load(cls, client):
+        raise NotImplementedError('OneDrive for Business not supported.')
