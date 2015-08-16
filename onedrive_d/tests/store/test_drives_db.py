@@ -29,7 +29,9 @@ class TestDriveStorage(unittest.TestCase):
         self.assertIs(self.drive_root.account, self.personal_account)
 
     def test_get_all_drives(self):
-        drive = drives.DriveObject(self.drive_root, get_data('drive.json'), DriveConfig.default_config())
+        drive_conf = dict(DriveConfig.DEFAULT_VALUES)
+        drive_conf['local_root'] = '/tmp'
+        drive = drives.DriveObject(self.drive_root, get_data('drive.json'), DriveConfig(drive_conf))
         self.drives_store.add_record(drive)
         for k, drive_value in self.drives_store.get_all_drives().items():
             drive_id, account_id, account_type = k
@@ -47,6 +49,10 @@ class TestDriveStorage(unittest.TestCase):
         for r in rows:
             self.drives_store.assemble_drive_record(r, d)
             self.assertEqual(0, len(d), str(r))
+
+    def test_add_unmapped_drive(self):
+        drive = drives.DriveObject(self.drive_root, get_data('drive.json'), DriveConfig.default_config())
+        self.assertRaises(ValueError, self.drives_store.add_record, drive)
 
     def tearDown(self):
         self.drives_store.close()

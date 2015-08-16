@@ -54,10 +54,12 @@ class DriveStorage:
         return self._all_drives
 
     def add_record(self, drive):
+        if drive.config.local_root is None:
+            raise ValueError('Drive does not have a local root directory.')
         account = drive.root.account
-        params = (drive.drive_id, account.profile.user_id, account.TYPE, drive.dump())
-        self._cursor.execute('INSERT OR REPLACE INTO drives (drive_id, account_id, account_type, drive_dump) '
-                             'VALUES (?,?,?,?)', params)
+        params = (drive.drive_id, account.profile.user_id, account.TYPE, drive.config.local_root, drive.dump())
+        self._cursor.execute('INSERT OR REPLACE INTO drives (drive_id, account_id, account_type, local_root, '
+                             'drive_dump) VALUES (?,?,?,?,?)', params)
 
     def close(self):
         self._cursor.close()
