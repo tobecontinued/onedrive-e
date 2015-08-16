@@ -24,6 +24,11 @@
     "height":398,
     "width":273
   },
+  "parentReference": {
+    "id": "53BEAAF056826882!103",
+    "driveId": "53beaaf056826882",
+    "path": "/drive/root:"
+  },
   "file": {
     "hashes":{
       "crc32Hash":"omY5NA==",

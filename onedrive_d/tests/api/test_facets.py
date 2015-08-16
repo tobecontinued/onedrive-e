@@ -1,6 +1,6 @@
 import unittest
-from ciso8601 import parse_datetime
 
+from onedrive_d import str_to_datetime
 from onedrive_d.api import facets
 from onedrive_d.api import resources
 from onedrive_d.tests import get_data
@@ -18,7 +18,7 @@ def assert_properties(test, data, obj):
     for k, v in data.items():
         if 'DateTime' in k:
             k = k.replace('DateTime', 'Time')
-            v = parse_datetime(v)
+            v = str_to_datetime(v)
         if 'lastModified' in k:
             k = k.replace('lastModified', 'modified')
         test.assertEqual(v, getattr(obj, to_underscore_name(k)), 'The property %s does not match data.' % k)
@@ -30,13 +30,13 @@ class TestFileSystemInfoFacet(unittest.TestCase):
         self.facet = facets.FileSystemInfoFacet(self.data)
 
     def assert_timestamp(self, attr_name, dict_key, time_str):
-        obj = facets.FileSystemInfoFacet(**{attr_name: parse_datetime(time_str)})
-        self.assertEqual(parse_datetime(time_str), getattr(obj, attr_name, None))
+        obj = facets.FileSystemInfoFacet(**{attr_name: str_to_datetime(time_str)})
+        self.assertEqual(str_to_datetime(time_str), getattr(obj, attr_name, None))
         self.assertEqual(time_str, obj.data[dict_key])
 
     def test_parse(self):
-        self.assertEqual(parse_datetime(self.data['createdDateTime']), self.facet.created_time)
-        self.assertEqual(parse_datetime(self.data['lastModifiedDateTime']), self.facet.modified_time)
+        self.assertEqual(str_to_datetime(self.data['createdDateTime']), self.facet.created_time)
+        self.assertEqual(str_to_datetime(self.data['lastModifiedDateTime']), self.facet.modified_time)
 
     def test_construct_ctime(self):
         self.assert_timestamp('created_time', 'createdDateTime', '2020-04-05T06:08:10Z')

@@ -1,11 +1,10 @@
 import io
 import unittest
-from ciso8601 import parse_datetime
 
 import requests_mock
-
 from requests import codes
 
+from onedrive_d import str_to_datetime
 from onedrive_d.api import drives
 from onedrive_d.api import facets
 from onedrive_d.api import items
@@ -196,8 +195,8 @@ class TestDriveObject(unittest.TestCase):
             'new_description': 'This is a dummy description.',
             'new_parent_reference': resources.ItemReference.build(drive_id='aaa', id='012'),
             'new_file_system_info': facets.FileSystemInfoFacet(
-                created_time=parse_datetime('1971-01-01T02:03:04Z'),
-                modified_time=parse_datetime('2008-01-02T03:04:05.06Z'))
+                created_time=str_to_datetime('1971-01-01T02:03:04Z'),
+                modified_time=str_to_datetime('2008-01-02T03:04:05.06Z'))
         }
         with requests_mock.Mocker() as mock:
             def callback(request, context):

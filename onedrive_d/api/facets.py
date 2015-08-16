@@ -5,8 +5,7 @@ timestamp strings.
 https://github.com/OneDrive/onedrive-api-docs/tree/master/facets
 """
 
-from ciso8601 import parse_datetime
-
+from onedrive_d import datetime_to_str, str_to_datetime
 from onedrive_d.api import resources
 
 
@@ -32,8 +31,8 @@ class FileSystemInfoFacet:
             if modified_time is not None:
                 self.set_datetime('_modified_time', 'lastModifiedDateTime', modified_time)
         else:
-            self._created_time = parse_datetime(data['createdDateTime'])
-            self._modified_time = parse_datetime(data['lastModifiedDateTime'])
+            self._created_time = str_to_datetime(data['createdDateTime'])
+            self._modified_time = str_to_datetime(data['lastModifiedDateTime'])
             self.data = data
 
     def set_datetime(self, prop, key, value):
@@ -44,7 +43,7 @@ class FileSystemInfoFacet:
         :param datetime.datetime value: A UTC datetime object denoting when the file was created on a client.
         """
         setattr(self, prop, value)
-        self.data[key] = value.isoformat() + 'Z'
+        self.data[key] = datetime_to_str(value)
 
     @property
     def created_time(self):
@@ -145,7 +144,7 @@ class PhotoFacet:
         Represents the date and time the photo was taken.
         :rtype: int
         """
-        return parse_datetime(self._data['takenDateTime'])
+        return str_to_datetime(self._data['takenDateTime'])
 
     @property
     def camera_make(self):

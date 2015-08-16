@@ -18,6 +18,23 @@ __updated__ = "2015-08-08"
 __version__ = "2.0.0.dev1"
 
 import pkgutil
+from ciso8601 import parse_datetime
+
+
+def datetime_to_str(d):
+    """
+    :param datetime.datetime d:
+    :return str:
+    """
+    return d.isoformat() + 'Z'
+
+
+def str_to_datetime(s):
+    """
+    :param str s:
+    :return datetime.datetime:
+    """
+    return parse_datetime(s)
 
 
 def get_content(file_name, pkg_name='onedrive_d', is_text=True):

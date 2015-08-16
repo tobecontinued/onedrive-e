@@ -1,5 +1,4 @@
-from ciso8601 import parse_datetime
-
+from onedrive_d import str_to_datetime
 from onedrive_d.api import resources
 from onedrive_d.api import facets
 
@@ -88,6 +87,17 @@ class OneDriveItem:
         :rtype: str
         """
         return self._data['description']
+
+    @property
+    def item_path(self):
+        return self._item_path
+
+    @item_path.setter
+    def item_path(self, value):
+        """
+        :param str value:
+        """
+        self._item_path = value
 
     @property
     def e_tag(self):
@@ -226,7 +236,7 @@ class OneDriveItem:
         """
         if self._fs_info is not None:
             return self._fs_info.created_time
-        return parse_datetime(self._data['createdDateTime'])
+        return str_to_datetime(self._data['createdDateTime'])
 
     @property
     def modified_time(self):
@@ -235,4 +245,4 @@ class OneDriveItem:
         """
         if self._fs_info is not None:
             return self._fs_info.modified_time
-        return parse_datetime(self._data['lastModifiedDateTime'])
+        return str_to_datetime(self._data['lastModifiedDateTime'])

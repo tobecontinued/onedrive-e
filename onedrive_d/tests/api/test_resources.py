@@ -2,8 +2,8 @@ __author__ = 'xb'
 
 import json
 import unittest
-from ciso8601 import parse_datetime
 
+from onedrive_d import str_to_datetime
 from onedrive_d.api import resources
 from onedrive_d.tests import get_data
 
@@ -69,7 +69,7 @@ class TestUploadSession(unittest.TestCase):
         data = get_data('upload_session.json')
         session = resources.UploadSession(data)
         self.assertEqual(data['uploadUrl'], session.upload_url)
-        self.assertEqual(parse_datetime(data['expirationDateTime']), session.expires_at)
+        self.assertEqual(str_to_datetime(data['expirationDateTime']), session.expires_at)
         ranges = []
         for r in session.next_ranges:
             if r[1] is None:

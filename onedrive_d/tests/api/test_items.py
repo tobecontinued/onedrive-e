@@ -1,8 +1,8 @@
 __author__ = 'xb'
 
-from ciso8601 import parse_datetime
 import unittest
 
+from onedrive_d import str_to_datetime
 from onedrive_d.api import facets
 from onedrive_d.api import items
 from onedrive_d.api import resources
@@ -22,7 +22,7 @@ class TestRootItem(unittest.TestCase):
         self.assertEqual(self.data['folder']['childCount'], self.item.folder_props.child_count)
 
     def test_parse_modified_time(self):
-        self.assertEqual(parse_datetime(self.data['fileSystemInfo']['lastModifiedDateTime']), self.item.modified_time)
+        self.assertEqual(str_to_datetime(self.data['fileSystemInfo']['lastModifiedDateTime']), self.item.modified_time)
 
     def test_children(self):
         for item_id, item_obj in self.item.children.items():
@@ -114,8 +114,8 @@ class TestOneDriveItemTimestamps(unittest.TestCase):
         self.assertNotIn('fileSystemInfo', self.data)
 
     def assert_timestamps(self, d, o):
-        self.assertEqual(parse_datetime(d['createdDateTime']), o.created_time)
-        self.assertEqual(parse_datetime(d['lastModifiedDateTime']), o.modified_time)
+        self.assertEqual(str_to_datetime(d['createdDateTime']), o.created_time)
+        self.assertEqual(str_to_datetime(d['lastModifiedDateTime']), o.modified_time)
 
     def test_time_fallback(self):
         item = items.OneDriveItem(get_sample_drive_object(), self.data)

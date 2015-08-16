@@ -1,7 +1,8 @@
 __author__ = 'xb'
 
 import json
-from ciso8601 import parse_datetime
+
+from onedrive_d import str_to_datetime
 
 
 class UserProfile:
@@ -139,7 +140,7 @@ class UploadSession:
         if 'uploadUrl' in data:
             self.upload_url = data['uploadUrl']
         if 'expirationDateTime' in data:
-            self.expires_at = parse_datetime(data['expirationDateTime'])
+            self.expires_at = str_to_datetime(data['expirationDateTime'])
         self.next_ranges = []
         if 'nextExpectedRanges' in data:
             for s in data['nextExpectedRanges']:
