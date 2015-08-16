@@ -102,9 +102,8 @@ class TestOneDriveItem(unittest.TestCase):
             ('location_props', facets.LocationFacet),
             ('parent_reference', resources.ItemReference)
         ]
-        for i in all_facets:
-            prop, type = i
-            self.assert_prop(prop, type)
+        for prop, t in all_facets:
+            self.assert_prop(prop, t)
 
 
 class TestOneDriveItemTimestamps(unittest.TestCase):

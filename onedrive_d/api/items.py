@@ -89,17 +89,6 @@ class OneDriveItem:
         return self._data['description']
 
     @property
-    def item_path(self):
-        return self._item_path
-
-    @item_path.setter
-    def item_path(self, value):
-        """
-        :param str value:
-        """
-        self._item_path = value
-
-    @property
     def e_tag(self):
         """
         :rtype: str
@@ -163,6 +152,7 @@ class OneDriveItem:
     @property
     def children(self):
         if not hasattr(self, '_children'):
+            # noinspection PyAttributeOutsideInit
             self._children = {d['id']: OneDriveItem(self.drive, d) for d in self._data['children']}
         return self._children
 

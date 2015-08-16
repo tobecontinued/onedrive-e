@@ -53,6 +53,9 @@ class DriveStorage:
             self.assemble_drive_record(row, self._all_drives)
         return self._all_drives
 
+    def get_drive(self, drive_id, account_id, account_type):
+        return self._all_drives[self._get_key(drive_id, account_id, account_type)]
+
     def add_record(self, drive):
         if drive.config.local_root is None:
             raise ValueError('Drive does not have a local root directory.')

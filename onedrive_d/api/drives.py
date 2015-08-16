@@ -91,10 +91,15 @@ class DriveObject:
         :param dict[str, str | int | dict] data: The deserialized Drive dictionary.
         :param onedrive_d.api.common.drive_config.DriveConfig config: Drive configuration.
         """
-        self.root = root
         self._data = data
-        self.drive_uri = root.account.client.API_URI + '/drives/' + data['id']
         self.config = config
+        self.root = root
+        self.is_default = root.account.profile.user_id.lower() == self.drive_id.lower()
+        if self.is_default:
+            self.drive_path = '/drive'
+        else:
+            self.drive_path = '/drives/' + data['id']
+        self.drive_uri = root.account.client.API_URI + self.drive_path
 
     @property
     def drive_id(self):

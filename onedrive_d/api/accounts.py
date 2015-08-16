@@ -77,12 +77,14 @@ class PersonalAccount:
             session=requests.Session(), account=self, proxies=client.proxies, net_mon=client.net_monitor)
         self.load_session(session_info)
 
+    # noinspection PyAttributeOutsideInit
     @property
     def profile(self):
         if not hasattr(self, '_profile'):
             self._profile = self.get_profile()
         return self._profile
 
+    # noinspection PyAttributeOutsideInit
     @profile.setter
     def profile(self, value):
         """
@@ -98,7 +100,6 @@ class PersonalAccount:
         self.token_type = session_info['token_type']
         self.scope = session_info['scope'].split(' ')
         self.session.session.headers['Authorization'] = 'Bearer ' + session_info['access_token']
-
 
     def renew_tokens(self):
         params = {

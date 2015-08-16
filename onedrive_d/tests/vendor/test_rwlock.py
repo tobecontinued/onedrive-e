@@ -88,10 +88,10 @@ class TestRWLock(unittest.TestCase):
 
         self.__start_and_join_threads(threads)
 
-        ## The third reader should enter after the second one but it should
-        ## exit before the second one exits
-        ## (i.e. the readers should be in the critical section
-        ## at the same time)
+        # The third reader should enter after the second one but it should
+        # exit before the second one exits
+        # (i.e. the readers should be in the critical section
+        # at the same time)
 
         self.assertEqual([], threads[0].buffer_read)
         self.assertEqual([1], threads[2].buffer_read)
@@ -109,7 +109,7 @@ class TestRWLock(unittest.TestCase):
 
         self.__start_and_join_threads(threads)
 
-        ## The second writer should wait for the first one to exit
+        # The second writer should wait for the first one to exit
 
         self.assertEqual([1, 2], threads[2].buffer_read)
         self.assert_(threads[0].exit_time <= threads[1].entry_time)
@@ -126,7 +126,7 @@ class TestRWLock(unittest.TestCase):
 
         self.__start_and_join_threads(threads)
 
-        ## The second writer should go before the second and the third reader
+        # The second writer should go before the second and the third reader
 
         self.assertEqual([1], threads[1].buffer_read)
         self.assertEqual([1, 2], threads[3].buffer_read)
@@ -148,8 +148,8 @@ class TestRWLock(unittest.TestCase):
 
         self.__start_and_join_threads(threads)
 
-        ## The two last writers should go first -- after the first reader and
-        ## before the second and the third reader
+        # The two last writers should go first -- after the first reader and
+        # before the second and the third reader
 
         self.assertEqual([1], threads[1].buffer_read)
         self.assertEqual([1, 2, 3], threads[3].buffer_read)
@@ -167,7 +167,7 @@ class TestRWLock(unittest.TestCase):
         buffer_ = []
         rw_lock = RWLock()
         threads = []
-        return (buffer_, rw_lock, threads)
+        return buffer_, rw_lock, threads
 
     @staticmethod
     def __start_and_join_threads(threads):
