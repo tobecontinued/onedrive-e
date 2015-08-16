@@ -13,7 +13,7 @@ def get_logger(name, min_level=logging.DEBUG, path=None):
     logger = logging.getLogger(name)
     logger.propagate = False
     logger.setLevel(min_level)
-    if path is not None:
+    if path:
         logger_fh = logging.FileHandler(path, 'a')
         logger_fh.setLevel(min_level)
         logger.addHandler(logger_fh)

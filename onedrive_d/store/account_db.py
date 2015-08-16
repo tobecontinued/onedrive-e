@@ -32,9 +32,9 @@ class AccountStorage:
         :return onedrive_d.api.accounts.PersonalAccount | onedrive_d.accounts.accounts.BusinessAccount:
         """
         if account_type == accounts.AccountTypes.PERSONAL:
-            return (accounts.PersonalAccount, self.personal_client)
+            return accounts.PersonalAccount, self.personal_client
         else:
-            return (accounts.BusinessAccount, self.business_client)
+            return accounts.BusinessAccount, self.business_client
 
     def deserialize_account_row(self, account_id, account_type, account_dump, profile_dump, container):
         account_cls, client = self.parse_account_type(account_type)

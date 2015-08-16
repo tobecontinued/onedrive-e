@@ -1,16 +1,18 @@
 __author__ = 'xb'
 
-import atexit
 import unittest
 
 from onedrive_d.api import drives
+from onedrive_d.common.drive_config import DriveConfig
 from onedrive_d.store import drives_db
 from onedrive_d.tests import get_data
 from onedrive_d.tests.api.account_factory import get_sample_personal_account
 from onedrive_d.tests.mocks import mock_atexit
+from onedrive_d.tests.mocks import mock_logger
 from onedrive_d.tests.store.test_account_db import get_sample_account_storage
 
-atexit.register = mock_atexit.register
+mock_atexit.mock_register()
+mock_logger.mock_loggers()
 
 
 class TestDriveStorage(unittest.TestCase):
@@ -27,19 +29,17 @@ class TestDriveStorage(unittest.TestCase):
         self.assertIs(self.drive_root.account, self.personal_account)
 
     def test_get_all_drives(self):
-        drive = drives.DriveObject(self.drive_root, get_data('drive.json'))
-        drive.local_root = '/tmp'
+        drive = drives.DriveObject(self.drive_root, get_data('drive.json'), DriveConfig.default_config())
         self.drives_store.add_record(drive)
         for k, drive_value in self.drives_store.get_all_drives().items():
             drive_id, account_id, account_type = k
             self.assertEqual(drive_id, drive_value.drive_id)
             self.assertEqual(drive.drive_id, drive_value.drive_id)
-            self.assertEqual(drive.local_root, drive_value.local_root)
+            self.assertEqual(drive.config.local_root, drive_value.config.local_root)
 
     def test_assemble_drive_error(self):
         d = {}
-        drive = drives.DriveObject(self.drive_root, get_data('drive.json'))
-        drive.local_root = '/tmp'
+        drive = drives.DriveObject(self.drive_root, get_data('drive.json'), DriveConfig.default_config())
         rows = [
             ('did', 'aid', 'at', drive.dump() + '.'),
             (drive.drive_id, self.personal_account.profile.user_id, self.personal_account.TYPE, drive.dump() + '.')

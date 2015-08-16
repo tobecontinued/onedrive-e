@@ -11,9 +11,13 @@ from onedrive_d.api import facets
 from onedrive_d.api import items
 from onedrive_d.api import options
 from onedrive_d.api import resources
+from onedrive_d.common import drive_config
 from onedrive_d.tests import get_data
 from onedrive_d.tests.api import account_factory
 from onedrive_d.tests.api import drive_factory
+from onedrive_d.tests.mocks import mock_logger
+
+mock_logger.mock_loggers()
 
 
 class TestDriveRoot(unittest.TestCase):
@@ -70,12 +74,25 @@ class TestDriveRoot(unittest.TestCase):
         self.assertRaises(ValueError, drive_root.add_cached_drive,
                           account_id=account.profile.user_id, account_type='what', drive=None)
 
-    def test_get_drive_from_cache(self):
+    def get_cached_drive_root_tuple(self):
         drive = drive_factory.get_sample_drive_object()
         drive_root = drive.root
         account = drive_root.account
         drive_root.add_cached_drive(account.profile.user_id, account.TYPE, drive)
+        return drive_root, drive
+
+    def test_get_drive_from_cache(self):
+        drive_root, drive = self.get_cached_drive_root_tuple()
         self.assertIs(drive_root.get_drive(drive.drive_id, skip_cache=False), drive)
+
+    @requests_mock.Mocker()
+    def test_purge_cache(self, mock):
+        data = get_data('drive_alt.json')
+        drive_root, drive = self.get_cached_drive_root_tuple()
+        mock.get(self.account.client.API_URI + '/drives/' + drive.drive_id, json=data)
+        self.assertNotEqual(data['id'], drive.drive_id)
+        self.assertIs(drive_root.get_drive(drive.drive_id, skip_cache=True), drive)
+        self.assertEqual(data['id'], drive.drive_id)
 
 
 class TestDriveObject(unittest.TestCase):
@@ -206,7 +223,7 @@ class TestDriveObject(unittest.TestCase):
             self.assertEqual(b'hel', data)
 
     def test_download_small_file(self):
-        self.drive.max_get_size_bytes = 10
+        self.drive.config = drive_config.DriveConfig({'max_get_size_bytes': 10})
         data = b'12345'
         output = io.BytesIO()
         with requests_mock.Mocker() as mock:
@@ -220,7 +237,7 @@ class TestDriveObject(unittest.TestCase):
             self.assertEqual(data, output.getvalue())
 
     def test_download_large_file(self):
-        self.drive.max_get_size_bytes = 2
+        self.drive.config = drive_config.DriveConfig({'max_get_size_bytes': 2})
         in_data = b'12345'
         output = io.BytesIO()
         expected_ranges = ['0-1', '2-3', '4-4']
@@ -238,7 +255,7 @@ class TestDriveObject(unittest.TestCase):
         self.assertEqual(in_data, output.getvalue())
 
     def test_upload_small_file(self):
-        self.drive.max_put_size_bytes = 10
+        self.drive.config = drive_config.DriveConfig({'max_put_size_bytes': 10})
         in_fd = io.BytesIO(b'12345')
         with requests_mock.Mocker() as mock:
             def callback(request, context):
@@ -262,7 +279,7 @@ class TestDriveObject(unittest.TestCase):
             self.assertIsInstance(item, items.OneDriveItem)
 
     def test_upload_large_file(self):
-        self.drive.max_put_size_bytes = 2
+        self.drive.config = drive_config.DriveConfig({'max_put_size_bytes': 2})
         session_url = 'https://foo/bar/accept_data'
         input = io.BytesIO(b'12345')
         output = io.BytesIO()
@@ -281,7 +298,7 @@ class TestDriveObject(unittest.TestCase):
 
             def accept_data(request, context):
                 self.assertEqual(expected_ranges.pop(0), request.headers['Content-Range'])
-                self.assertLessEqual(len(request.body), self.drive.max_put_size_bytes)
+                self.assertLessEqual(len(request.body), self.drive.config.max_put_size_bytes)
                 output.write(request.body)
                 context.status_code = codes.accepted
                 return {

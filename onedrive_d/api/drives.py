@@ -13,6 +13,7 @@ from onedrive_d.api import items
 from onedrive_d.api import options
 from onedrive_d.api import resources
 from onedrive_d.common import logger_factory
+from onedrive_d.common import drive_config
 
 
 class DriveRoot:
@@ -41,7 +42,8 @@ class DriveRoot:
         """
         uri = self.account.client.API_URI + '/drives'
         request = self.account.session.get(uri)
-        all_drives = {d['id']: DriveObject(self, d) for d in request.json()['value']}
+        all_drives = {d['id']: DriveObject(self, d, drive_config.DriveConfig.default_config())
+                      for d in request.json()['value']}
         return all_drives
 
     def get_default_drive(self):
@@ -51,18 +53,24 @@ class DriveRoot:
         """
         return self.get_drive(None)
 
+    def purge_drive_cache(self, drive_id):
+        del self._cached_drives[drive_id]
+
     def get_drive(self, drive_id=None, skip_cache=False):
         """
         :param str | None drive_id: (Optional) ID of the target Drive. Use None to get default Drive.
         :return onedrive_d.api.drives.DriveObject:
         """
-        if drive_id in self._cached_drives and not skip_cache:
-            return self._cached_drives[drive_id]
+        if drive_id in self._cached_drives:
+            drive = self._cached_drives[drive_id]
+            if skip_cache:
+                drive.refresh()
+            return drive
         uri = self.account.client.API_URI + '/drive'
         if drive_id is not None:
             uri = uri + 's/' + drive_id
         request = self.account.session.get(uri)
-        d = DriveObject(self, request.json())
+        d = DriveObject(self, request.json(), drive_config.DriveConfig.default_config())
         self._cached_drives[d.drive_id] = d
         return d
 
@@ -77,30 +85,16 @@ class DriveObject:
 
     logger = logger_factory.get_logger('DriveObject')
 
-    def __init__(self, root, data, max_get_size_bytes=1048576, max_put_size_bytes=524288):
+    def __init__(self, root, data, config):
         """
         :param onedrive_d.api.drives.OneDriveRoot root: The parent root object.
         :param dict[str, str | int | dict] data: The deserialized Drive dictionary.
+        :param onedrive_d.api.common.drive_config.DriveConfig config: Drive configuration.
         """
         self.root = root
         self._data = data
         self.drive_uri = root.account.client.API_URI + '/drives/' + data['id']
-        self.max_get_size_bytes = max_get_size_bytes
-        self.max_put_size_bytes = max_put_size_bytes
-
-    @property
-    def local_root(self):
-        """
-        :return str: Path to the directory set as local repository for the drive.
-        """
-        return self._local_root
-
-    @local_root.setter
-    def local_root(self, path):
-        """
-        :param str path: Path to the directory set as local repository for the drive.
-        """
-        self._local_root = path
+        self.config = config
 
     @property
     def drive_id(self):
@@ -126,8 +120,10 @@ class DriveObject:
         """
         Refresh metadata of the drive object.
         """
+        self.root.purge_drive_cache(self.drive_id)
         new_drive = self.root.get_drive(self.drive_id)
-        self.__dict__.update(new_drive.__dict__)
+        # noinspection PyProtectedMember
+        self._data = new_drive._data
         del new_drive
 
     def get_item_uri(self, item_id=None, item_path=None):
@@ -208,7 +204,7 @@ class DriveObject:
         :param str conflict_behavior: (Optional) Specify the behavior to use if the file already exists.
         :rtype: onedrive_d.api.items.OneDriveItem
         """
-        if size <= self.max_put_size_bytes:
+        if size <= self.config.max_put_size_bytes:
             return self.put_file(filename, data, parent_id, parent_path, conflict_behavior)
         else:
             return self.put_large_file(filename, data, size, parent_id, parent_path, conflict_behavior)
@@ -243,7 +239,7 @@ class DriveObject:
             f, t = expected_ranges.pop(0)  # Both inclusive
             if t is None or t >= size:
                 t = size - 1
-            next_cursor = f + self.max_put_size_bytes
+            next_cursor = f + self.config.max_put_size_bytes
             if t >= next_cursor:
                 expected_ranges.insert(0, (next_cursor, t))
                 t = next_cursor - 1
@@ -285,13 +281,13 @@ class DriveObject:
         :param str | None item_id: ID of the target file.
         :param str | None item_path: Path to the target file.
         """
-        if size <= self.max_get_size_bytes:
+        if size <= self.config.max_get_size_bytes:
             self.get_file_content(item_id, item_path, file=file)
             return
         t = 0
         while t < size:
             f = t
-            t += self.max_get_size_bytes - 1  # Both inclusive.
+            t += self.config.max_get_size_bytes - 1  # Both inclusive.
             if t >= size:
                 t = size - 1
             self.get_file_content(item_id, item_path, range_bytes=(f, t), file=file)
@@ -414,9 +410,7 @@ class DriveObject:
 
     def dump(self):
         data = {
-            'max_get_size_bytes': self.max_get_size_bytes,
-            'max_put_size_bytes': self.max_put_size_bytes,
-            'local_root': self.local_root,
+            'config_dump': self.config.dump(),
             'data': self._data,
             self.VERSION_KEY: self.VERSION_VALUE
         }
@@ -425,8 +419,7 @@ class DriveObject:
     @classmethod
     def load(cls, drive_root, account_id, account_type, s):
         data = json.loads(s)
-        drive = DriveObject(drive_root, data['data'], data['max_get_size_bytes'], data['max_put_size_bytes'])
-        drive.local_root = data['local_root']
+        drive = DriveObject(drive_root, data['data'], drive_config.DriveConfig.load(data['config_dump']))
         try:
             drive_root.add_cached_drive(account_id, account_type, drive)
         except ValueError as e:

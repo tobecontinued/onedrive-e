@@ -45,6 +45,7 @@ class TestUserProfile(unittest.TestCase):
         del dp[resources.UserProfile.VERSION_KEY]
         self.assertRaises(ValueError, resources.UserProfile.load, json.dumps(dp))
 
+
 class TestItemReference(unittest.TestCase):
     data = get_data('item_reference.json')
 

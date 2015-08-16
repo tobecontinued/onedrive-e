@@ -1,0 +1,11 @@
+{
+  "max_get_size_bytes": 1,
+  "max_put_size_bytes": 2,
+  "ignore_files": [
+    "~/.onedrive/ignore_list.txt",
+    "~/OneDrive/.ignore"
+  ],
+  "proxies": {
+    "https": "127.0.0.1:8080"
+  }
+}

@@ -1,6 +1,5 @@
 __author__ = 'xb'
 
-import atexit
 import unittest
 
 from requests import codes
@@ -10,9 +9,11 @@ from onedrive_d.api import accounts
 from onedrive_d.store.account_db import AccountStorage
 from onedrive_d.tests import get_data
 from onedrive_d.tests.mocks import mock_atexit
+from onedrive_d.tests.mocks import mock_logger
 from onedrive_d.tests.api.account_factory import get_sample_personal_account
 
-atexit.register = mock_atexit.register
+mock_atexit.mock_register()
+mock_logger.mock_loggers()
 
 
 def get_sample_account_storage(personal_client=None, business_client=None):

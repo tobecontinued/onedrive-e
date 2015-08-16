@@ -27,7 +27,7 @@ class DriveStorage:
 
     @staticmethod
     def _get_key(drive_id, account_id, account_type):
-        return (drive_id, account_id, account_type)
+        return drive_id, account_id, account_type
 
     def assemble_drive_record(self, row, container):
         drive_id, account_id, account_type, drive_dump = row
