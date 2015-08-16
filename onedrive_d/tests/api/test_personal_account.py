@@ -45,6 +45,7 @@ class TestPersonalAccount(unittest.TestCase):
         self.assertIn('a', account.scope)
         self.assertIn('b', account.scope)
         self.assertIn('c', account.scope)
+        self.assertEqual('Bearer ' + account.access_token, account.session.session.headers['Authorization'])
 
     def test_get_account_fail_no_code(self):
         client = get_sample_client()
@@ -102,8 +103,13 @@ class TestPersonalAccount(unittest.TestCase):
     def test_renew_session(self):
         account = get_sample_account()
         old_expire_at = account.expires_at
+
+        def callback(request, context):
+            self.assertEqual('Bearer ' + account.access_token, request.headers['Authorization'])
+            context.status_code = requests.codes.ok
+            return self.new_data
         with requests_mock.Mocker() as mock:
-            mock.post(account.client.OAUTH_TOKEN_URI, json=self.new_data, status_code=requests.codes.ok)
+            mock.post(account.client.OAUTH_TOKEN_URI, json=callback, status_code=requests.codes.ok)
             account.renew_tokens()
             self.assert_new_tokens(account)
             self.assertGreater(account.expires_at, old_expire_at)

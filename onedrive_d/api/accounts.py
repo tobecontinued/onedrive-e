@@ -73,11 +73,9 @@ class PersonalAccount:
         if expires_at is None:
             expires_at = time.time() + session_info['expires_in']
         self.expires_at = expires_at
-        self.load_session(session_info)
-        session = requests.Session()
-        session.headers.update({'Authorization': 'Bearer ' + session_info['access_token']})
         self.session = restapi.ManagedRESTClient(
-            session=session, account=self, proxies=client.proxies, net_mon=client.net_monitor)
+            session=requests.Session(), account=self, proxies=client.proxies, net_mon=client.net_monitor)
+        self.load_session(session_info)
 
     @property
     def profile(self):
@@ -99,6 +97,8 @@ class PersonalAccount:
         self.refresh_token = session_info['refresh_token']
         self.token_type = session_info['token_type']
         self.scope = session_info['scope'].split(' ')
+        self.session.session.headers['Authorization'] = 'Bearer ' + session_info['access_token']
+
 
     def renew_tokens(self):
         params = {

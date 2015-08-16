@@ -61,6 +61,7 @@ class ManagedRESTClient:
                 time.sleep(e.retry_after_seconds)
             except errors.OneDriveTokenExpiredError as e:
                 if auto_renew:
+                    self.logger.info('Access token expired. Try refreshing...')
                     self.account.renew_tokens()
                 else:
                     raise e
