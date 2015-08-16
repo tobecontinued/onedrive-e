@@ -5,6 +5,7 @@ onedrive-d is an OneDrive client based on OneDrive API.
 It aims to run on major Linux distributions that support Python 3.
 """
 
+__all__ = ['api', 'cli', 'common', 'store', 'tests', 'ui', 'vendor']
 __author__ = "Xiangyu Bu"
 __copyright__ = "Copyright © 2014-present Xiangyu Bu"
 __created__ = "2015-08-07"
