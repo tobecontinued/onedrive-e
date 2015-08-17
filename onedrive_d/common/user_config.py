@@ -39,7 +39,8 @@ class UserConfig:
 
     def __init__(self, data):
         """
-        :param dict[str, int | str | dict] data: Previously dumped user config data.
+        :param dict[str, int | str | onedrive_d.common.drive_config.DriveConfig] data: Previously dumped user config
+        data.
         """
         for k in self.DEFAULT_CONFIG:
             if k not in data:

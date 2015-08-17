@@ -12,86 +12,10 @@ from onedrive_d.api import options
 from onedrive_d.api import resources
 from onedrive_d.common import drive_config
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api import account_factory
 from onedrive_d.tests.api import drive_factory
 from onedrive_d.tests.mocks import mock_logger
 
 mock_logger.mock_loggers()
-
-
-class TestDriveRoot(unittest.TestCase):
-    def setUp(self):
-        self.root = drive_factory.get_sample_drive_root()
-        self.account = self.root.account
-
-    def test_get_all_drives(self):
-        with requests_mock.Mocker() as mock:
-            def callback(request, context):
-                response_drives = [get_data('drive.json'), get_data('drive.json')]
-                ids = [str(i) for i in range(0, 2)]
-                for d in response_drives:
-                    d['id'] = ids.pop(0)
-                context.status_code = codes.ok
-                return {'value': response_drives}
-
-            mock.get(self.account.client.API_URI + '/drives', json=callback)
-            all_drives = self.root.get_all_drives()
-            all_ids = [str(i) for i in range(0, 2)]
-            for i, x in all_drives.items():
-                self.assertIn(i, all_ids)
-                self.assertIsInstance(x, drives.DriveObject)
-                all_ids.remove(i)
-            self.assertEqual(0, len(all_ids))
-
-    def run_get_drive(self, drive_id):
-        """
-        :param str | None drive_id:
-        """
-        with requests_mock.Mocker() as mock:
-            path = '/drive'
-            if drive_id is not None:
-                path += 's/' + drive_id
-            mock.get(self.account.client.API_URI + path, json=get_data('drive.json'))
-            if drive_id is not None:
-                drive = self.root.get_drive(drive_id)
-            else:
-                drive = self.root.get_default_drive()
-            self.assertIsInstance(drive, drives.DriveObject)
-
-    def test_get_drive(self):
-        self.run_get_drive('123')
-
-    def test_get_default_drive(self):
-        self.run_get_drive(None)
-
-    def test_add_cached_drive_errors(self):
-        account = account_factory.get_sample_personal_account()
-        drive_root = drives.DriveRoot(account)
-        self.assertNotEqual('123', account.profile.user_id)
-        self.assertRaises(ValueError, drive_root.add_cached_drive,
-                          account_id='123', account_type=account.TYPE, drive=None)
-        self.assertRaises(ValueError, drive_root.add_cached_drive,
-                          account_id=account.profile.user_id, account_type='what', drive=None)
-
-    def get_cached_drive_root_tuple(self):
-        drive = drive_factory.get_sample_drive_object()
-        drive_root = drive.root
-        account = drive_root.account
-        drive_root.add_cached_drive(account.profile.user_id, account.TYPE, drive)
-        return drive_root, drive
-
-    def test_get_drive_from_cache(self):
-        drive_root, drive = self.get_cached_drive_root_tuple()
-        self.assertIs(drive_root.get_drive(drive.drive_id, skip_cache=False), drive)
-
-    @requests_mock.Mocker()
-    def test_purge_cache(self, mock):
-        data = get_data('drive_alt.json')
-        drive_root, drive = self.get_cached_drive_root_tuple()
-        mock.get(self.account.client.API_URI + '/drives/' + drive.drive_id, json=data)
-        self.assertNotEqual(data['id'], drive.drive_id)
-        self.assertIs(drive_root.get_drive(drive.drive_id, skip_cache=True), drive)
-        self.assertEqual(data['id'], drive.drive_id)
 
 
 class TestDriveObject(unittest.TestCase):
@@ -125,9 +49,7 @@ class TestDriveObject(unittest.TestCase):
         next_link = 'https://get_children'
         with requests_mock.Mocker() as mock:
             def callback(request, context):
-                data = {
-                    'value': [item_set.pop(0)]
-                }
+                data = {'value': [item_set.pop(0)]}
                 if len(item_set) > 0:
                     data['@odata.nextLink'] = next_link
                 context.status_code = codes.ok
@@ -144,16 +66,14 @@ class TestDriveObject(unittest.TestCase):
             self.assertListEqual(item_names, received_names)
 
     def test_get_children(self):
-        self.use_item_collection(
-            'get_children',
-            self.drive.get_item_uri(None, 'foo/bar') + ':/children',
-            {'item_path': 'foo/bar'})
+        self.use_item_collection('get_children',
+                                 self.drive.get_item_uri(None, 'foo/bar') + ':/children',
+                                 {'item_path': 'foo/bar'})
 
     def test_search(self):
-        self.use_item_collection(
-            'search',
-            self.drive.get_item_uri(None, 'foo/bar') + '/view.search?q=try&select=name,size',
-            {'item_path': 'foo/bar', 'keyword': 'try', 'select': ['name', 'size']})
+        self.use_item_collection('search',
+                                 self.drive.get_item_uri(None, 'foo/bar') + '/view.search?q=try&select=name,size',
+                                 {'item_path': 'foo/bar', 'keyword': 'try', 'select': ['name', 'size']})
 
     def test_create_dir(self):
         """
@@ -168,13 +88,7 @@ class TestDriveObject(unittest.TestCase):
                 self.assertDictEqual({}, data['folder'])
                 self.assertEqual(conflict_behavior, data['@name.conflictBehavior'])
                 context.status_code = codes.created
-                return {
-                    'id': '000aaa!100',
-                    'name': folder_name,
-                    'folder': {
-                        'childCount': 0
-                    }
-                }
+                return {'id': '000aaa!100', 'name': folder_name, 'folder': {'childCount': 0}}
 
             mock.post(self.drive.get_item_uri(None, None), json=callback, status_code=codes.created)
             item = self.drive.create_dir(name=folder_name, conflict_behavior=conflict_behavior)
@@ -263,12 +177,7 @@ class TestDriveObject(unittest.TestCase):
                 self.assertEqual(5, len(request.body.getvalue()))
                 qs = request.path_url.split('?', 1)[1]
                 self.assertEqual('@name.conflictBehavior=' + options.NameConflictBehavior.FAIL, qs)
-                data = {
-                    'id': 'abc',
-                    'name': name,
-                    'size': 5,
-                    'file': {},
-                }
+                data = {'id': 'abc', 'name': name, 'size': 5, 'file': {}}
                 context.status_code = codes.created
                 return data
 
@@ -283,27 +192,25 @@ class TestDriveObject(unittest.TestCase):
         input = io.BytesIO(b'12345')
         output = io.BytesIO()
         expected_ranges = ['0-1/5', '2-3/5', '4-4/5']
+        response_dict = {
+            'uploadUrl': session_url,
+            'expirationDateTime': '2020-01-01T00:00:00.0Z',
+            'nextExpectedRanges': ['0-']
+        }
         with requests_mock.Mocker() as mock:
             def create_session(request, context):
                 body = request.json()['item']
                 self.assertEqual('test', body['name'])
                 self.assertEqual(options.NameConflictBehavior.RENAME, body['@name.conflictBehavior'])
                 context.status_code = codes.ok
-                return {
-                    'uploadUrl': session_url,
-                    'expirationDateTime': '2020-01-01T00:00:00.0Z',
-                    'nextExpectedRanges': ['0-']
-                }
+                return response_dict
 
             def accept_data(request, context):
                 self.assertEqual(expected_ranges.pop(0), request.headers['Content-Range'])
                 self.assertLessEqual(len(request.body), self.drive.config.max_put_size_bytes)
                 output.write(request.body)
                 context.status_code = codes.accepted
-                return {
-                    'uploadUrl': session_url,
-                    'expirationDateTime': '2020-01-01T00:00:00.0Z',
-                }
+                return response_dict
 
             mock.post(self.drive.get_item_uri(item_id='123', item_path=None) + ':/test:/upload.createSession',
                       json=create_session)
@@ -349,6 +256,7 @@ class TestDriveObject(unittest.TestCase):
         new_drive = drives.DriveObject.load(drive_root, account_id='123', account_type=drive_root.account.TYPE, s=dump)
         self.assertIsInstance(new_drive, drives.DriveObject)
         self.assertEqual(0, len(drive_root._cached_drives))
+
 
 if __name__ == '__main__':
     unittest.main()

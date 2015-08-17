@@ -54,9 +54,9 @@ class TestManagedRESTClient(unittest.TestCase):
                 retry_after_seconds = None
             self.request_status_code(status_code=status_code, retry_after_seconds=retry_after_seconds)
 
-    def assert_compare(self, assert_call, obj, dict, keys):
+    def assert_compare(self, assert_call, obj, d, keys):
         for k in keys:
-            assert_call(getattr(obj, k), dict[k], k)
+            assert_call(getattr(obj, k), d[k], k)
 
     @Mocker()
     def test_auto_renew_tokens(self, mocker):
@@ -85,8 +85,7 @@ class TestManagedRESTClient(unittest.TestCase):
         self.assert_compare(self.assertNotEqual, account, new_tokens, compares)
         mocker.post(url, json=normal_callback)
         mocker.post(account.client.OAUTH_TOKEN_URI, json=renew_callback)
-        rest_client = restapi.ManagedRESTClient(session=requests.Session(), net_mon=None, account=account)
-        rest_client.post(url)
+        restapi.ManagedRESTClient(session=requests.Session(), net_mon=None, account=account).post(url)
         self.assert_compare(self.assertEqual, account, new_tokens, compares)
 
     @Mocker()

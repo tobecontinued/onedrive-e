@@ -66,11 +66,10 @@ class TestPathFilter(unittest.TestCase):
         self.assert_cases(cases)
 
     def test_special_patterns(self):
-        cases = [
+        self.assert_cases([
             ('/#test#', False, True),
             ('/Documents/xb/old/resume.txt', False, True)  # Test rule containing "**".
-        ]
-        self.assert_cases(cases)
+        ])
 
     def test_auto_correction(self):
         cases = [

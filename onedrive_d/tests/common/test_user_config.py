@@ -6,6 +6,7 @@ import unittest
 from onedrive_d.common import user_config
 from onedrive_d.common.drive_config import DriveConfig
 from onedrive_d.tests import get_data
+from onedrive_d.tests import assert_factory
 
 
 class TestGetCurrentOsUser(unittest.TestCase):
@@ -39,8 +40,7 @@ class TestUserConfig(unittest.TestCase):
         self.user_conf = user_config.UserConfig(self.data)
 
     def test_parse(self):
-        for k, v in self.data.items():
-            self.assertEqual(v, getattr(self.user_conf, k))
+        assert_factory.assert_dict_equals_attributes(self, self.data, self.user_conf)
 
     def test_dump(self):
         dump = self.user_conf.dump()

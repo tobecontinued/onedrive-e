@@ -3,6 +3,7 @@ __author__ = 'xb'
 import unittest
 
 from onedrive_d.common import drive_config
+from onedrive_d.tests import assert_factory
 from onedrive_d.tests import get_data
 
 
@@ -11,8 +12,7 @@ class TestDriveConfig(unittest.TestCase):
     conf = drive_config.DriveConfig(data)
 
     def test_parse(self):
-        for k, v in self.data.items():
-            self.assertEqual(v, getattr(self.conf, k))
+        assert_factory.assert_dict_equals_attributes(self, self.data, self.conf)
 
     def test_append_default_values(self):
         del self.data['max_get_size_bytes']
