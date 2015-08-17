@@ -49,16 +49,17 @@ class ItemStorage:
     """
 
     logger = logger_factory.get_logger('ItemStorage')
-    lock = rwlock.RWLock()
 
     def __init__(self, db_path, drive):
         """
         :param str db_path: A unique path for the database to store items for the target drive.
         :param onedrive_d.api.drives.DriveObject drive: The underlying drive object.
-        :return:
         """
-        self.drive = drive
+        if not hasattr(drive, 'storage_lock'):
+            drive.storage_lock = rwlock.RWLock()
+        self.lock = drive.storage_lock
         self._conn = sqlite3.connect(db_path, isolation_level=None, check_same_thread=False)
+        self.drive = drive
         self._cursor = self._conn.cursor()
         self._cursor.execute(get_content('onedrive_items.sql'))
         self._conn.commit()

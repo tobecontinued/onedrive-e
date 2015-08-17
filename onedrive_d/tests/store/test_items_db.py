@@ -7,6 +7,7 @@ from onedrive_d.store import items_db
 from onedrive_d.tests import get_data
 from onedrive_d.tests.api import drive_factory
 from onedrive_d.tests.mocks import mock_atexit
+from onedrive_d.tests.store import db_factory
 
 mock_atexit.mock_register()
 
@@ -25,7 +26,7 @@ class TestItemStorage(unittest.TestCase):
         self.all_items = []
         self.all_items_data = []
         self.drive = drive_factory.get_sample_drive_object()
-        self.itemdb_mgr = items_db.ItemStorageManager(':memory:')
+        self.itemdb_mgr = db_factory.get_sample_item_storage_manager()
         self.itemdb = self.itemdb_mgr.get_item_storage(self.drive)
         for name in ['image_item.json', 'folder_item.json', 'folder_child_item.json']:
             self._add_item(name)
