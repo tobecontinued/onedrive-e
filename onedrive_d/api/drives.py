@@ -99,7 +99,7 @@ class DriveObject:
             self.drive_path = '/drive'
         else:
             self.drive_path = '/drives/' + data['id']
-        self.drive_uri = root.account.client.API_URI + self.drive_path
+        self.drive_uri = root.account.client.API_URI
 
     @property
     def drive_id(self):
@@ -140,11 +140,11 @@ class DriveObject:
         """
         uri = self.drive_uri
         if item_id is not None:
-            uri += '/items/' + item_id
-        elif item_path is not None:
-            uri += '/root:/' + item_path
+            uri += self.drive_path + '/items/' + item_id
+        elif item_path is not None and item_path != self.drive_path + '/root:':
+            uri += item_path
         else:
-            uri += '/root'
+            uri += self.drive_path + '/root'
         return uri
 
     def get_root_dir(self, list_children=True):
@@ -193,7 +193,7 @@ class DriveObject:
             'folder': {},
             '@name.conflictBehavior': conflict_behavior
         }
-        uri = self.get_item_uri(parent_id, parent_path)
+        uri = self.get_item_uri(parent_id, parent_path) + '/children'
         request = self.root.account.session.post(uri, json=data, ok_status_code=requests.codes.created)
         return items.OneDriveItem(self, request.json())
 

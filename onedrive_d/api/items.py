@@ -93,14 +93,14 @@ class OneDriveItem:
         """
         :rtype: str
         """
-        return self._data['eTag']
+        return self._data['eTag'] if 'eTag' in self._data else None
 
     @property
     def c_tag(self):
         """
         :rtype: str
         """
-        return self._data['cTag']
+        return self._data['cTag'] if 'eTag' in self._data else None
 
     @property
     def created_by(self):

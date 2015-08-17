@@ -39,7 +39,7 @@ class TestDriveObject(unittest.TestCase):
                 context.status_code = codes.ok
                 return data
 
-            mock.get(self.drive.drive_uri + '/root?expand=children', json=callback)
+            mock.get(self.drive.get_item_uri(None, None), json=callback)
             root_item = self.drive.get_root_dir(list_children=True)
             self.assertIsInstance(root_item, items.OneDriveItem)
 
@@ -79,7 +79,7 @@ class TestDriveObject(unittest.TestCase):
         """
         https://github.com/OneDrive/onedrive-api-docs/blob/master/items/create.md
         """
-        folder_name = 'Documents'
+        folder_name = 'foo'
         conflict_behavior = options.NameConflictBehavior.REPLACE
         with requests_mock.Mocker() as mock:
             def callback(request, context):
@@ -88,9 +88,9 @@ class TestDriveObject(unittest.TestCase):
                 self.assertDictEqual({}, data['folder'])
                 self.assertEqual(conflict_behavior, data['@name.conflictBehavior'])
                 context.status_code = codes.created
-                return {'id': '000aaa!100', 'name': folder_name, 'folder': {'childCount': 0}}
+                return get_data('new_dir_item.json')
 
-            mock.post(self.drive.get_item_uri(None, None), json=callback, status_code=codes.created)
+            mock.post(self.drive.get_item_uri(None, None) + '/children', json=callback)
             item = self.drive.create_dir(name=folder_name, conflict_behavior=conflict_behavior)
             self.assertIsInstance(item, items.OneDriveItem)
 

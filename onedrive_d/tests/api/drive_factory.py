@@ -12,5 +12,6 @@ def get_sample_drive_root():
 
 
 def get_sample_drive_object(data=get_data('drive.json')):
-    d = drives.DriveObject(root=get_sample_drive_root(), data=data, config=drive_config.DriveConfig.default_config())
+    d = drives.DriveObject(
+        root=get_sample_drive_root(), data=data, config=drive_config.DriveConfig(get_data('drive_config.json')))
     return d
