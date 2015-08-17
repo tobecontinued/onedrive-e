@@ -1,13 +1,15 @@
 __author__ = 'xb'
 
+from onedrive_d.common import path_filter
+
 
 class DriveConfig:
     DEFAULT_VALUES = {
         'max_get_size_bytes': 1048576,
         'max_put_size_bytes': 524288,
         'local_root': None,
-        'ignore_files': {},
-        'proxies': {}
+        'ignore_files': set(),
+        'proxies': dict()
     }
 
     def __init__(self, data):
@@ -74,6 +76,16 @@ class DriveConfig:
         :rtype: dict[str, str]
         """
         return self._data['proxies']
+
+    @property
+    def path_filter(self):
+        if not hasattr(self, '_path_filter'):
+            rules = set()
+            for path in self.ignore_files:
+                with open(path, 'r') as f:
+                    rules.add(f.readlines())
+            self._path_filter = path_filter.PathFilter(rules)
+        return self._path_filter
 
     def dump(self):
         data = {}
