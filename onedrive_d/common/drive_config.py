@@ -1,5 +1,6 @@
 __author__ = 'xb'
 
+from onedrive_d.common import logger_factory
 from onedrive_d.common import path_filter
 
 
@@ -11,6 +12,8 @@ class DriveConfig:
         'ignore_files': set(),
         'proxies': dict()
     }
+
+    logger = logger_factory.get_logger('DriveConfig')
 
     def __init__(self, data):
         for k, v in self.DEFAULT_VALUES.items():
@@ -77,13 +80,17 @@ class DriveConfig:
         """
         return self._data['proxies']
 
+    # noinspection PyAttributeOutsideInit
     @property
     def path_filter(self):
         if not hasattr(self, '_path_filter'):
             rules = set()
             for path in self.ignore_files:
-                with open(path, 'r') as f:
-                    rules.add(f.readlines())
+                try:
+                    with open(path, 'r') as f:
+                        rules.update(f.read().splitlines())
+                except OSError as e:
+                    self.logger.error('Failed to load ignore list "%s": %s', path, e)
             self._path_filter = path_filter.PathFilter(rules)
         return self._path_filter
 

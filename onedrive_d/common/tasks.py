@@ -32,6 +32,7 @@ class BaseTask:
         """
         return self._item
 
+    # noinspection PyAttributeOutsideInit
     @item.setter
     def item(self, value):
         """

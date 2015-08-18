@@ -24,6 +24,9 @@ class TestPersonalAccount(unittest.TestCase):
 
     new_data = get_data('personal_access_token_alt.json')
 
+    def setUp(self):
+        self.account = get_sample_account()
+
     def assert_account(self, account):
         """
         :param onedrive_d.api.accounts.PersonalAccount account:
@@ -60,6 +63,7 @@ class TestPersonalAccount(unittest.TestCase):
                     'error': 'dummy error',
                     'error_description': 'dummy description'
                 }
+
             mock.post(re.compile('//login\.live\.com\.*'), json=callback)
             client = get_sample_client()
             self.assertRaises(ValueError, accounts.get_personal_account, client, uri='http://foo/bar?code=123')
@@ -108,6 +112,7 @@ class TestPersonalAccount(unittest.TestCase):
             self.assertEqual('Bearer ' + account.access_token, request.headers['Authorization'])
             context.status_code = requests.codes.ok
             return self.new_data
+
         with requests_mock.Mocker() as mock:
             mock.post(account.client.OAUTH_TOKEN_URI, json=callback, status_code=requests.codes.ok)
             account.renew_tokens()
@@ -116,39 +121,44 @@ class TestPersonalAccount(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_renew_session_failure(self, mock):
-        account = get_sample_account()
-        mock.post(account.client.OAUTH_TOKEN_URI, json=get_data('error_type1.json'), status_code=requests.codes.bad)
-        self.assertRaises(errors.OneDriveError, account.renew_tokens)
+        mock.post(self.account.client.OAUTH_TOKEN_URI, json=get_data('error_type1.json'),
+                  status_code=requests.codes.bad)
+        self.assertRaises(errors.OneDriveError, self.account.renew_tokens)
 
     @requests_mock.Mocker()
     def test_profile(self, mock):
-        account = get_sample_account()
         mock.get('https://apis.live.net/v5.0/me', json=get_data('user_profile.json'), status_code=requests.codes.ok)
-        profile = account.profile
+        profile = self.account.profile
         self.assertIsInstance(profile, resources.UserProfile)
-        account.profile = None
-        self.assertIsNone(account.profile)
+        self.account.profile = None
+        self.assertIsNone(self.account.profile)
+
+    @requests_mock.Mocker()
+    def test_sign_out(self, mock):
+        def callback(request, context):
+            self.assertIn('client_id=' + self.account.client.client_id, request.url)
+            context.status_code = requests.codes.ok
+
+        mock.get(self.account.client.OAUTH_SIGN_OUT_URI, text=callback)
+        self.account.sign_out()
 
     def test_dump(self):
-        account = get_sample_account()
-        dump = account.dump()
-        account_restore = accounts.PersonalAccount.load(account.client, dump)
-        self.assertEqual(account.access_token, account_restore.access_token)
-        self.assertEqual(account.refresh_token, account_restore.refresh_token)
-        self.assertEqual(account.expires_at, account_restore.expires_at)
+        dump = self.account.dump()
+        account_restore = accounts.PersonalAccount.load(self.account.client, dump)
+        self.assertEqual(self.account.access_token, account_restore.access_token)
+        self.assertEqual(self.account.refresh_token, account_restore.refresh_token)
+        self.assertEqual(self.account.expires_at, account_restore.expires_at)
 
     def test_dump_bad_version(self):
-        account = get_sample_account()
-        d = account.dump()
+        d = self.account.dump()
         dp = json.loads(d)
-        dp[account.VERSION_KEY] = 'str'
+        dp[self.account.VERSION_KEY] = 'str'
         self.assertRaises(ValueError, accounts.PersonalAccount.load, None, json.dumps(dp))
 
     def test_dump_no_version(self):
-        account = get_sample_account()
-        d = account.dump()
+        d = self.account.dump()
         dp = json.loads(d)
-        del dp[account.VERSION_KEY]
+        del dp[self.account.VERSION_KEY]
         self.assertRaises(ValueError, accounts.PersonalAccount.load, None, json.dumps(dp))
 
 

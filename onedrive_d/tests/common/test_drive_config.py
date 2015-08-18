@@ -1,10 +1,16 @@
 __author__ = 'xb'
 
+import os
+import sys
 import unittest
 
 from onedrive_d.common import drive_config
+from onedrive_d.common import path_filter
 from onedrive_d.tests import assert_factory
 from onedrive_d.tests import get_data
+from onedrive_d.tests.mocks import mock_logger
+
+mock_logger.mock_loggers()
 
 
 class TestDriveConfig(unittest.TestCase):
@@ -40,6 +46,21 @@ class TestDriveConfig(unittest.TestCase):
         conf3 = drive_config.DriveConfig.load(dump2)
         for k in self.data:
             self.assertEqual(getattr(conf2, k), getattr(conf3, k))
+
+    def test_path_filter(self):
+        """
+        Test if the path filter object is properly instantiated.
+        """
+        config = drive_config.DriveConfig({
+            'ignore_files': [
+                os.path.dirname(sys.modules['onedrive_d.tests'].__file__) + '/data/ignore_list.txt',
+                '/tmp/foo'  # bad path should not crash the program
+            ]
+        })
+        filter = config.path_filter
+        self.assertIsInstance(filter, path_filter.PathFilter)
+        self.assertTrue(filter.should_ignore('/foo'))
+        self.assertTrue(filter.should_ignore('/a.swp'))
 
 
 if __name__ == '__main__':

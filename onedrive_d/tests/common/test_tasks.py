@@ -3,7 +3,6 @@ __author__ = 'xb'
 import unittest
 
 from requests import codes
-
 from requests_mock import Mocker
 
 from onedrive_d.common import tasks
@@ -14,6 +13,7 @@ from onedrive_d.tests.store import db_factory
 
 
 class BaseTestCase:
+    # noinspection PyAttributeOutsideInit
     def setup_objects(self):
         self.rename_records = []
         self.drive = drive_factory.get_sample_drive_object()

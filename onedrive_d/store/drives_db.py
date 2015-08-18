@@ -53,9 +53,6 @@ class DriveStorage:
             self.assemble_drive_record(row, self._all_drives)
         return self._all_drives
 
-    def get_drive(self, drive_id, account_id, account_type):
-        return self._all_drives[self._get_key(drive_id, account_id, account_type)]
-
     def add_record(self, drive):
         account = drive.root.account
         params = (drive.drive_id, account.profile.user_id, account.TYPE, drive.config.local_root, drive.dump())
@@ -63,5 +60,6 @@ class DriveStorage:
                              'drive_dump) VALUES (?,?,?,?,?)', params)
 
     def close(self):
+        self._conn.commit()
         self._cursor.close()
         self._conn.close()

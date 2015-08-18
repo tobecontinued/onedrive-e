@@ -119,7 +119,7 @@ class ItemStorage:
         :param str relation: Relation of the criteria.
         :return dict[str, onedrive_d.store.items_db.ItemRecord]: All matching rows in the form of ItemRecord.
         """
-        where, values = self._get_where_clause(args)
+        where, values = self._get_where_clause(args, relation)
         ret = {}
         self.lock.reader_acquire()
         q = self._cursor.execute('SELECT item_id, type, item_name, parent_id, parent_path, etag, ctag, size, '
