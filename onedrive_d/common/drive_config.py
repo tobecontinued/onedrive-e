@@ -89,7 +89,7 @@ class DriveConfig:
                 try:
                     with open(path, 'r') as f:
                         rules.update(f.read().splitlines())
-                except OSError as e:
+                except Exception as e:
                     self.logger.error('Failed to load ignore list "%s": %s', path, e)
             self._path_filter = path_filter.PathFilter(rules)
         return self._path_filter
