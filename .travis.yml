@@ -12,6 +12,7 @@ addons:
   apt:
     packages:
     - python3-dev
+    - gcc
 
 install:
   - pip install -U pip
@@ -26,7 +27,8 @@ before_script:
   - python3 --version
 
 script:
-  - coverage3 run --source=onedrive_d setup.py test
+  - coverage3 run --branch --source=onedrive_d setup.py test
 
 after_success:
-  coveralls
+  - coverage3 report
+  - coveralls

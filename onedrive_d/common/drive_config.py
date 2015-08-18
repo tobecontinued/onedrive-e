@@ -28,7 +28,7 @@ class DriveConfig:
 
     @staticmethod
     def default_config():
-        return DriveConfig(DriveConfig.DEFAULT_VALUES)
+        return DriveConfig(dict(DriveConfig.DEFAULT_VALUES))
 
     @classmethod
     def set_default_config(cls, config):
