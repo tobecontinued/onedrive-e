@@ -50,10 +50,6 @@ class TestDriveStorage(unittest.TestCase):
             self.drives_store.assemble_drive_record(r, d)
             self.assertEqual(0, len(d), str(r))
 
-    def test_add_unmapped_drive(self):
-        drive = drives.DriveObject(self.drive_root, get_data('drive.json'), DriveConfig.default_config())
-        self.assertRaises(ValueError, self.drives_store.add_record, drive)
-
     def tearDown(self):
         self.drives_store.close()
         self.account_store.close()
