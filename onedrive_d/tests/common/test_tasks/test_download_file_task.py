@@ -30,10 +30,12 @@ class TestDownloadFileTask(test_tasks.BaseTestCase, unittest.TestCase):
     def test_handle(self, mock_request):
         mock_request.get(self.drive.drive_uri + self.drive.drive_path + '/items/' + self.item.id + '/content',
                          content=b'1', status_code=codes.ok)
-        with mock.patch('builtins.open', autospec=True) as m:
+        m = mock.mock_open()
+        with mock.patch('builtins.open', m, create=True):
             self.task.handle()
-            m.assert_called_once_with(self.file_path, 'wb')
-            m().write.assert_called_once(b'1')
+        m.assert_called_once_with(self.file_path, 'wb')
+        handle = m()
+        handle.write.assert_called_once_with(b'1')
 
 
 if __name__ == '__main__':

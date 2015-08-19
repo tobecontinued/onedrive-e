@@ -35,9 +35,12 @@ class TestUploadFileTask(test_tasks.BaseTestCase, unittest.TestCase):
 
         mock_request.put(self.drive.get_item_uri(None, None) + '/test:/content', json=callback)
         mock_os.mock_getsize({self.file_path: len(in_data)})
-        with mock.patch('builtins.open', autospec=True, return_value=io.BytesIO(in_data)) as m:
+
+        m = mock.mock_open()
+        m.return_value = io.BytesIO(in_data)
+        with mock.patch('builtins.open', m, create=True):
             self.task.handle()
-            m.assert_called_once_with(self.file_path, 'rb')
+        m.assert_called_once_with(self.file_path, 'rb')
         self.assertEqual(in_data, output.getvalue())
 
 
