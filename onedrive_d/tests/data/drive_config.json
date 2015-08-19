@@ -1,8 +1,8 @@
 {
-  "max_get_size_bytes": 1,
-  "max_put_size_bytes": 2,
+  "max_get_size_bytes": 5,
+  "max_put_size_bytes": 10,
   "ignore_files": [],
-  "local_root": "/tmp",
+  "local_root": "/foobar",
   "proxies": {
     "https": "127.0.0.1:8080"
   }

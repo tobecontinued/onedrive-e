@@ -26,16 +26,19 @@ class TestUploadFileTask(test_tasks.BaseTestCase, unittest.TestCase):
     @Mocker()
     def test_handle(self, mock_request):
         in_data = b'12345'
+        output = io.BytesIO()
 
         def callback(request, context):
+            output.write(request.body.getvalue())
             context.status_code = codes.created
             return get_data('image_item.json')
 
         mock_request.put(self.drive.get_item_uri(None, None) + '/test:/content', json=callback)
         mock_os.mock_getsize({self.file_path: len(in_data)})
-        m = mock.mock_open(read_data=io.BytesIO(in_data))
-        with mock.patch('__main__.open', m, create=True):
+        with mock.patch('builtins.open', autospec=True, return_value=io.BytesIO(in_data)) as m:
             self.task.handle()
+            m.assert_called_once_with(self.file_path, 'rb')
+        self.assertEqual(in_data, output.getvalue())
 
 
 if __name__ == '__main__':

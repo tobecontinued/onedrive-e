@@ -110,8 +110,6 @@ class CreateDirTask(NameReferenceMixin, LocalParentPathMixin):
         """
         Create a directory named self.name under self.parent_path or self.item_id.
         """
-        if self.name is None:
-            raise ValueError('CreateDirTask got a task with directory name unset.')
         try:
             new_item = self.drive.create_dir(name=self.name, parent_path=self.parent_path,
                                              conflict_behavior=self.conflict_behavior)
