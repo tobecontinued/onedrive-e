@@ -11,13 +11,12 @@ class BaseTestCase:
     # noinspection PyAttributeOutsideInit
     def setup_objects(self):
         self.rename_records = []
+        self.utime_records = {}
         self.drive = drive_factory.get_sample_drive_object()
         self.drive.config = drive_config.DriveConfig({})
         self.items_store_mgr = db_factory.get_sample_item_storage_manager()
         self.items_store = self.items_store_mgr.get_item_storage(self.drive)
         self.task_pool = db_factory.get_sample_task_pool()
-        self.task_base = tasks.TaskMixin()
-        self.task_base.drive = self.drive
-        self.task_base.items_store = self.items_store
-        self.task_base.task_pool = self.task_pool
+        self.task_base = tasks.TaskMixin(drive=self.drive, items_store=self.items_store, task_pool=self.task_pool)
         mock_os.mock_rename(self.rename_records)
+        mock_os.mock_utime(self.utime_records)

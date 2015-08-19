@@ -1,30 +1,8 @@
 __author__ = 'xb'
 
 import json
-import os
-from pwd import getpwnam, getpwuid
 
 from onedrive_d.common.drive_config import DriveConfig
-
-
-def get_current_os_user():
-    """
-    Find the real user who runs the current process. Return a tuple of uid, username, homedir.
-    :rtype: (int, str, str)
-    """
-    user_name = os.getenv('SUDO_USER')
-    if not user_name:
-        user_name = os.getenv('USER')
-    if user_name:
-        pw = getpwnam(user_name)
-        user_id = pw.pw_uid
-    else:
-        # If cannot find the user, use ruid instead.
-        user_id = os.getresuid()[0]
-        pw = getpwuid(user_id)
-        user_name = pw.pw_name
-    user_home = pw.pw_dir
-    return user_id, user_name, user_home
 
 
 class UserConfig:

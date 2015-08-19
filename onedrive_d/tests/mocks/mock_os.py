@@ -14,14 +14,8 @@ def mock_rename(records):
     os.rename = rename
 
 
-def mock_getsize(routing_dict):
-    """
-    :param dict[str, int] routing_dict:
-    """
+def mock_utime(records):
+    def utime(path, times):
+        records[path] = times
 
-    def fake_getsize(path):
-        if path in routing_dict:
-            return routing_dict[path]
-        raise MockException('os.path.getsize("{}") is not expected.' % path)
-
-    os.path.getsize = fake_getsize
+    os.utime = utime
