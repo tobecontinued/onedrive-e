@@ -16,7 +16,9 @@ def create_item_db_name(drive):
 
 class ItemRecordStatuses:
     OK = 'OK'
+    DOWNLOADED = 'DOWNLOADED'
     MOVING = 'MOVING'
+    UPLOADED = 'UPLOADED'
 
 
 class ItemRecord:

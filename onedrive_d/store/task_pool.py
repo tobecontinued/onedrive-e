@@ -16,5 +16,8 @@ class TaskPool:
     def add_task(self, task):
         pass
 
-    def pop_task(self):
+    def pop_task(self, task_type=None):
+        pass
+
+    def delete_children_tasks(self, parent_id, parent_path):
         pass
