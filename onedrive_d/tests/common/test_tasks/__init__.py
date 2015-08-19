@@ -17,9 +17,6 @@ class BaseTestCase:
         self.items_store_mgr = db_factory.get_sample_item_storage_manager()
         self.items_store = self.items_store_mgr.get_item_storage(self.drive)
         self.task_pool = db_factory.get_sample_task_pool()
-        self.task_base = tasks.TaskMixin()
-        self.task_base.drive = self.drive
-        self.task_base.items_store = self.items_store
-        self.task_base.task_pool = self.task_pool
+        self.task_base = tasks.TaskMixin(drive=self.drive, items_store=self.items_store, task_pool=self.task_pool)
         mock_os.mock_rename(self.rename_records)
         mock_os.mock_utime(self.utime_records)

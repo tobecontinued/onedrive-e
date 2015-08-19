@@ -133,7 +133,7 @@ class ItemStorage:
         self.lock.reader_release()
         return ret
 
-    def update_item(self, item, status):
+    def update_item(self, item, status=ItemRecordStatuses.OK):
         """
         :param onedrive_d.api.items.OneDriveItem item:
         :param str status:

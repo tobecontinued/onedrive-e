@@ -103,10 +103,16 @@ class TestDriveObject(unittest.TestCase):
         self.assert_create_dir(self.drive.drive_uri + self.drive.drive_path + '/root:/bar/children',
                                parent_path=self.drive.drive_path + '/root:/bar')
 
-    def test_delete_item(self):
+    def assert_delete_item(self, url_part, **kwargs):
         with requests_mock.Mocker() as mock:
-            mock.delete(self.drive.get_item_uri(None, None), status_code=codes.no_content)
-            self.drive.delete_item()
+            mock.delete(self.drive.drive_uri + self.drive.drive_path + url_part, status_code=codes.no_content)
+            self.drive.delete_item(**kwargs)
+
+    def test_delete_item_by_id(self):
+        self.assert_delete_item('/items/some_id', item_id='some_id')
+
+    def test_delete_item_by_path(self):
+        self.assert_delete_item('/root:/foo/bar', item_path='/drive/root:/foo/bar')
 
     def test_update_root(self):
         self.assertRaises(ValueError, self.drive.update_item, None, None)
