@@ -3,9 +3,14 @@ __author__ = 'xb'
 import json
 import unittest
 
+import requests
+import requests_mock
+
 from onedrive_d import str_to_datetime
 from onedrive_d.api import resources
+from onedrive_d.api import options
 from onedrive_d.tests import get_data
+from onedrive_d.tests.api import drive_factory
 
 
 class TestUserProfile(unittest.TestCase):
@@ -116,6 +121,35 @@ class TestIdentitySet(unittest.TestCase):
         self.assertIsNone(ident.user)
         self.assertIsInstance(ident.device, resources.Identity)
         self.assertIsInstance(ident.application, resources.Identity)
+
+
+class TestAsyncCopySession(unittest.TestCase):
+    def setUp(self):
+        self.drive = drive_factory.get_sample_drive_object()
+        self.data = get_data('async_operation_response.json')
+        self.session = resources.AsyncCopySession(self.drive, {'Location': 'https://foo'})
+
+    @requests_mock.Mocker()
+    def test_update(self, mock_request):
+        def callback(request, context):
+            data = self.data.copy()
+            self.data['percentageComplete'] += 50
+            if self.data['percentageComplete'] == 100:
+                self.data['status'] = options.AsyncOperationStatuses.COMPLETED
+            else:
+                self.data['status'] = options.AsyncOperationStatuses.IN_PROGRESS
+            context.status_code = requests.codes.ok
+            return data
+
+        mock_request.get('https://foo', json=callback)
+        expects = [(0, options.AsyncOperationStatuses.NOT_STARTED),
+                   (50, options.AsyncOperationStatuses.IN_PROGRESS),
+                   (100, options.AsyncOperationStatuses.COMPLETED)]
+        for exp in expects:
+            self.session.update_status()
+            exp_percentage, exp_status = exp
+            self.assertEqual(exp_percentage, self.session.percentage_complete)
+            self.assertEqual(exp_status, self.session.status)
 
 
 if __name__ == '__main__':

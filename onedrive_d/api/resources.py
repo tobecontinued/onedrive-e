@@ -2,7 +2,10 @@ __author__ = 'xb'
 
 import json
 
+import requests
+
 from onedrive_d import str_to_datetime
+from onedrive_d.api import options
 
 
 class UserProfile:
@@ -162,6 +165,45 @@ class AsyncCopySession:
         self.drive = drive
         self.url = headers['Location']
 
+    def update_status(self):
+        code_accepted = requests.codes.accepted
+        code_see_other = requests.codes.see_other
+        request = self.drive.root.account.session.get(self.url, ok_status_code=set(code_accepted, code_see_other))
+        if request.status_code == code_accepted:
+            data = request.json()
+            self._operation = data['operation']
+            self._percentage_complete = data['percentageComplete']
+            self._status = data['status']
+        elif request.status_code == code_see_other:
+            self._percentage_complete = 100
+            self._status = options.AsyncOperationStatuses.COMPLETED
+            self._item_url = request.headers['Location']
+
+    @property
+    def operation(self):
+        """
+        :return str: The type of job being run.
+        """
+        return self._operation
+
+    @property
+    def percentage_complete(self):
+        """
+        :return float: An float value between 0 and 100 that indicates the percentage complete.
+        """
+        return self._percentage_complete
+
+    @property
+    def status(self):
+        """
+        :return str: An enum value in options.AsyncOperationStatuses to indicate the status of the job.
+        """
+        return self._status
+
+    def get_completed_item(self):
+        # This GET request supposedly returns an item JSON. But we need to avoid cyclic import.
+        request = self.drive.root.account.session.get(self._item_url)
+        return self.drive.get_item(item_id=request.json()['id'])
 
 class Identity:
     def __init__(self, data):
