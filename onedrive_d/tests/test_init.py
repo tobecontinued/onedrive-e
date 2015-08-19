@@ -6,15 +6,15 @@ import onedrive_d
 
 
 class TestTimeConversion(unittest.TestCase):
-    s = '1970-01-01T00:01:01.123456Z'
-    d = datetime.datetime(1970, 1, 1, 0, 1, 1, 123456)
-    t = 61.1234560
+    s = '1970-01-01T00:01:01.860000Z'
+    d = datetime.datetime(1970, 1, 1, 0, 1, 1, 860000)
+    t = 61.86
 
     def test_convert(self):
         self.assertEqual(self.d, onedrive_d.str_to_datetime(self.s))
         self.assertEqual(self.s, onedrive_d.datetime_to_str(self.d))
         self.assertEqual(self.t, onedrive_d.datetime_to_timestamp(self.d))
-        # self.assertEqual(self.s, onedrive_d.timestamp_to_str(self.t))
+        # self.assertEqual(self.d, onedrive_d.timestamp_to_datetime(self.t))
 
 
 class TestGetCurrentOsUser(unittest.TestCase):
