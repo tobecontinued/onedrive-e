@@ -40,7 +40,7 @@ class TestUploadFileTask(test_tasks.BaseTestCase, unittest.TestCase):
         m.return_value = io.BytesIO(in_data)
         with mock.patch('builtins.open', m, create=True):
             self.task.handle()
-        m.assert_called_once_with(self.file_path, 'rb')
+        m.assert_called_with(self.file_path, 'rb')
         self.assertEqual(in_data, output.getvalue())
 
 

@@ -12,7 +12,7 @@ class BaseTestCase:
     def setup_objects(self):
         self.rename_records = []
         self.drive = drive_factory.get_sample_drive_object()
-        self.drive.config = drive_config.DriveConfig({'max_put_size_bytes': 10})
+        self.drive.config = drive_config.DriveConfig({})
         self.items_store_mgr = db_factory.get_sample_item_storage_manager()
         self.items_store = self.items_store_mgr.get_item_storage(self.drive)
         self.task_pool = db_factory.get_sample_task_pool()
