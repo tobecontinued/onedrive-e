@@ -17,8 +17,32 @@ __status__ = "Development"
 __updated__ = "2015-08-08"
 __version__ = "2.0.0.dev1"
 
+import os
 import pkgutil
+from calendar import timegm
+from datetime import datetime
+from pwd import getpwnam, getpwuid
 from ciso8601 import parse_datetime
+
+
+def get_current_os_user():
+    """
+    Find the real user who runs the current process. Return a tuple of uid, username, homedir.
+    :rtype: (int, str, str)
+    """
+    user_name = os.getenv('SUDO_USER')
+    if not user_name:
+        user_name = os.getenv('USER')
+    if user_name:
+        pw = getpwnam(user_name)
+        user_id = pw.pw_uid
+    else:
+        # If cannot find the user, use ruid instead.
+        user_id = os.getresuid()[0]
+        pw = getpwuid(user_id)
+        user_name = pw.pw_name
+    user_home = pw.pw_dir
+    return user_id, user_name, user_home
 
 
 def datetime_to_str(d):
@@ -37,6 +61,18 @@ def str_to_datetime(s):
     return parse_datetime(s)
 
 
+def datetime_to_timestamp(d):
+    """
+    :param datetime.datetime d: A datetime object.
+    :return float: An equivalent UNIX timestamp.
+    """
+    return timegm(d.utctimetuple()) + d.microsecond / 1000000.0
+
+
+def timestamp_to_str(t):
+    return datetime_to_str(datetime.utcfromtimestamp(t))
+
+
 def get_content(file_name, pkg_name='onedrive_d', is_text=True):
     """
     Read a resource file in data/.
@@ -49,3 +85,6 @@ def get_content(file_name, pkg_name='onedrive_d', is_text=True):
     if is_text:
         content = content.decode('utf-8')
     return content
+
+
+OS_USER_ID, OS_USER_NAME, OS_USER_HOME = get_current_os_user()

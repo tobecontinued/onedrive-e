@@ -47,6 +47,8 @@ $ wget -O- https://bootstrap.pypa.io/get-pip.py | sudo python3
 $ sudo pip3 install --upgrade setuptools
 ```
 
+It is very important that your system hardware clock is set to UTC. Refer to `man tzconfig` for more details.
+
 ## Install
 
 After properly setting up pre-requisites, run the following command to install the package:
