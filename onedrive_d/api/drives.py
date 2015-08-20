@@ -150,6 +150,9 @@ class DriveObject:
     def get_root_dir(self, list_children=True):
         return self.get_item(None, None, list_children)
 
+    def build_item(self, data):
+        return items.OneDriveItem(self, data)
+
     def get_item(self, item_id=None, item_path=None, list_children=True):
         """
         Retrieve the metadata of an item from OneDrive server.

@@ -2,8 +2,6 @@ __author__ = 'xb'
 
 import json
 
-import requests
-
 from onedrive_d import str_to_datetime
 from onedrive_d.api import options
 
@@ -160,24 +158,24 @@ class AsyncCopySession:
     """
     Track the state of an async copy request.
     """
+    ACCEPTABLE_STATUS_CODES = {200, 202, 303}
 
     def __init__(self, drive, headers):
         self.drive = drive
         self.url = headers['Location']
+        self._status = options.AsyncOperationStatuses.NOT_STARTED
 
     def update_status(self):
-        code_accepted = requests.codes.accepted
-        code_see_other = requests.codes.see_other
-        request = self.drive.root.account.session.get(self.url, ok_status_code=set(code_accepted, code_see_other))
-        if request.status_code == code_accepted:
+        request = self.drive.root.account.session.get(self.url, ok_status_code=self.ACCEPTABLE_STATUS_CODES)
+        if request.status_code == 202:
             data = request.json()
             self._operation = data['operation']
             self._percentage_complete = data['percentageComplete']
             self._status = data['status']
-        elif request.status_code == code_see_other:
+        elif request.status_code == 200:
             self._percentage_complete = 100
             self._status = options.AsyncOperationStatuses.COMPLETED
-            self._item_url = request.headers['Location']
+            self._item = self.drive.build_item(request.json())
 
     @property
     def operation(self):
@@ -200,10 +198,8 @@ class AsyncCopySession:
         """
         return self._status
 
-    def get_completed_item(self):
-        # This GET request supposedly returns an item JSON. But we need to avoid cyclic import.
-        request = self.drive.root.account.session.get(self._item_url)
-        return self.drive.get_item(item_id=request.json()['id'])
+    def get_item(self):
+        return self._item
 
 class Identity:
     def __init__(self, data):
