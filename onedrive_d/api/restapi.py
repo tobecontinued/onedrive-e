@@ -44,9 +44,9 @@ class ManagedRESTClient:
         while True:
             try:
                 request = getattr(self.session, method)(url, **params)
-                ok = request.status_code != ok_status_code if isinstance(ok_status_code, int) \
+                bad_status = request.status_code != ok_status_code if isinstance(ok_status_code, int) \
                     else request.status_code not in ok_status_code
-                if not ok:
+                if bad_status:
                     if request.status_code in self.RECOVERABLE_STATUS_CODES:
                         if 'Retry-After' in request.headers:
                             retry_after_seconds = int(request.headers['Retry-After'])
