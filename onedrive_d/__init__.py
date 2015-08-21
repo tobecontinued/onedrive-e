@@ -35,14 +35,18 @@ def get_current_os_user():
         user_name = os.getenv('USER')
     if user_name:
         pw = getpwnam(user_name)
-        user_id = pw.pw_uid
+        user_uid = pw.pw_uid
     else:
         # If cannot find the user, use ruid instead.
-        user_id = os.getresuid()[0]
-        pw = getpwuid(user_id)
+        user_uid = os.getresuid()[0]
+        pw = getpwuid(user_uid)
         user_name = pw.pw_name
+    user_gid = pw.pw_gid
     user_home = pw.pw_dir
-    return user_id, user_name, user_home
+    return user_uid, user_name, user_home, user_gid
+
+
+OS_USER_ID, OS_USER_NAME, OS_USER_HOME, OS_USER_GID = get_current_os_user()
 
 
 def datetime_to_str(d):
@@ -101,4 +105,6 @@ def get_content(file_name, pkg_name='onedrive_d', is_text=True):
     return content
 
 
-OS_USER_ID, OS_USER_NAME, OS_USER_HOME = get_current_os_user()
+def mkdir(path):
+    os.mkdir(path, mode=0o700)
+    os.chown(path, OS_USER_ID, OS_USER_GID)

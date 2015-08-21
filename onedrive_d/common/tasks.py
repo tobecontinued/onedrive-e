@@ -2,11 +2,13 @@ __author__ = 'xb'
 
 import os
 
+from onedrive_d import mkdir
 from onedrive_d import datetime_to_timestamp
 from onedrive_d import timestamp_to_datetime
 from onedrive_d.api import errors
 from onedrive_d.api import facets
 from onedrive_d.api import options
+from onedrive_d.api import resources
 from onedrive_d.common import logger_factory
 from onedrive_d.store.items_db import ItemRecordStatuses
 
@@ -88,20 +90,112 @@ class LocalParentPathMixin(TaskMixin, ParentPathReferenceMixin):
         """
         return self.parent_path.replace(self.drive.drive_path + '/root:', self.drive.config.local_root, 1)
 
+    @property
+    def local_relative_parent_path(self):
+        """
+        :rtype: str
+        """
+        return self._local_relative_parent_path
+
     @local_parent_path.setter
     def local_parent_path(self, relative_path):
         """
         :param str relative_path: Path relative to drive's root directory.
         """
+        self._local_relative_parent_path = relative_path
         self.parent_path = self.drive.drive_path + '/root:' + relative_path
 
 
-class SynchronizeDirTask(TaskMixin):
-    def __init__(self, task_base):
+class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
+    def __init__(self, task_base, local_parent_path, name):
+        super().__init__(task_base)
+        self.local_parent_path = local_parent_path
+        self.name = name
+        self.local_path = self.local_parent_path + '/' + name
+        self.repo_relative_parent_path = '/' + self.local_relative_parent_path + '/' + self.name
+
+    def list_items(self, path_filter):
+        ent_list = {}
+        ent_count = {}
+        for ent in os.listdir(self.local_path):
+            ent_path = self.local_path + '/' + ent
+            is_folder = os.path.isfile(ent_path)
+            if path_filter.should_ignore(self.repo_relative_parent_path + '/' + ent, is_folder):
+                continue
+            ent_lower = ent.lower()
+            if ent_lower in ent_count:
+                ent_count[ent_lower] += 1
+                filename, ext = os.path.splitext(ent)
+                try:
+                    ent = filename + ' (case conflict ' + str(ent_count[ent_lower]) + ')' + ext
+                    os.rename(ent_path, self.local_path + '/' + ent)
+                    ent_count[ent.lower()] = 0
+                except (IOError, OSError) as e:
+                    self.logger.error('An error occurred when solving name conflict: %s.', e)
+            else:
+                ent_count[ent_lower] = 0
+            ent_list[ent] = is_folder
+        return ent_list
+
+    def analyze_item(self, item, all_local_items, path_filter):
+        """
+        :param onedrive_d.items.OneDriveItem item: A remote item.
+        :param dict[str, True | False] all_local_items: All local items of interest.
+        :param onedrive_d.common.path_filter.PathFilter path_filter: Path filter for the drive.
+        """
+        item_path = self.local_path + '/' + item.name
+        try:
+            is_exist = os.path.exists(item_path)
+            del all_local_items[item.name]
+        except Exception as e:
+            self.logger.error('Cannot stat path "%s": %s', item_path, e)
+            return
+        q = self.items_store.get_items_by_id(item_id=item.id)
+        if len(q) == 0 and not is_exist:
+            # The item does not exist locally and we have no proof it was touched before.
+            if item.is_folder:
+                # If the item is a folder, create it and schedule a sync later.
+                try:
+                    self.logger.debug('Creating directory "%s" as it does not exist locally and has no previous '
+                                      'record.', item_path)
+                    mkdir(item_path)
+                    self.items_store.update_item(item)
+                    self.task_pool.add_task(SynchronizeDirTask(self, self.local_relative_parent_path + '/' +
+                                                               self.name, item.name))
+                except (IOError, OSError) as e:
+                    self.logger.error('Failed to create directory "%s": %s.', item_path, e)
+            else:
+                # Just download the item.
+                self.logger.debug('Downloading "%s" as it does not exist locally and has no record in database.',
+                                  item_path)
+                self.task_pool.add_task(DownloadFileTask(self, item))
+        elif not is_exist:
+            pass
+        elif len(q) == 0:
+            pass
+        else:
+            pass
+
+    def analyze_untouched_local_item(self, name):
         pass
 
     def handle(self):
-        pass
+        if not os.path.isdir(self.local_path):
+            self.logger.error('Cannot sync path "%s" because it is not a directory.', self.local_path)
+            return
+        path_filter = self.drive.config.path_filter
+        try:
+            all_local_items = self.list_items(path_filter)
+            all_remote_items = self.drive.get_children(item_path=self.parent_path + '/' + self.name)
+        except (IOError, OSError) as e:
+            self.logger.error('An error occurred synchronizing "%s": %s.', self.local_path, e)
+            return
+        while all_remote_items.has_next():
+            remote_item_list = all_remote_items.get_next()
+            for item in remote_item_list:
+                self.analyze_item(item, all_local_items, path_filter)
+        for local_item_name in all_local_items:
+            self.analyze_untouched_local_item(local_item_name)
 
 
 class CreateDirTask(NameReferenceMixin, LocalParentPathMixin):
@@ -124,7 +218,7 @@ class CreateDirTask(NameReferenceMixin, LocalParentPathMixin):
             self.items_store.update_item(new_item, ItemRecordStatuses.OK)
             self.logger.info('Created remote directory: %s/%s. Item ID: %s.', self.parent_path, new_item.name,
                              new_item.id)
-            sync_task = SynchronizeDirTask(self)
+            sync_task = SynchronizeDirTask(self, local_parent_path=self.local_relative_parent_path, name=self.name)
             self.task_pool.add_task(sync_task)
         except errors.OneDriveError as e:
             self.logger.error("An API error occurred: %s.", e)
@@ -192,25 +286,114 @@ class UploadFileTask(NameReferenceMixin, LocalParentPathMixin):
             self.logger.error('Error occurred when uploading "%s": %s.', local_item_path, e)
 
 
-class MoveItemTask(TaskMixin):
-    def __init__(self, task_base):
-        pass
+class MoveFromTask(NameReferenceMixin, LocalParentPathMixin):
+    """
+    A transient task that will become either RemoveItemTask or MoveItemTask.
+    """
+
+    def __init__(self, task_base, local_parent_path, name, is_folder=False):
+        super().__init__(task_base=task_base)
+        self.local_parent_path = local_parent_path
+        self.name = name
+        self.is_resolved = False
+        self.is_folder = is_folder
 
     def handle(self):
-        pass
+        path = self.local_parent_path + '/' + self.name
+        try:
+            if self.is_resolved or os.path.exists(path):
+                return
+            RemoveItemTask(self, local_parent_path=self.local_relative_parent_path, name=self.name,
+                           is_folder=self.is_folder).handle()
+        except Exception as e:
+            self.logger.error('An error occurred when touching "%s": %s.', path, e)
 
 
-class CopyItemTask(TaskMixin):
-    def __init__(self, task_base):
-        pass
+class MoveItemTask(NameReferenceMixin, LocalParentPathMixin):
+    def __init__(self, move_from_task, local_parent_path, name):
+        """
+        :param onedrive_d.common.tasks.MoveFromTask move_from_task:
+        :param str local_parent_path: New local relative parent path.
+        :param str name: New name for the item.
+        """
+        super().__init__(move_from_task)
+        move_from_task.is_resolved = True
+        self.old_parent_path = move_from_task.parent_path
+        self.old_name = move_from_task.name
+        self.local_parent_path = local_parent_path
+        self.name = name
 
     def handle(self):
-        pass
+        try:
+            new_parent_reference = resources.ItemReference.build(path=self.parent_path)
+            item = self.drive.update_item(item_path=self.old_parent_path + '/' + self.old_name, new_name=self.name,
+                                          new_parent_reference=new_parent_reference)
+            self.items_store.update_item(item, ItemRecordStatuses.OK)
+        except errors.OneDriveError as e:
+            self.logger.error('Error occurred when moving to "%s": %s.', self.local_parent_path + '/' + self.name, e)
 
 
-class UpdateItemInfoTask(TaskMixin):
-    def __init__(self, task_base):
-        pass
+class CopyItemTask(NameReferenceMixin, LocalParentPathMixin):
+    def __init__(self, task_base, from_item_id, local_parent_path, new_name):
+        super().__init__(task_base)
+        self.from_item_id = from_item_id
+        self.local_parent_path = local_parent_path
+        self.name = new_name
 
     def handle(self):
-        pass
+        dest_reference = resources.ItemReference.build(path=self.local_parent_path)
+        try:
+            async_status = self.drive.copy_item(dest_reference=dest_reference, item_id=self.from_item_id,
+                                                new_item_name=self.name)
+            self.task_pool.add_task(CopyItemStatusMonitorTask(self, async_status, self.local_relative_parent_path,
+                                                              self.name))
+        except Exception as e:
+            self.logger.error('Error occurred when moving to "%s": %s.', self.local_parent_path + '/' + self.name, e)
+
+
+class CopyItemStatusMonitorTask(NameReferenceMixin, LocalParentPathMixin):
+    def __init__(self, task_base, async_copy_status, local_parent_path, name):
+        super().__init__(task_base)
+        self.async_copy_status = async_copy_status
+        self.local_parent_path = local_parent_path
+        self.name = name
+
+    def handle(self):
+        path = self.local_parent_path + '/' + self.name
+        try:
+            self.async_copy_status.update_status()
+            if self.async_copy_status.status == options.AsyncOperationStatuses.FAILED:
+                # If failed, fall back to an upload task.
+                if os.path.exists(path):
+                    self.logger.info('Server failed to copy item "%s". Fall back to uploading.', path)
+                    self.task_pool.add_task(UploadFileTask(self, local_parent_path=self.local_relative_parent_path,
+                                                           name=self.name))
+            elif self.async_copy_status.status == options.AsyncOperationStatuses.COMPLETED:
+                # If completed, update the item.
+                item = self.async_copy_status.get_completed_item()
+                self.items_store.update_item(item, ItemRecordStatuses.OK)
+            else:
+                # Put the task back to task pool.
+                self.task_pool.add_task(self)
+        except errors.OneDriveError as e:
+            self.logger.error('Error occurred when polling copy to "%s": %s.', path, e)
+
+
+class UpdateItemInfoTask(NameReferenceMixin, LocalParentPathMixin):
+    def __init__(self, task_base, local_parent_path, name, new_mtime):
+        super().__init__(task_base)
+        self.local_parent_path = local_parent_path
+        self.name = name
+        if isinstance(new_mtime, int):
+            new_mtime = timestamp_to_datetime(new_mtime)
+        self.new_mtime = new_mtime
+
+    def handle(self):
+        try:
+            fs_info = facets.FileSystemInfoFacet(modified_time=self.new_mtime)
+            new_item = self.drive.update_item(item_path=self.parent_path + '/' + self.name,
+                                              new_file_system_info=fs_info)
+            self.items_store.update_item(new_item, ItemRecordStatuses.OK)
+        except errors.OneDriveError as e:
+            self.logger.error('Error occurred when polling copy to "%s": %s.', self.local_parent_path + '/' +
+                              self.name, e)
