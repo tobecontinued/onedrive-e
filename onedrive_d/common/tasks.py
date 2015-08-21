@@ -137,6 +137,24 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
             ent_list[ent] = is_folder
         return ent_list
 
+    def download_item(self, item, item_path):
+        if item.is_folder:
+            # If the item is a folder, create it and schedule a sync later.
+            try:
+                self.logger.debug('Creating directory "%s" as it does not exist locally and has no previous '
+                                  'record.', item_path)
+                mkdir(item_path)
+                self.items_store.update_item(item)
+                self.task_pool.add_task(SynchronizeDirTask(self, self.local_relative_parent_path + '/' +
+                                                           self.name, item.name))
+            except (IOError, OSError) as e:
+                self.logger.error('Failed to create directory "%s": %s.', item_path, e)
+        else:
+            # Just download the item.
+            self.logger.debug('Downloading "%s" as it does not exist locally and has no record in database.',
+                              item_path)
+            self.task_pool.add_task(DownloadFileTask(self, item))
+
     def analyze_item(self, item, all_local_items, path_filter):
         """
         :param onedrive_d.items.OneDriveItem item: A remote item.
@@ -153,27 +171,15 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         q = self.items_store.get_items_by_id(item_id=item.id)
         if len(q) == 0 and not is_exist:
             # The item does not exist locally and we have no proof it was touched before.
-            if item.is_folder:
-                # If the item is a folder, create it and schedule a sync later.
-                try:
-                    self.logger.debug('Creating directory "%s" as it does not exist locally and has no previous '
-                                      'record.', item_path)
-                    mkdir(item_path)
-                    self.items_store.update_item(item)
-                    self.task_pool.add_task(SynchronizeDirTask(self, self.local_relative_parent_path + '/' +
-                                                               self.name, item.name))
-                except (IOError, OSError) as e:
-                    self.logger.error('Failed to create directory "%s": %s.', item_path, e)
-            else:
-                # Just download the item.
-                self.logger.debug('Downloading "%s" as it does not exist locally and has no record in database.',
-                                  item_path)
-                self.task_pool.add_task(DownloadFileTask(self, item))
+            self.download_item(item, item_path)
         elif not is_exist:
+            # Local record exists but the file was removed.
             pass
         elif len(q) == 0:
+            # File exists but local record is missing
             pass
         else:
+            # Local record exists and file exists
             pass
 
     def analyze_untouched_local_item(self, name):
@@ -193,7 +199,8 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         while all_remote_items.has_next():
             remote_item_list = all_remote_items.get_next()
             for item in remote_item_list:
-                self.analyze_item(item, all_local_items, path_filter)
+                if not path_filter.should_ignore(self.repo_relative_parent_path + '/' + item.name):
+                    self.analyze_item(item, all_local_items, path_filter)
         for local_item_name in all_local_items:
             self.analyze_untouched_local_item(local_item_name)
 
