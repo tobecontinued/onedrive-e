@@ -18,8 +18,8 @@ class TestItemStorage(unittest.TestCase):
         'item_name': 'name',
         'type': 'type',
         'size': 'size',
-        'etag': 'e_tag',
-        'ctag': 'c_tag',
+        'e_tag': 'e_tag',
+        'c_tag': 'c_tag',
     }
 
     def setUp(self):

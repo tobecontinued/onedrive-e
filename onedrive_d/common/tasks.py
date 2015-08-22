@@ -115,6 +115,11 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         self.repo_relative_parent_path = '/' + self.local_relative_parent_path + '/' + self.name
 
     def list_items(self, path_filter):
+        """
+        List all entry names under the directory to sync without those to be ignored.
+        :param onedrive_d.common.path_filter.PathFilter path_filter:
+        :return: dict[str, True | False]: Key is entry name and value indicates whether or not the entry is a directory.
+        """
         ent_list = {}
         ent_count = {}
         for ent in os.listdir(self.local_path):
@@ -137,7 +142,13 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
             ent_list[ent] = is_folder
         return ent_list
 
-    def download_item(self, item, item_path):
+    def handle_item_creation(self, item, item_path):
+        """
+        When there is no record in database about the item, and the item does not exist locally, create the item
+        locally and update the database.
+        :param onedrive_d.api.items.OneDriveItem item:
+        :param str item_path:
+        """
         if item.is_folder:
             # If the item is a folder, create it and schedule a sync later.
             try:
@@ -155,6 +166,47 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
                               item_path)
             self.task_pool.add_task(DownloadFileTask(self, item))
 
+    def handle_item_missing(self, item, record, item_path):
+        """
+        When there is record about the item in database, but the item is missing locally, verify that the item did
+        not change after the record was created, and either download the item or remove the item.
+        :param onedrive_d.api.items.OneDriveItem item:
+        :param onedrive_d.store.items_db.ItemRecord record:
+        :param str item_path:
+        :return:
+        """
+        if item.c_tag == record.c_tag and item.e_tag == record.e_tag:
+            # The item did not change remotely, so we assume the local entry was deleted but the database and remote
+            # repository were not updated. Update them accordingly.
+            self.logger.debug('Local item "%s" does not exist. Remote item matches database record. Remove remote '
+                              'item.', item_path)
+            self.drive.delete_item(item_id=item.id)
+            self.items_store.delete_item(item_id=item.id)
+        else:
+            # The item was changed since the last update of the record. Download the item back to local repository.
+            self.handle_item_creation(item, item_path)
+
+    def handle_record_missing(self, item, item_path):
+        """
+        When the entry path exists both locally and remotely, but there is no database record, first compare entry
+        types and then decide what to do next.
+        :param onedrive_d.api.items.OneDriveItem item:
+        :param str item_path:
+        """
+        pass
+
+    def handle_normal_item(self, item, record, item_path):
+        """
+        When the file exists, the record exists, and the remote item exists, first validate item type,
+        and then compare modification time and size, and then decide what to do. If necessary, hash the file and
+        compare the hashtags.
+        :param onedrive_d.api.items.OneDriveItem item:
+        :param onedrive_d.store.items_db.ItemRecord record:
+        :param str item_path:
+        :return:
+        """
+        pass
+
     def analyze_item(self, item, all_local_items, path_filter):
         """
         :param onedrive_d.items.OneDriveItem item: A remote item.
@@ -171,16 +223,16 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         q = self.items_store.get_items_by_id(item_id=item.id)
         if len(q) == 0 and not is_exist:
             # The item does not exist locally and we have no proof it was touched before.
-            self.download_item(item, item_path)
+            self.handle_item_creation(item, item_path)
         elif not is_exist:
             # Local record exists but the file was removed.
-            pass
+            self.handle_item_missing(item, q[0], item_path)
         elif len(q) == 0:
             # File exists but local record is missing
-            pass
+            self.handle_record_missing(item, item_path)
         else:
             # Local record exists and file exists
-            pass
+            self.handle_normal_item(item, q[0], item_path)
 
     def analyze_untouched_local_item(self, name):
         pass
