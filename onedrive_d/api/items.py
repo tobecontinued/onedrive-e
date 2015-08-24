@@ -125,7 +125,11 @@ class OneDriveItem:
 
     def _get_prop(self, prop, key, type):
         if not hasattr(self, prop):
-            setattr(self, prop, type(self._data[key]))
+            if key not in self._data:
+                v = None
+            else:
+                v = type(self._data[key])
+            setattr(self, prop, v)
         return getattr(self, prop)
 
     @property
