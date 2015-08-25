@@ -128,12 +128,12 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         for ent in os.listdir(self.local_path):
             ent_path = self.local_path + '/' + ent
             is_folder = os.path.isfile(ent_path)
-            if path_filter.should_ignore(self.repo_relative_parent_path + '/' + ent, is_folder):
+            filename, ext = os.path.splitext(ent)
+            if path_filter.should_ignore(self.repo_relative_parent_path + '/' + ent, is_folder) or ext == '.!od':
                 continue
             ent_lower = ent.lower()
             if ent_lower in ent_count:
                 ent_count[ent_lower] += 1
-                filename, ext = os.path.splitext(ent)
                 try:
                     ent = filename + ' (case conflict ' + str(ent_count[ent_lower]) + ')' + ext
                     os.rename(ent_path, self.local_path + '/' + ent)
@@ -408,7 +408,7 @@ class DownloadFileTask(ItemReferenceMixin, LocalParentPathMixin):
         self.parent_path = item.parent_reference.path
 
     def get_temp_filename(self):
-        return '.' + self.item.name + '.!od_tmp'
+        return '.' + self.item.name + '.!od'
 
     def handle(self):
         local_temp_path = self.local_parent_path + '/' + self.get_temp_filename()
