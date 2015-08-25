@@ -19,10 +19,11 @@ class TestTimeConversion(unittest.TestCase):
 
 class TestGetCurrentOsUser(unittest.TestCase):
     def assert_values(self):
-        user_id, user_name, user_home = onedrive_d.get_current_os_user()
+        user_id, user_name, user_home, user_gid = onedrive_d.get_current_os_user()
         self.assertIsInstance(user_id, int)
         self.assertIsInstance(user_name, str)
         self.assertIsInstance(user_home, str)
+        self.assertIsInstance(user_gid, int)
         self.assertGreater(user_id, 0)  # must NOT be root
         self.assertGreater(len(user_home), 0)
 

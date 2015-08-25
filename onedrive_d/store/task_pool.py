@@ -19,5 +19,8 @@ class TaskPool:
     def pop_task(self, task_type=None):
         pass
 
+    def has_pending_task(self, item=None, local_path=None):
+        return False
+
     def delete_children_tasks(self, parent_id, parent_path):
         pass

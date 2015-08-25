@@ -23,7 +23,7 @@ class ItemRecordStatuses:
 
 class ItemRecord:
     def __init__(self, row):
-        self.item_id, self.type, self.item_name, self.parent_id, self.parent_path, self.etag, self.ctag, self.size, \
+        self.item_id, self.type, self.item_name, self.parent_id, self.parent_path, self.e_tag, self.c_tag, self.size, \
         self.created_time, self.modified_time, self.status, self.crc32_hash, self.sha1_hash = row
         self.created_time = str_to_datetime(self.created_time)
         self.modified_time = str_to_datetime(self.modified_time)

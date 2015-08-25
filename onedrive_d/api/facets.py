@@ -114,7 +114,7 @@ class FileFacet:
         """
         :rtype: HashFacet
         """
-        return HashFacet(self._data['hashes'])
+        return HashFacet(self._data['hashes']) if 'hashes' in self._data else None
 
 
 class ImageFacet:
