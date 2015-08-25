@@ -47,6 +47,7 @@ def get_current_os_user():
 
 
 OS_USER_ID, OS_USER_NAME, OS_USER_HOME, OS_USER_GID = get_current_os_user()
+OS_HOSTNAME = os.uname()[1]
 
 
 def datetime_to_str(d):

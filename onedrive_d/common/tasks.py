@@ -5,10 +5,13 @@ import os
 from onedrive_d import mkdir
 from onedrive_d import datetime_to_timestamp
 from onedrive_d import timestamp_to_datetime
+from onedrive_d import compare_timestamps
+from onedrive_d import OS_HOSTNAME
 from onedrive_d.api import errors
 from onedrive_d.api import facets
 from onedrive_d.api import options
 from onedrive_d.api import resources
+from onedrive_d.common import hasher
 from onedrive_d.common import logger_factory
 from onedrive_d.store.items_db import ItemRecordStatuses
 
@@ -142,6 +145,17 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
             ent_list[ent] = is_folder
         return ent_list
 
+    def resolve_type_conflict_path(self, item_path):
+        i = 1
+        suffix = ' (' + OS_HOSTNAME + ')'
+        p, ext = os.path.splitext(item_path)
+        while os.path.exists(p + suffix + ext):
+            suffix = ' ' + str(i) + ' (' + OS_HOSTNAME + ')'
+            i += 1
+        n = p + suffix + ext
+        os.rename(item_path, n)
+        return n
+
     def handle_item_creation(self, item, item_path):
         """
         When there is no record in database about the item, and the item does not exist locally, create the item
@@ -186,6 +200,38 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
             # The item was changed since the last update of the record. Download the item back to local repository.
             self.handle_item_creation(item, item_path)
 
+    def move_and_create_dir(self, item, item_path):
+        try:
+            if not os.path.isdir(item_path):
+                new_path = self.resolve_type_conflict_path(item_path)
+                self.analyze_untouched_local_item(os.path.basename(new_path))
+            self.handle_item_creation(item, item_path)
+        except (OSError, IOError) as e:
+            self.logger.error('An OSError occurred when handling "%s": %s.', item_path, e)
+
+    def move_and_create_file(self, item, item_path):
+        new_path = self.resolve_type_conflict_path(item_path)
+        self.analyze_untouched_local_item(os.path.basename(new_path))
+        self.handle_item_creation(item, item_path)
+
+    def stat_file(self, item_path):
+        return os.path.getsize(item_path), os.path.getmtime(item_path)
+
+    def check_file_hash(self, item, item_path, file_mtime):
+        file_props = item.file_props
+        hash_props = file_props.hashes if file_props is not None else None
+        if hash_props is not None:
+            if hash_props.crc32 is not None and hash_props.crc32 == hasher.crc32_value(item_path) or \
+                                    hash_props.sha1 is not None and hash_props.sha1 == hasher.hash_value(item_path):
+                # The remote and local files have identical content, update remote timestamps
+                # and update local record. No changes on the local file.
+                self.logger.debug('Item "%s" has same hash value for remote and local content.')
+                self.task_pool.add_task(
+                    UpdateItemInfoTask(self, self.local_relative_parent_path + '/' + self.name, item.name,
+                                       timestamp_to_datetime(file_mtime)))
+                return True
+        return False
+
     def handle_record_missing(self, item, item_path):
         """
         When the entry path exists both locally and remotely, but there is no database record, first compare entry
@@ -193,7 +239,30 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         :param onedrive_d.api.items.OneDriveItem item:
         :param str item_path:
         """
-        pass
+        if item.is_folder:
+            self.move_and_create_dir(item, item_path)
+        else:
+            try:
+                if not os.path.isfile(item_path):
+                    self.move_and_create_file(item, item_path)
+                    return
+                file_size, file_mtime = self.stat_file(item_path)
+                if file_size == item.size and compare_timestamps(
+                        datetime_to_timestamp(item.modified_time), file_mtime) == 0:
+                    # If local file and remote file match in terms of mtime and file size, then we assume two files
+                    # are identical and just update the record.
+                    self.items_store.update_item(item)
+                else:
+                    # When the two key properties do not match, we want to use file hashes to determine if they are
+                    # identical or not.
+                    if self.check_file_hash(item, item_path, file_mtime):
+                        return
+                    # The server does not return any hash info or the hash info does not match local file. Keep both
+                    # versions and update local database.
+                    self.logger.debug('No remote hash or mismatch remote hash. No local record. Keep both versions.')
+                    self.move_and_create_file(item, item_path)
+            except Exception as e:
+                self.logger.error('An error occurred when handling "%s": %s.', item_path, e)
 
     def handle_normal_item(self, item, record, item_path):
         """
@@ -203,9 +272,41 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         :param onedrive_d.api.items.OneDriveItem item:
         :param onedrive_d.store.items_db.ItemRecord record:
         :param str item_path:
-        :return:
         """
-        pass
+        try:
+            if item.is_folder:
+                if os.path.isdir(item_path):
+                    self.task_pool.add_task(SynchronizeDirTask(self, self.local_relative_parent_path + '/' +
+                                                               self.name, item.name))
+                else:
+                    self.move_and_create_dir(item, item_path)
+            else:
+                if not os.path.isfile(item_path):
+                    self.move_and_create_file(item, item_path)
+                    return
+                file_size, file_mtime = self.stat_file(item_path)
+                if record.item_id == item.id and record.e_tag == item.e_tag:
+                    # The remote item did not change since last update of record.
+                    if file_size != record.size or compare_timestamps(
+                            file_mtime, datetime_to_timestamp(record.modified_time)) != 0:
+                        self.task_pool.add_task(UploadFileTask(self, self.local_relative_parent_path + '/' +
+                                                               self.name, item.name,
+                                                               options.NameConflictBehavior.REPLACE))
+                elif record.size == file_size and compare_timestamps(
+                        datetime_to_timestamp(record.modified_time), file_mtime) == 0 and record.modified_time < \
+                        item.modified_time:
+                    # Local item did not change since last update of record, but item was updated remotely.
+                    self.task_pool.add_task(DownloadFileTask(self, item))
+                elif self.check_file_hash(item, item_path, file_mtime):
+                    # Both remote item and local item were changed since last update of record, but file hash
+                    # still matches. Just update the record.
+                    return
+                else:
+                    # Both remote item and local item were changed since last update of record, but we could not
+                    # determine which one to keep. Just keep both.
+                    self.move_and_create_file(item, item_path)
+        except (OSError, IOError) as e:
+            self.logger.error('An OSError occurred handling item "%s": %s.', item_path, e)
 
     def analyze_item(self, item, all_local_items, path_filter):
         """
@@ -251,7 +352,8 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         while all_remote_items.has_next():
             remote_item_list = all_remote_items.get_next()
             for item in remote_item_list:
-                if not path_filter.should_ignore(self.repo_relative_parent_path + '/' + item.name):
+                if not path_filter.should_ignore(self.repo_relative_parent_path + '/' + item.name) and not \
+                        self.task_pool.has_pending_task(item=item):
                     self.analyze_item(item, all_local_items, path_filter)
         for local_item_name in all_local_items:
             self.analyze_untouched_local_item(local_item_name)
