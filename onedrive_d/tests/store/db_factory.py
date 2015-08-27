@@ -2,6 +2,7 @@ __author__ = 'xb'
 
 from onedrive_d.store import items_db
 from onedrive_d.store import task_pool
+from onedrive_d.vendor import rwlock
 
 
 def get_sample_item_storage_manager():
@@ -9,4 +10,6 @@ def get_sample_item_storage_manager():
 
 
 def get_sample_task_pool():
-    return task_pool.TaskPool()
+    p = task_pool.TaskPool()
+    p._lock = rwlock.RWLock()
+    return p

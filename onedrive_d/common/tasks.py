@@ -1,6 +1,9 @@
 __author__ = 'xb'
 
 import os
+from time import sleep
+
+from send2trash import send2trash
 
 from onedrive_d import mkdir
 from onedrive_d import datetime_to_timestamp
@@ -308,13 +311,13 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         except (OSError, IOError) as e:
             self.logger.error('An OSError occurred handling item "%s": %s.', item_path, e)
 
-    def analyze_item(self, item, all_local_items, path_filter):
+    def analyze_item(self, item, item_path, all_local_items, path_filter):
         """
         :param onedrive_d.items.OneDriveItem item: A remote item.
+        :param str item_path: Local path to the item.
         :param dict[str, True | False] all_local_items: All local items of interest.
         :param onedrive_d.common.path_filter.PathFilter path_filter: Path filter for the drive.
         """
-        item_path = self.local_path + '/' + item.name
         try:
             is_exist = os.path.exists(item_path)
             del all_local_items[item.name]
@@ -336,7 +339,15 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
             self.handle_normal_item(item, q[0], item_path)
 
     def analyze_untouched_local_item(self, name):
-        pass
+        item_path = self.local_path + '/' + name
+        try:
+            # TODO: finish this stub
+            if os.path.isdir(item_path):
+                pass
+            elif os.path.isfile(item_path):
+                pass
+        except (OSError, IOError) as e:
+            self.logger.error('An error occurred synchronizing "%s": %s.', item_path, e)
 
     def handle(self):
         if not os.path.isdir(self.local_path):
@@ -352,9 +363,10 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         while all_remote_items.has_next():
             remote_item_list = all_remote_items.get_next()
             for item in remote_item_list:
+                item_path = self.local_path + '/' + item.name
                 if not path_filter.should_ignore(self.repo_relative_parent_path + '/' + item.name) and not \
-                        self.task_pool.has_pending_task(item=item):
-                    self.analyze_item(item, all_local_items, path_filter)
+                        self.task_pool.has_pending_task(item_path):
+                    self.analyze_item(item, item_path, all_local_items, path_filter)
         for local_item_name in all_local_items:
             self.analyze_untouched_local_item(local_item_name)
 
@@ -397,6 +409,9 @@ class RemoveItemTask(NameReferenceMixin, LocalParentPathMixin):
         try:
             self.drive.delete_item(item_path=p)
             self.items_store.delete_item(parent_path=self.parent_path, item_name=self.name, is_folder=self.is_folder)
+            if self.is_folder:
+                # Remove pending tasks of all its children
+                self.task_pool.remove_children_tasks(self.local_parent_path + '/' + self.name)
         except errors.OneDriveError as e:
             self.logger.error('An API error occurred when deleting "%s": %s.', p, e)
 
@@ -416,6 +431,8 @@ class DownloadFileTask(ItemReferenceMixin, LocalParentPathMixin):
         try:
             with open(local_temp_path, 'wb') as f:
                 self.drive.download_file(file=f, size=self.item.size, item_id=self.item.id)
+            if os.path.exists(local_item_path):
+                send2trash(local_item_path)
             os.rename(local_temp_path, local_item_path)
             t = datetime_to_timestamp(self.item.modified_time)
             os.utime(local_item_path, (t, t))
@@ -486,11 +503,12 @@ class MoveItemTask(NameReferenceMixin, LocalParentPathMixin):
 
     def handle(self):
         try:
+            sleep(seconds=2)
             new_parent_reference = resources.ItemReference.build(path=self.parent_path)
             item = self.drive.update_item(item_path=self.old_parent_path + '/' + self.old_name, new_name=self.name,
                                           new_parent_reference=new_parent_reference)
             self.items_store.update_item(item, ItemRecordStatuses.OK)
-        except errors.OneDriveError as e:
+        except Exception as e:
             self.logger.error('Error occurred when moving to "%s": %s.', self.local_parent_path + '/' + self.name, e)
 
 
