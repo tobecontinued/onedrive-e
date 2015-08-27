@@ -20,7 +20,7 @@ install_requires = [
     'ciso8601>=1.0.1',
     'requests>=2.0',
     'send2trash>=1.3.0',
-    'zgitignore>=0.6'
+    'zgitignore>=0.7.1'
 ]
 
 test_requires = [

@@ -28,7 +28,6 @@ class TestUploadFileTask(test_tasks.BaseTestCase, unittest.TestCase):
 
     @Mocker()
     def test_handle(self, mock_request):
-        output = io.BytesIO()
         data = get_data('image_item.json')
 
         def patch_callback(request, context):
