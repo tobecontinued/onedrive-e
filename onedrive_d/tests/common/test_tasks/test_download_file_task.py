@@ -1,5 +1,6 @@
 __author__ = 'xb'
 
+import os
 import unittest
 
 try:
@@ -32,6 +33,7 @@ class TestDownloadFileTask(test_tasks.BaseTestCase, unittest.TestCase):
     def test_handle(self, mock_request):
         mock_request.get(self.drive.drive_uri + self.drive.drive_path + '/items/' + self.item.id + '/content',
                          content=b'1', status_code=codes.ok)
+        os.path.exists = lambda path: False
         m = mock.mock_open()
         with mock.patch('builtins.open', m, create=True):
             self.task.handle()
