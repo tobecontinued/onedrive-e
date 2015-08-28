@@ -58,10 +58,9 @@ After properly setting up pre-requisites, run the following command to install t
 
 # Install onedrive-d with no GUI support
 $ python3 setup.py install
-
-# Install onedrive-d with GUI
-$ python3 setup.py install gui # TODO: finish this.
 ```
+
+Note: GUI will be implemented in a separate package as an `onedrive-d` extension.
 
 ## Configure
 

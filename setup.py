@@ -53,7 +53,6 @@ setup(
         'onedrive_d.tests',
         'onedrive_d.tests.api',
         'onedrive_d.tests.common',
-        'onedrive_d.ui'
     ],
     package_data={
         'onedrive_d': ['lang/*.json'],
