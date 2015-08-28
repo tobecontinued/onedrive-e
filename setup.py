@@ -18,6 +18,7 @@ setup_requires = []
 
 install_requires = [
     'ciso8601>=1.0.1',
+    'clint>=0.5.1',
     'requests>=2.0',
     'send2trash>=1.3.0',
     'zgitignore>=0.7.1'
@@ -57,6 +58,12 @@ setup(
     package_data={
         'onedrive_d': ['lang/*.json'],
         'onedrive_d.tests': ['data/*.json']
+    },
+    entry_point={
+        'console_scripts': [
+            'onedrived = onedrive_d.cli.cli_main:main'
+            'onedrived-pref = onedrive_d.cli.pref_main:main'
+        ]
     },
     setup_requires=setup_requires,
     install_requires=install_requires,
