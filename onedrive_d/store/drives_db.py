@@ -26,7 +26,7 @@ class DriveStorage:
         atexit.register(self.close)
 
     @staticmethod
-    def _get_key(drive_id, account_id, account_type):
+    def get_key(drive_id, account_id, account_type):
         return drive_id, account_id, account_type
 
     def assemble_drive_record(self, row, container):
@@ -39,7 +39,7 @@ class DriveStorage:
             return
         try:
             drive = drives.DriveObject.load(drive_root, account_id, account_type, drive_dump)
-            container[self._get_key(drive.drive_id, account_id, account_type)] = drive
+            container[self.get_key(drive.drive_id, account_id, account_type)] = drive
         except ValueError as e:
             self.logger.warning('Cannot load drive %s from database: %s', drive_id, e)
 
@@ -61,6 +61,12 @@ class DriveStorage:
         params = (drive.drive_id, account.profile.user_id, account.TYPE, drive.config.local_root, drive.dump())
         self._cursor.execute('INSERT OR REPLACE INTO drives (drive_id, account_id, account_type, local_root, '
                              'drive_dump) VALUES (?,?,?,?,?)', params)
+        self._conn.commit()
+
+    def delete_record(self, drive):
+        self._cursor.execute('DELETE FROM drives WHERE drive_id=? AND account_id=? AND account_type=?',
+                             (drive.drive_id, drive.root.account.id, drive.root.account.TYPE))
+        self._conn.commit()
 
     def close(self):
         self._conn.commit()
