@@ -16,7 +16,7 @@ class PersonalClient:
     DEFAULT_REDIRECT_URI = 'https://login.live.com/oauth20_desktop.srf'
     DEFAULT_CLIENT_SCOPE = ['wl.signin', 'wl.offline_access', 'onedrive.readwrite']
 
-    def __init__(self, client_id, client_secret,
+    def __init__(self, client_id=DEFAULT_CLIENT_ID, client_secret=DEFAULT_CLIENT_SECRET,
                  client_scope=DEFAULT_CLIENT_SCOPE,
                  redirect_uri=DEFAULT_REDIRECT_URI,
                  proxies=None,
@@ -54,3 +54,6 @@ class BusinessClient:
 
     def __init__(self):
         raise NotImplementedError("OneDrive for Business not supported yet.")
+
+    def get_auth_uri(self, locale='en'):
+        raise NotImplementedError()
