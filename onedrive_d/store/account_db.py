@@ -81,6 +81,11 @@ class AccountStorage:
             'INSERT OR REPLACE INTO accounts (account_id, account_type, account_dump, profile_dump) '
             'VALUES (?, ?, ?, ?)', params)
 
+    def delete_account(self, account):
+        key = (account.profile.user_id, account.TYPE)
+        del self._all_accounts[key]
+        self._cursor.execute('DELETE FROM accounts WHERE account_id=? AND account_type=?', key)
+
     def close(self):
         # Write all data back to database
         self.logger.info('Writing account information back to storage...')

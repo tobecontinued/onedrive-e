@@ -94,6 +94,12 @@ class TestAccountStorage(unittest.TestCase):
         self.assertIsInstance(all_accounts, dict)
         self.assertEqual(1, len(all_accounts))
 
+    def test_delete_account(self):
+        self.account_store.add_account(self.personal_account)
+        self.assertEqual(1, len(self.account_store.get_all_accounts()))
+        self.account_store.delete_account(self.personal_account)
+        self.assertEqual(0, len(self.account_store.get_all_accounts()))
+
     def tearDown(self):
         self.account_store.close()
 
