@@ -12,7 +12,8 @@ class UserConfig:
 
     DEFAULT_CONFIG = {
         'http_retry_after_seconds': 30,
-        'default_drive_config': DriveConfig.default_config()
+        'default_drive_config': DriveConfig.default_config(),
+        'proxies': dict()
     }
 
     def __init__(self, data):
@@ -25,14 +26,18 @@ class UserConfig:
                 data[k] = self.DEFAULT_CONFIG[k]
         self.http_retry_after_seconds = data['http_retry_after_seconds']
         self.default_drive_config = data['default_drive_config']
+        self.proxies = data['proxies']
 
     def take_effect(self):
         DriveConfig.set_default_config(self.default_drive_config)
 
     def dump(self):
+        if self.proxies is not None and len(self.proxies) == 0:
+            self.proxies = None
         data = {
             'http_retry_after_seconds': self.http_retry_after_seconds,
-            'default_drive_config': self.default_drive_config.dump()
+            'default_drive_config': self.default_drive_config.dump(),
+            'proxies': self.proxies
         }
         return json.dumps(data)
 
