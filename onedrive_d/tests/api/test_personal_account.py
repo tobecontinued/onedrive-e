@@ -1,5 +1,6 @@
 import json
 import re
+import time
 import unittest
 
 import requests
@@ -94,7 +95,7 @@ class TestPersonalAccount(unittest.TestCase):
         self.test_get_account_success_by_code(args)
 
     def test_parse_expire_time(self):
-        expires_at = 1234
+        expires_at = time.time() + 3600
         client = get_sample_client()
         account = accounts.PersonalAccount(client, PERSONAL_ACCOUNT_DATA, expires_at)
         self.assertEqual(expires_at, account.expires_at)

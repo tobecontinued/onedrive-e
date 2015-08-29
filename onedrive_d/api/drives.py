@@ -119,6 +119,9 @@ class DriveObject:
 
     @property
     def quota(self):
+        """
+        :rtype: onedrive_d.api.facets.QuotaFacet
+        """
         return facets.QuotaFacet(self._data['quota'])
 
     def refresh(self):

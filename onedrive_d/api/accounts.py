@@ -76,6 +76,8 @@ class PersonalAccount:
         self.session = restapi.ManagedRESTClient(
             session=requests.Session(), account=self, proxies=client.proxies, net_mon=client.net_monitor)
         self.load_session(session_info)
+        if self.expires_at < time.time():
+            self.renew_tokens()
 
     # noinspection PyAttributeOutsideInit
     @property

@@ -42,7 +42,7 @@ class TestDriveConfig(unittest.TestCase):
         data['proxies'] = {'sock5': '1.2.3.4:5'}
         conf2 = drive_config.DriveConfig(data)
         dump2 = conf2.dump()
-        self.assertDictEqual({'ignore_files': ['/q'], 'proxies': {'sock5': '1.2.3.4:5'}}, dump2)
+        self.assertDictEqual({'ignore_files': ['/q']}, dump2)
         conf3 = drive_config.DriveConfig.load(dump2)
         for k in self.data:
             self.assertEqual(getattr(conf2, k), getattr(conf3, k))

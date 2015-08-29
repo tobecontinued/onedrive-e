@@ -10,7 +10,6 @@ class DriveConfig:
         'max_put_size_bytes': 524288,
         'local_root': None,
         'ignore_files': set(),
-        'proxies': dict()
     }
 
     logger = logger_factory.get_logger('DriveConfig')
@@ -24,9 +23,6 @@ class DriveConfig:
         for item in self.DEFAULT_VALUES['ignore_files']:
             if item not in data['ignore_files']:
                 data['ignore_files'].add(item)
-        for k, v in self.DEFAULT_VALUES['proxies'].items():
-            if k not in data['proxies']:
-                data['proxies'][k] = v
         self._data = data
 
     @staticmethod
@@ -73,13 +69,6 @@ class DriveConfig:
         """
         return self._data['ignore_files']
 
-    @property
-    def proxies(self):
-        """
-        :rtype: dict[str, str]
-        """
-        return self._data['proxies']
-
     # noinspection PyAttributeOutsideInit
     @property
     def path_filter(self):
@@ -102,10 +91,6 @@ class DriveConfig:
         ignore_files = [s for s in self.ignore_files if s not in self.DEFAULT_VALUES['ignore_files']]
         if len(ignore_files) > 0:
             data['ignore_files'] = ignore_files
-        proxies = {k: v for k, v in self._data['proxies'].items()
-                   if k not in self.DEFAULT_VALUES['proxies'] or v != self.DEFAULT_VALUES['proxies'][k]}
-        if len(proxies) > 0:
-            data['proxies'] = proxies
         return data
 
     @classmethod
