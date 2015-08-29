@@ -62,6 +62,17 @@ class TestDriveConfig(unittest.TestCase):
         self.assertTrue(filter.should_ignore('/foo'))
         self.assertTrue(filter.should_ignore('/a.swp'))
 
+    def test_add_ignore_file(self):
+        path = '/foo/bar'
+        self.assertNotIn(path, drive_config.DriveConfig.DEFAULT_VALUES['ignore_files'])
+        config = drive_config.DriveConfig.default_config()
+        config.ignore_files.add(path)
+        self.assertNotIn(path, drive_config.DriveConfig.DEFAULT_VALUES['ignore_files'])
+        self.assertIn(path, config.ignore_files)
+        d = config.dump()
+        c = drive_config.DriveConfig.load(d)
+        self.assertIn(path, c.ignore_files)
+
 
 if __name__ == '__main__':
     unittest.main()

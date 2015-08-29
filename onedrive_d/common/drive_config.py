@@ -1,5 +1,7 @@
 __author__ = 'xb'
 
+from copy import deepcopy
+
 from onedrive_d.common import logger_factory
 from onedrive_d.common import path_filter
 
@@ -27,7 +29,7 @@ class DriveConfig:
 
     @staticmethod
     def default_config():
-        return DriveConfig(dict(DriveConfig.DEFAULT_VALUES))
+        return DriveConfig(deepcopy(DriveConfig.DEFAULT_VALUES))
 
     @classmethod
     def set_default_config(cls, config):
