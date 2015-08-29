@@ -21,8 +21,8 @@ class DriveStorage:
         self._cursor.execute(get_content('onedrive_drives.sql'))
         self._conn.commit()
         self._all_drives = {}
+        self._drive_roots = {}
         self.account_store = account_store
-        self._drive_roots = {k: drives.DriveRoot(account) for k, account in account_store.get_all_accounts().items()}
         atexit.register(self.close)
 
     @staticmethod
@@ -44,7 +44,10 @@ class DriveStorage:
             self.logger.warning('Cannot load drive %s from database: %s', drive_id, e)
 
     def get_drive_root(self, account_id, account_type):
-        return self._drive_roots[(account_id, account_type)]
+        key = (account_id, account_type)
+        if key not in self._drive_roots:
+            self._drive_roots[key] = drives.DriveRoot(self.account_store.get_account(account_id, account_type))
+        return self._drive_roots[key]
 
     def get_all_drives(self):
         self._conn.commit()
