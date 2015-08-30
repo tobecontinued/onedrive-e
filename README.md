@@ -55,9 +55,8 @@ After properly setting up pre-requisites, run the following command to install t
 
 ```bash
 # use sudo to install the package system-wide
-
-# Install onedrive-d with no GUI support
-$ python3 setup.py install
+$ python3 setup.py build
+$ sudo python3 setup.py install
 ```
 
 Note: GUI will be implemented in a separate package as an `onedrive-d` extension.
@@ -82,10 +81,11 @@ TBA.
 
 ## Uninstall
 
-You will need `pip3` to properly uninstall the package.
+You will need `pip3` to properly uninstall the package. Refer to Pre-requisites section for how to get the latest
+`pip3`.
 
 ```
-$ pip3 uninstall onedrive_d
+$ sudo pip3 uninstall onedrive_d
 ```
 
 ## Support

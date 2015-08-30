@@ -30,5 +30,5 @@ script:
   - coverage3 run --branch --source=onedrive_d setup.py test
 
 after_success:
-  - coverage3 report
+  - coverage3 report -m
   - coveralls

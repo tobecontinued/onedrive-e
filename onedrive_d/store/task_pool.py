@@ -71,6 +71,7 @@ class TaskPool:
                 for t in self._all_tasks:
                     if isinstance(t, task_class):
                         ret = t
+                        self._all_tasks.remove(t)
                         break
         if ret is not None:
             self._tasks_by_path[self.get_task_path(ret)].remove(ret)

@@ -13,7 +13,7 @@ class BaseTestCase:
         self.rename_records = []
         self.utime_records = {}
         self.drive = drive_factory.get_sample_drive_object()
-        self.drive.config = drive_config.DriveConfig({})
+        self.drive.config = drive_config.DriveConfig({'local_root': '/foo'})
         self.items_store_mgr = db_factory.get_sample_item_storage_manager()
         self.items_store = self.items_store_mgr.get_item_storage(self.drive)
         self.task_pool = db_factory.get_sample_task_pool()
