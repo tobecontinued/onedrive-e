@@ -4,17 +4,24 @@ Other classes use this class to generate logger.
 
 import atexit
 import logging
+import logging.handlers
 
-logging.basicConfig(format='[%(asctime)-15s] %(levelname)s: %(threadName)s: %(message)s')
-atexit.register(logging.shutdown)
+_instance = None
 
 
-def get_logger(name, min_level=logging.DEBUG, path=None):
-    logger = logging.getLogger(name)
-    logger.propagate = False
-    logger.setLevel(min_level)
+def init_logger(min_level=logging.WARNING, path=None, max_bytes=10 << 100):
+    global _instance
+    logging.basicConfig(format='[%(asctime)-15s] (%(levelname)s) %(threadName)s: %(message)s')
+    _instance = logging.getLogger()
+    _instance.propagate = False
+    _instance.setLevel(min_level)
     if path:
-        logger_fh = logging.FileHandler(path, 'a')
-        logger_fh.setLevel(min_level)
-        logger.addHandler(logger_fh)
-    return logger
+        handler = logging.handlers.RotatingFileHandler(path, 'a', maxBytes=max_bytes)
+        _instance.addHandler(handler)
+    atexit.register(logging.shutdown)
+
+
+def get_logger(name):
+    if _instance is None:
+        init_logger()
+    return _instance
