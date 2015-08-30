@@ -107,5 +107,5 @@ def get_content(file_name, pkg_name='onedrive_d', is_text=True):
 
 
 def mkdir(path):
-    os.mkdir(path, mode=0o700)
+    os.makedirs(path, mode=0o700)
     os.chown(path, OS_USER_ID, OS_USER_GID)
