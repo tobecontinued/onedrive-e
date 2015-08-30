@@ -7,6 +7,7 @@ from onedrive_d.common.drive_config import DriveConfig
 from onedrive_d.store import drives_db
 from onedrive_d.tests import get_data
 from onedrive_d.tests.api.account_factory import get_sample_personal_account
+from onedrive_d.tests.api.drive_factory import get_sample_drive_object
 from onedrive_d.tests.mocks import mock_atexit
 from onedrive_d.tests.mocks import mock_logger
 from onedrive_d.tests.store.test_account_db import get_sample_account_storage
@@ -50,10 +51,16 @@ class TestDriveStorage(unittest.TestCase):
             self.drives_store.assemble_drive_record(r, d)
             self.assertEqual(0, len(d), str(r))
 
+    def test_delete_record(self):
+        drive = get_sample_drive_object()
+        self.drives_store.add_record(drive)
+        self.assertEqual(1, len(self.drives_store.get_all_drives()))
+        self.drives_store.delete_record(drive)
+        self.assertEqual(0, len(self.drives_store.get_all_drives()))
+
     def tearDown(self):
         self.drives_store.close()
         self.account_store.close()
-
 
 if __name__ == '__main__':
     unittest.main()

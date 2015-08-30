@@ -64,8 +64,9 @@ class DriveStorage:
         self._conn.commit()
 
     def delete_record(self, drive):
-        self._cursor.execute('DELETE FROM drives WHERE drive_id=? AND account_id=? AND account_type=?',
-                             (drive.drive_id, drive.root.account.id, drive.root.account.TYPE))
+        key = self.get_key(drive.drive_id, drive.root.account.profile.user_id, drive.root.account.TYPE)
+        del self._all_drives[key]
+        self._cursor.execute('DELETE FROM drives WHERE drive_id=? AND account_id=? AND account_type=?', key)
         self._conn.commit()
 
     def close(self):
