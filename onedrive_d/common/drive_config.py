@@ -25,7 +25,7 @@ class DriveConfig:
         for item in self.DEFAULT_VALUES['ignore_files']:
             if item not in data['ignore_files']:
                 data['ignore_files'].add(item)
-        self._data = data
+        self.data = data
 
     @staticmethod
     def default_config():
@@ -48,28 +48,28 @@ class DriveConfig:
         """
         :rtype: int
         """
-        return self._data['max_get_size_bytes']
+        return self.data['max_get_size_bytes']
 
     @property
     def max_put_size_bytes(self):
         """
         :rtype: int
         """
-        return self._data['max_put_size_bytes']
+        return self.data['max_put_size_bytes']
 
     @property
     def local_root(self):
         """
         :rtype: str
         """
-        return self._data['local_root']
+        return self.data['local_root']
 
     @property
     def ignore_files(self):
         """
         :rtype: [str]
         """
-        return self._data['ignore_files']
+        return self.data['ignore_files']
 
     # noinspection PyAttributeOutsideInit
     @property
@@ -85,12 +85,12 @@ class DriveConfig:
             self._path_filter = path_filter.PathFilter(rules)
         return self._path_filter
 
-    def dump(self):
+    def dump(self, exact_dump=False):
         data = {}
         for key in ['max_get_size_bytes', 'max_put_size_bytes', 'local_root']:
-            if getattr(self, key) != self.DEFAULT_VALUES[key]:
+            if exact_dump or getattr(self, key) != self.DEFAULT_VALUES[key]:
                 data[key] = getattr(self, key)
-        ignore_files = [s for s in self.ignore_files if s not in self.DEFAULT_VALUES['ignore_files']]
+        ignore_files = [s for s in self.ignore_files if exact_dump or s not in self.DEFAULT_VALUES['ignore_files']]
         if len(ignore_files) > 0:
             data['ignore_files'] = ignore_files
         return data
