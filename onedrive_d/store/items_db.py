@@ -124,7 +124,7 @@ class ItemStorage:
         where, values = self._get_where_clause(args, relation)
         ret = {}
         self.lock.reader_acquire()
-        q = self._cursor.execute('SELECT item_id, type, item_name, parent_id, parent_path, etag, ctag, size, '
+        q = self._conn.execute('SELECT item_id, type, item_name, parent_id, parent_path, etag, ctag, size, '
                                  'created_time, modified_time, status, crc32_hash, sha1_hash FROM items WHERE ' +
                                  where, values)
         for row in q.fetchall():
@@ -133,7 +133,7 @@ class ItemStorage:
         self.lock.reader_release()
         return ret
 
-    def update_item(self, item, status=ItemRecordStatuses.OK):
+    def update_item(self, item, status=ItemRecordStatuses.OK, parent_path=None):
         """
         :param onedrive_d.api.items.OneDriveItem item:
         :param str status:
@@ -147,6 +147,10 @@ class ItemStorage:
             crc32_hash = file_facet.hashes.crc32
             sha1_hash = file_facet.hashes.sha1
         parent_ref = item.parent_reference
+        try:
+            parent_path = parent_ref.path
+        except:
+            pass
         created_time_str = datetime_to_str(item.created_time)
         modified_time_str = datetime_to_str(item.modified_time)
         self.lock.writer_acquire()
@@ -154,7 +158,7 @@ class ItemStorage:
             'INSERT OR REPLACE INTO items (item_id, type, item_name, parent_id, parent_path, etag, '
             'ctag, size, created_time, modified_time, status, crc32_hash, sha1_hash)'
             ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            (item.id, item.type, item.name, parent_ref.id, parent_ref.path, item.e_tag, item.c_tag,
+            (item.id, item.type, item.name, parent_ref.id, parent_path, item.e_tag, item.c_tag,
              item.size, created_time_str, modified_time_str, status, crc32_hash, sha1_hash))
         self._conn.commit()
         self.lock.writer_release()

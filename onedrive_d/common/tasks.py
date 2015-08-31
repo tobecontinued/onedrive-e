@@ -117,8 +117,14 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         super().__init__(task_base)
         self.local_parent_path = local_parent_path
         self.name = name
-        self.local_path = self.local_parent_path + '/' + name
-        self.repo_relative_parent_path = '/' + self.local_relative_parent_path + '/' + self.name
+        if name is not None or name == '':
+            append_name = ''
+            self.item_path = None
+        else:
+            append_name = '/' + name
+            self.item_path = self.parent_path + append_name
+        self.local_path = self.local_parent_path + append_name
+        self.repo_relative_parent_path = '/' + self.local_relative_parent_path + append_name
 
     def list_items(self, path_filter):
         """
@@ -172,7 +178,8 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
                 self.logger.debug('Creating directory "%s" as it does not exist locally and has no previous '
                                   'record.', item_path)
                 mkdir(item_path)
-                self.items_store.update_item(item)
+                parent_path = self.drive.drive_path + '/root:' if self.item_path is None else self.item_path
+                self.items_store.update_item(item, parent_path=parent_path)
                 self.task_pool.add_task(SynchronizeDirTask(self, self.local_relative_parent_path + '/' +
                                                            self.name, item.name))
             except (IOError, OSError) as e:
@@ -197,8 +204,11 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
             # repository were not updated. Update them accordingly.
             self.logger.debug('Local item "%s" does not exist. Remote item matches database record. Remove remote '
                               'item.', item_path)
-            self.drive.delete_item(item_id=item.id)
-            self.items_store.delete_item(item_id=item.id)
+            try:
+                self.drive.delete_item(item_id=item.id)
+                self.items_store.delete_item(item_id=item.id)
+            except errors.OneDriveError as e:
+                self.logger.error('An error occurred deleting item "%s": %s.', item.id, e)
         else:
             # The item was changed since the last update of the record. Download the item back to local repository.
             self.handle_item_creation(item, item_path)
@@ -311,6 +321,10 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         except (OSError, IOError) as e:
             self.logger.error('An OSError occurred handling item "%s": %s.', item_path, e)
 
+    def _get_first_value(self, dic):
+        for k, v in dic.items():
+            return v
+
     def analyze_item(self, item, item_path, all_local_items, path_filter):
         """
         :param onedrive_d.items.OneDriveItem item: A remote item.
@@ -320,8 +334,9 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         """
         try:
             is_exist = os.path.exists(item_path)
-            del all_local_items[item.name]
-        except Exception as e:
+            if item.name in all_local_items:
+                del all_local_items[item.name]
+        except (OSError, IOError) as e:
             self.logger.error('Cannot stat path "%s": %s', item_path, e)
             return
         q = self.items_store.get_items_by_id(item_id=item.id)
@@ -330,13 +345,13 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
             self.handle_item_creation(item, item_path)
         elif not is_exist:
             # Local record exists but the file was removed.
-            self.handle_item_missing(item, q[0], item_path)
+            self.handle_item_missing(item, self._get_first_value(q), item_path)
         elif len(q) == 0:
             # File exists but local record is missing
             self.handle_record_missing(item, item_path)
         else:
             # Local record exists and file exists
-            self.handle_normal_item(item, q[0], item_path)
+            self.handle_normal_item(item, self._get_first_value(q), item_path)
 
     def analyze_untouched_local_item(self, name):
         item_path = self.local_path + '/' + name
@@ -356,11 +371,11 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         path_filter = self.drive.config.path_filter
         try:
             all_local_items = self.list_items(path_filter)
-            all_remote_items = self.drive.get_children(item_path=self.parent_path + '/' + self.name)
+            all_remote_items = self.drive.get_children(item_path=self.item_path)
         except (IOError, OSError) as e:
             self.logger.error('An error occurred synchronizing "%s": %s.', self.local_path, e)
             return
-        while all_remote_items.has_next():
+        while all_remote_items.has_next:
             remote_item_list = all_remote_items.get_next()
             for item in remote_item_list:
                 item_path = self.local_path + '/' + item.name
@@ -416,10 +431,11 @@ class RemoveItemTask(NameReferenceMixin, LocalParentPathMixin):
             self.logger.error('An API error occurred when deleting "%s": %s.', p, e)
 
 
-class DownloadFileTask(ItemReferenceMixin, LocalParentPathMixin):
+class DownloadFileTask(NameReferenceMixin, ItemReferenceMixin, LocalParentPathMixin):
     def __init__(self, task_base, item):
         super().__init__(task_base=task_base)
         self.item = item
+        self.name = item.name
         self.parent_path = item.parent_reference.path
 
     def get_temp_filename(self):
