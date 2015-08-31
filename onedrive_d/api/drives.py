@@ -177,10 +177,9 @@ class DriveObject:
         :rtype: onedrive_d.api.items.ItemCollection
         """
         uri = self.get_item_uri(item_id, item_path)
-        append = '/children'
         if item_path is not None:
-            append = ':' + append
-        uri += append
+            uri += ':'
+        uri += '/children'
         request = self.root.account.session.get(uri)
         return items.ItemCollection(self, request.json())
 

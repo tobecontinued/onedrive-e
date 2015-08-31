@@ -24,7 +24,7 @@ class ItemCollection:
         """
         :return True | False: Whether or not there are more sets to fetch.
         """
-        return '@odata.nextLink' in self._data
+        return self._page_count == 0 or '@odata.nextLink' in self._data
 
     def get_next(self):
         """
