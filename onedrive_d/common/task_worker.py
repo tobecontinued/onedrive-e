@@ -18,14 +18,16 @@ class TaskConsumer(threading.Thread):
         self.task_pool = task_pool
 
     def run(self):
+        self.logger.debug('Started.')
         while True:
             self.task_pool.semaphore.acquire()
             if self.terminate_sign.is_set():
-                return
+                break
             task = self.task_pool.pop_task()
             self.logger.debug('Acquired task of type "%s" on path "%s"',
                               task.__class__.__name__, task.local_parent_path + '/' + task.name)
             task.handle()
+        self.logger.debug('Stopped.')
 
 
 TaskConsumer.terminate_sign.clear()
