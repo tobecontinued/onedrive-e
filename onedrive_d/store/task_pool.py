@@ -17,7 +17,7 @@ class TaskPool:
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
-            cls._semaphore = threading.Semaphore()
+            cls._semaphore = threading.Semaphore(0)
             cls._lock = rwlock.RWLock()
             cls._instance = TaskPool()
         return cls._instance
