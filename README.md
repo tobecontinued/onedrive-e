@@ -77,7 +77,7 @@ TBA.
 
 ### Use ignore list
 
-(Refer to this document.)[docs/ignore_list.md]
+[Refer to this document.](doc/ignore_list.md)
 
 ## Uninstall
 
