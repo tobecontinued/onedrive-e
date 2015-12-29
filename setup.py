@@ -62,7 +62,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'onedrived = onedrive_d.cli.cli_main:main'
+            'onedrived = onedrive_d.cli.cli_main:main',
             'onedrived-pref = onedrive_d.cli.pref_main:main'
         ]
     },
