@@ -57,7 +57,7 @@ setup(
         'onedrive_d.tests.common',
     ],
     package_data={
-        'onedrive_d': ['lang/*.json'],
+        'onedrive_d': ['lang/*', 'data/*'],
         'onedrive_d.tests': ['data/*.json']
     },
     entry_points={
@@ -72,5 +72,5 @@ setup(
     test_suite='onedrive_d.tests',
     include_package_data=True,
     url='https://github.com/xybu/onedrive-d',
-    zip_safe=False
+    zip_safe=False, requires=['send2trash', 'requests', 'requests', 'requests']
 )

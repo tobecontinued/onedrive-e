@@ -5,7 +5,7 @@ import sys
 
 from clint.textui import colored, columns, indent, prompt, puts, validators
 
-from onedrive_d import OS_USER_NAME, OS_USER_HOME, mkdir
+from onedrive_d import OS_USER_NAME, OS_USER_HOME, mkdir, get_content
 from onedrive_d.api import accounts, clients
 from onedrive_d.cli import CONFIG_DIR, get_current_user_config
 from onedrive_d.common import drive_config, netman
@@ -15,6 +15,9 @@ from onedrive_d.vendor.utils import pretty_print_bytes
 try:
     if not os.path.exists(CONFIG_DIR):
         mkdir(CONFIG_DIR)
+        default_ignore_list_data = get_content('default_ignore_list.txt', is_text=True)
+        with open(CONFIG_DIR + '/odignore.txt', 'w') as f:
+            f.write(default_ignore_list_data)
         print(colored.green('Created path "' + CONFIG_DIR + '".'))
     user_conf = get_current_user_config()
     network_monitor = netman.NetworkMonitor()
@@ -287,9 +290,9 @@ def print_existing_ignore_list_paths():
 def edit_default_ignore_list():
     puts(colored.green('Editing global ignore list files...\n'))
 
-    default_path = OS_USER_HOME + './onedrived/odignore.txt'
+    default_path = CONFIG_DIR + '/odignore.txt'
     if os.path.isfile(default_path) and default_path not in user_conf.default_drive_config.ignore_files:
-        puts(colored.yellow('Found factory ignore list file "%s".' % default_path))
+        puts(colored.yellow('Found default ignore list file "%s".' % default_path))
         if prompt.yn('Do you want to add this ignore list? '):
             user_conf.default_drive_config.ignore_files.add(default_path)
 

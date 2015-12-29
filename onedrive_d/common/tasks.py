@@ -112,6 +112,22 @@ class LocalParentPathMixin(TaskMixin, ParentPathReferenceMixin):
         self.parent_path = self.drive.drive_path + '/root:' + relative_path
 
 
+def resolve_type_conflict_path(item_path):
+    i = 1
+    suffix = ' (' + OS_HOSTNAME + ')'
+    p, ext = os.path.splitext(item_path)
+    while os.path.exists(p + suffix + ext):
+        suffix = ' ' + str(i) + ' (' + OS_HOSTNAME + ')'
+        i += 1
+    n = p + suffix + ext
+    os.rename(item_path, n)
+    return n
+
+
+def stat_file(item_path):
+    return os.path.getsize(item_path), os.path.getmtime(item_path)
+
+
 class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
     def __init__(self, task_base, local_parent_path, name):
         super().__init__(task_base)
@@ -153,17 +169,6 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
                 ent_count[ent_lower] = 0
             ent_list[ent] = is_folder
         return ent_list
-
-    def resolve_type_conflict_path(self, item_path):
-        i = 1
-        suffix = ' (' + OS_HOSTNAME + ')'
-        p, ext = os.path.splitext(item_path)
-        while os.path.exists(p + suffix + ext):
-            suffix = ' ' + str(i) + ' (' + OS_HOSTNAME + ')'
-            i += 1
-        n = p + suffix + ext
-        os.rename(item_path, n)
-        return n
 
     def handle_item_creation(self, item, item_path):
         """
@@ -216,19 +221,16 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
     def move_and_create_dir(self, item, item_path):
         try:
             if not os.path.isdir(item_path):
-                new_path = self.resolve_type_conflict_path(item_path)
-                self.analyze_untouched_local_item(os.path.basename(new_path))
+                new_path = resolve_type_conflict_path(item_path)
+                self._analyze_untouched_local_item(os.path.basename(new_path))
             self.handle_item_creation(item, item_path)
         except (OSError, IOError) as e:
             self.logger.error('An OSError occurred when handling "%s": %s.', item_path, e)
 
     def move_and_create_file(self, item, item_path):
-        new_path = self.resolve_type_conflict_path(item_path)
-        self.analyze_untouched_local_item(os.path.basename(new_path))
+        new_path = resolve_type_conflict_path(item_path)
+        self._analyze_untouched_local_item(os.path.basename(new_path))
         self.handle_item_creation(item, item_path)
-
-    def stat_file(self, item_path):
-        return os.path.getsize(item_path), os.path.getmtime(item_path)
 
     def check_file_hash(self, item, item_path, file_mtime):
         file_props = item.file_props
@@ -259,7 +261,7 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
                 if not os.path.isfile(item_path):
                     self.move_and_create_file(item, item_path)
                     return
-                file_size, file_mtime = self.stat_file(item_path)
+                file_size, file_mtime = stat_file(item_path)
                 if file_size == item.size and compare_timestamps(
                         datetime_to_timestamp(item.modified_time), file_mtime) == 0:
                     # If local file and remote file match in terms of mtime and file size, then we assume two files
@@ -297,7 +299,7 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
                 if not os.path.isfile(item_path):
                     self.move_and_create_file(item, item_path)
                     return
-                file_size, file_mtime = self.stat_file(item_path)
+                file_size, file_mtime = stat_file(item_path)
                 if record.item_id == item.id and record.e_tag == item.e_tag:
                     # The remote item did not change since last update of record.
                     if file_size != record.size or compare_timestamps(
@@ -321,11 +323,12 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
         except (OSError, IOError) as e:
             self.logger.error('An OSError occurred handling item "%s": %s.', item_path, e)
 
-    def _get_first_value(self, dic):
+    @staticmethod
+    def _get_first_value(dic):
         for k, v in dic.items():
             return v
 
-    def analyze_item(self, item, item_path, all_local_items, path_filter):
+    def _analyze_item(self, item, item_path, all_local_items, path_filter):
         """
         :param onedrive_d.items.OneDriveItem item: A remote item.
         :param str item_path: Local path to the item.
@@ -353,14 +356,22 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
             # Local record exists and file exists
             self.handle_normal_item(item, self._get_first_value(q), item_path)
 
-    def analyze_untouched_local_item(self, name):
+    def _analyze_untouched_local_item(self, name):
         item_path = self.local_path + '/' + name
+        rel_path = self.repo_relative_parent_path + '/' + name
+        is_dir = os.path.isdir(item_path)
+        path_filter = self.drive.config.path_filter
+        q = self.items_store.get_items_by_id(local_parent_path=self.repo_relative_parent_path, name=name)
         try:
-            # TODO: finish this stub
-            if os.path.isdir(item_path):
-                pass
-            elif os.path.isfile(item_path):
-                pass
+            if len(q) > 0:
+                # the item was synced before, but server no longer has it. Remove the entry.
+                send2trash(item_path)
+            elif is_dir and not path_filter.should_ignore(rel_path, is_dir=is_dir):
+                self.task_pool.add_task(CreateDirTask(self, local_parent_path=self.local_parent_path, name=name))
+            elif not path_filter.should_ignore(rel_path, is_dir=False):
+                # TODO: this can be made smarter by hashtag.
+                self.task_pool.add_task(UploadFileTask(self, local_parent_path=self.local_relative_parent_path,
+                                                           name=name))
         except (OSError, IOError) as e:
             self.logger.error('An error occurred synchronizing "%s": %s.', item_path, e)
 
@@ -381,9 +392,9 @@ class SynchronizeDirTask(NameReferenceMixin, LocalParentPathMixin):
                 item_path = self.local_path + '/' + item.name
                 if not path_filter.should_ignore(self.repo_relative_parent_path + '/' + item.name) and not \
                         self.task_pool.has_pending_task(item_path):
-                    self.analyze_item(item, item_path, all_local_items, path_filter)
+                    self._analyze_item(item, item_path, all_local_items, path_filter)
         for local_item_name in all_local_items:
-            self.analyze_untouched_local_item(local_item_name)
+            self._analyze_untouched_local_item(local_item_name)
 
 
 class CreateDirTask(NameReferenceMixin, LocalParentPathMixin):

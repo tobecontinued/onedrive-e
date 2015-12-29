@@ -1,5 +1,3 @@
-__author__ = 'xb'
-
 import threading
 
 from onedrive_d.store import items_db

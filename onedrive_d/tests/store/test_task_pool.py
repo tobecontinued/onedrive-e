@@ -21,9 +21,9 @@ class TestTaskPool(BaseTestCase, unittest.TestCase):
         self.assertIs(self.task, self.task_pool.pop_task(task_class=tasks.CreateDirTask))
 
     def test_has_pending_task(self):
-        self.assertTrue(self.task_pool.has_pending_task(self.task_pool.get_task_path(self.task)))
+        self.assertTrue(self.task_pool.has_pending_task(self.task.local_parent_path + '/' + self.task.name))
         self.task_pool.pop_task()
-        self.assertFalse(self.task_pool.has_pending_task(self.task_pool.get_task_path(self.task)))
+        self.assertFalse(self.task_pool.has_pending_task(self.task.local_parent_path + '/' + self.task.name))
 
     def test_singleton(self):
         a = task_pool.TaskPool.get_instance()

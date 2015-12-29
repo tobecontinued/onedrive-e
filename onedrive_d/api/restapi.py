@@ -85,6 +85,10 @@ class ManagedRESTClient:
             args['headers'] = headers
         return self.request('get', url, args, ok_status_code=ok_status_code, auto_renew=auto_renew)
 
+
+    def download(self):
+        pass
+
     def post(self, url, data=None, json=None, headers=None, ok_status_code=requests.codes.ok, auto_renew=True):
         """
         Perform a HTTP POST request.

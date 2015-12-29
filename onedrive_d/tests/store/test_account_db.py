@@ -1,5 +1,3 @@
-__author__ = 'xb'
-
 import unittest
 
 from requests import codes

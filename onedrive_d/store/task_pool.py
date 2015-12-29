@@ -6,6 +6,28 @@ from onedrive_d.common import logger_factory
 from onedrive_d.vendor import rwlock
 
 
+def _add_to_list(key, table, value):
+    """
+    Add an item to a dict whose values are lists.
+    :param str key:
+    :param dict[str, T] table:
+    :param T value:
+    """
+    if key not in table:
+        table[key] = [value]
+    else:
+        table[key].append(value)
+
+
+def get_task_path(task):
+    """
+    Return the local path the task performs on.
+    :param onedrive_d.common.tasks.LocalParentPathMixin task:
+    :return str:
+    """
+    return task.local_parent_path + '/' + task.name
+
+
 class TaskPool:
     """
     An in-memory, singleton storage for Tasks based on hash maps.
@@ -26,31 +48,11 @@ class TaskPool:
         self._all_tasks = []
         self._tasks_by_path = {}
 
-    def _add_to_list(self, key, table, value):
-        """
-        Add an item to a dict whose values are lists.
-        :param str key:
-        :param dict[str, T] table:
-        :param T value:
-        """
-        if key not in table:
-            table[key] = [value]
-        else:
-            table[key].append(value)
-
-    def get_task_path(self, task):
-        """
-        Return the local path the task performs on.
-        :param onedrive_d.common.tasks.LocalParentPathMixin task:
-        :return str:
-        """
-        return task.local_parent_path + '/' + task.name
-
     def add_task(self, task):
         self.logger.debug('Try acquiring writer lock...')
         self._lock.writer_acquire()
         self._all_tasks.append(task)
-        self._add_to_list(self.get_task_path(task), self._tasks_by_path, task)
+        _add_to_list(get_task_path(task), self._tasks_by_path, task)
         self.logger.debug('Added task "%s" on path "%s".', task.__class__.__name__,
                           task.local_parent_path + '/' + task.name)
         self._lock.writer_release()
@@ -74,7 +76,7 @@ class TaskPool:
                         self._all_tasks.remove(t)
                         break
         if ret is not None:
-            self._tasks_by_path[self.get_task_path(ret)].remove(ret)
+            self._tasks_by_path[get_task_path(ret)].remove(ret)
         self._lock.writer_release()
         return ret
 
@@ -89,7 +91,7 @@ class TaskPool:
         local_parent_path += '/'
         self._lock.writer_acquire()
         for t in self._all_tasks:
-            task_path = self.get_task_path(t)
+            task_path = get_task_path(t)
             if task_path.startswith(local_parent_path):
                 self._all_tasks.remove(t)
                 self._tasks_by_path[task_path].remove(t)

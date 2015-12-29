@@ -5,7 +5,7 @@ onedrive-d is an OneDrive client based on OneDrive API.
 It aims to run on major Linux distributions that support Python 3.
 """
 
-__all__ = ['api', 'cli', 'common', 'store', 'tests', 'ui', 'vendor']
+__all__ = ['api', 'cli', 'common', 'store', 'tests', 'vendor']
 __author__ = "Xiangyu Bu"
 __copyright__ = "Copyright © 2014-present Xiangyu Bu"
 __created__ = "2015-08-07"
@@ -28,7 +28,7 @@ from ciso8601 import parse_datetime
 def get_current_os_user():
     """
     Find the real user who runs the current process. Return a tuple of uid, username, homedir.
-    :rtype: (int, str, str)
+    :rtype: (int, str, str, int)
     """
     user_name = os.getenv('SUDO_USER')
     if not user_name:
