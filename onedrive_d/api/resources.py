@@ -165,6 +165,7 @@ class AsyncCopySession:
         self.url = headers['Location']
         self._status = options.AsyncOperationStatuses.NOT_STARTED
 
+    # noinspection PyAttributeOutsideInit
     def update_status(self):
         request = self.drive.root.account.session.get(self.url, ok_status_code=self.ACCEPTABLE_STATUS_CODES)
         if request.status_code == 202:
@@ -200,6 +201,7 @@ class AsyncCopySession:
 
     def get_item(self):
         return self._item
+
 
 class Identity:
     def __init__(self, data):

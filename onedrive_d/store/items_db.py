@@ -1,12 +1,10 @@
-__author__ = 'xb'
-
 import atexit
 import sqlite3
 
-from onedrive_d import get_content
 from onedrive_d import datetime_to_str, str_to_datetime
+from onedrive_d import get_content
 from onedrive_d.common import logger_factory
-from onedrive_d.vendor import rwlock
+from onedrive_d.vendor.rwlock import ReadWriteLock
 
 
 def create_item_db_name(drive):
@@ -58,7 +56,7 @@ class ItemStorage:
         :param onedrive_d.api.drives.DriveObject drive: The underlying drive object.
         """
         if not hasattr(drive, 'storage_lock'):
-            drive.storage_lock = rwlock.RWLock()
+            drive.storage_lock = ReadWriteLock()
         self.lock = drive.storage_lock
         self._conn = sqlite3.connect(db_path, isolation_level=None, check_same_thread=False)
         self.drive = drive
@@ -71,8 +69,8 @@ class ItemStorage:
         self._cursor.close()
         self._conn.close()
 
-    def local_path_to_remote_path(self, local_path):
-        return self.drive.drive_path + '/root:' + local_path
+    def _local_path_to_remote_path(self, path):
+        return path.replace(self.drive.config.local_root, self.drive.drive_path + '/root:', 1)
 
     def get_items_by_id(self, item_id=None, parent_path=None, item_name=None, local_parent_path=None):
         """
@@ -80,11 +78,11 @@ class ItemStorage:
         :param str item_id: ID of the target item.
         :param str parent_path: Path reference of the target item's parent. Used with item_name.
         :param str item_name: Name of the item. Used with parent_path or local_parent_path.
-        :param str local_parent_path: Path relative to drive's local root. If at root, use ''.
+        :param str local_parent_path: Local path to item's parent directory.
         :return dict[str, onedrive_d.store.items_db.ItemRecord]: All qualified records index by item ID.
         """
         if local_parent_path is not None:
-            parent_path = self.local_path_to_remote_path(local_parent_path)
+            parent_path = self._local_path_to_remote_path(local_parent_path)
         args = {'item_id': item_id, 'parent_path': parent_path, 'item_name': item_name}
         return self.get_items(args)
 
@@ -123,14 +121,14 @@ class ItemStorage:
         """
         where, values = self._get_where_clause(args, relation)
         ret = {}
-        self.lock.reader_acquire()
+        self.lock.acquire_read()
         q = self._conn.execute('SELECT item_id, type, item_name, parent_id, parent_path, etag, ctag, size, '
-                                 'created_time, modified_time, status, crc32_hash, sha1_hash FROM items WHERE ' +
-                                 where, values)
+                               'created_time, modified_time, status, crc32_hash, sha1_hash FROM items WHERE ' +
+                               where, values)
         for row in q.fetchall():
             item = ItemRecord(row)
             ret[item.item_id] = item
-        self.lock.reader_release()
+        self.lock.release_read()
         return ret
 
     def update_item(self, item, status=ItemRecordStatuses.OK, parent_path=None):
@@ -153,15 +151,15 @@ class ItemStorage:
             pass
         created_time_str = datetime_to_str(item.created_time)
         modified_time_str = datetime_to_str(item.modified_time)
-        self.lock.writer_acquire()
+        self.lock.acquire_write()
         self._cursor.execute(
-            'INSERT OR REPLACE INTO items (item_id, type, item_name, parent_id, parent_path, etag, '
-            'ctag, size, created_time, modified_time, status, crc32_hash, sha1_hash)'
-            ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            (item.id, item.type, item.name, parent_ref.id, parent_path, item.e_tag, item.c_tag,
-             item.size, created_time_str, modified_time_str, status, crc32_hash, sha1_hash))
+                'INSERT OR REPLACE INTO items (item_id, type, item_name, parent_id, parent_path, etag, '
+                'ctag, size, created_time, modified_time, status, crc32_hash, sha1_hash)'
+                ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (item.id, item.type, item.name, parent_ref.id, parent_path, item.e_tag, item.c_tag,
+                 item.size, created_time_str, modified_time_str, status, crc32_hash, sha1_hash))
         self._conn.commit()
-        self.lock.writer_release()
+        self.lock.release_write()
 
     def delete_item(self, item_id=None, parent_path=None, item_name=None, local_parent_path=None, is_folder=False):
         """
@@ -169,13 +167,13 @@ class ItemStorage:
         :param str item_id: ID of the target item.
         :param str parent_path: Path reference of the target item's parent. Used with item_name.
         :param str item_name: Name of the item. Used with parent_path or local_parent_path.
-        :param str local_parent_path: Path relative to drive's local root. If at root, use ''.
+        :param str local_parent_path: Local path to item's parent directory.
         :param True | False is_folder: True to indicate that the item is a folder (delete all children).
         """
         if local_parent_path is not None:
-            parent_path = self.local_path_to_remote_path(local_parent_path)
+            parent_path = self._local_path_to_remote_path(local_parent_path)
         where, values = self._get_where_clause({'item_id': item_id, 'parent_path': parent_path, 'item_name': item_name})
-        self.lock.writer_acquire()
+        self.lock.acquire_write()
         if is_folder:
             # Translate ID reference to path and name reference.
             q = self._cursor.execute('SELECT item_id, parent_path, item_name FROM items WHERE ' + where, values)
@@ -188,7 +186,7 @@ class ItemStorage:
                                      (item_id, parent_path + '/' + item_name + '/%'))
         self._cursor.execute('DELETE FROM items WHERE ' + where, values)
         self._conn.commit()
-        self.lock.writer_release()
+        self.lock.release_write()
 
     def update_status(self, status, item_id=None, parent_path=None, item_name=None, local_parent_path=None):
         """
@@ -199,10 +197,10 @@ class ItemStorage:
         :param str local_parent_path: Path relative to drive's local root. If at root, use ''.
         """
         if local_parent_path is not None:
-            parent_path = self.local_path_to_remote_path(local_parent_path)
+            parent_path = self._local_path_to_remote_path(local_parent_path)
         where, values = self._get_where_clause({'item_id': item_id, 'parent_path': parent_path, 'item_name': item_name})
         values = (status,) + values
-        self.lock.writer_acquire()
+        self.lock.acquire_write()
         self._cursor.execute('UPDATE items SET status=? WHERE ' + where, values)
         self._conn.commit()
-        self.lock.writer_release()
+        self.lock.release_write()

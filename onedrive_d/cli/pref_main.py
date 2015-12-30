@@ -24,7 +24,7 @@ try:
     personal_client = clients.PersonalClient(proxies=user_conf.proxies, net_monitor=network_monitor)
     business_client = None
     account_store = account_db.AccountStorage(
-        CONFIG_DIR + '/accounts.db', personal_client=personal_client, business_client=business_client)
+            CONFIG_DIR + '/accounts.db', personal_client=personal_client, business_client=business_client)
     drive_store = drives_db.DriveStorage(CONFIG_DIR + '/drives.db', account_store)
 except Exception as e:
     print(colored.red('Fatal error: ' + str(e)))
@@ -34,10 +34,10 @@ except Exception as e:
 def add_personal_account():
     puts(colored.green('Link with an OneDrive Personal account:'))
     puts(colored.cyan(
-        'Please use your browser to visit the following URL, sign in with your OneDrive account and '
-        'authorize onedrive-d, then copy the callback URL back here. The callback URL is the URL at '
-        'which the authorization page goes blank and usually starts with ' +
-        clients.PersonalClient.DEFAULT_REDIRECT_URI + '.'))
+            'Please use your browser to visit the following URL, sign in with your OneDrive account and '
+            'authorize onedrive-d, then copy the callback URL back here. The callback URL is the URL at '
+            'which the authorization page goes blank and usually starts with ' +
+            clients.PersonalClient.DEFAULT_REDIRECT_URI + '.'))
     puts()
     puts(colored.yellow('Please visit this URL: '))
     puts(personal_client.get_auth_uri())
@@ -69,32 +69,34 @@ def prompt_delete_account(account_list):
         if account_to_delete is None:
             puts(colored.red('Error: The account has been deleted.'))
         else:
+            drive_store.delete_records_by_account(account_to_delete.profile.user_id, account_to_delete.TYPE)
             account_store.delete_account(account_to_delete)
             account_list[id_to_delete] = None
+            puts(colored.green('Successfully deleted the account.'))
 
 
 def list_existing_accounts():
-    col = 30
+    col = 20
     all_accounts = account_store.get_all_accounts()
     if len(all_accounts) == 0:
         puts(colored.red('There is no linked account yet.'))
         return
     puts(colored.green('You have linked the following account(s) to onedrive-d:\n'))
     puts(columns(
-        [(colored.red('Index')), 20],
-        [(colored.magenta('Account ID')), col],
-        [(colored.cyan('Account Type')), col],
-        [(colored.green('Name')), None]))
+            [(colored.red('Index')), 10],
+            [(colored.magenta('Account ID')), col],
+            [(colored.cyan('Account Type')), col],
+            [(colored.green('Name')), None]))
     account_list = []
     for id, account in all_accounts.items():
         puts(columns(
-            [str(len(account_list)), 20],
-            [account.profile.user_id, col],
-            [account.TYPE, col],
-            [account.profile.name, None]))
+                [str(len(account_list)), 10],
+                [account.profile.user_id, col],
+                [account.TYPE, col],
+                [account.profile.name, None]))
         account_list.append(account)
     puts(colored.yellow('\nTo delete an account, type the index and hit [Enter]. Otherwise hit [Ctrl+C] to break.'))
-    puts(colored.yellow('Note: all the Drives belong to the account will also be deleted.'))
+    puts(colored.yellow('Note: all the Drives belonging to the account will also be deleted.'))
     puts()
     try:
         prompt_delete_account(account_list)
@@ -122,6 +124,8 @@ def prompt_drive_config(drive):
         local_root = prompt.query('Which local directory do you want to sync with this Drive?',
                                   default=drive_config_data['local_root'])
         try:
+            while local_root[-1] == '/':
+                local_root = local_root[:-1]
             if not os.path.exists(local_root):
                 puts(colored.yellow('Directory "%s" does not exist. Try creating it...' % local_root))
                 mkdir(local_root)
@@ -154,7 +158,8 @@ def prompt_drive_config(drive):
 
 
 def prompt_add_drive(drive_list):
-    while True:
+    drive_count = 0
+    while len(drive_list) > drive_count:
         puts()
         id_to_add = prompt.query('Type the index of the Drive to add: ',
                                  validators=[validators.IntegerValidator(),
@@ -165,12 +170,13 @@ def prompt_add_drive(drive_list):
         else:
             prompt_drive_config(drive_to_add)
             drive_list[id_to_add] = None
+            drive_count += 1
             puts(colored.green('Successfully added Drive.'))
             puts()
 
 
 def add_new_drive():
-    puts(colored.green('Here are all the Drives belong to the accounts you have linked and not yet added:\n'))
+    puts(colored.green('Here are all the Drives belonging to the accounts you have linked and not yet added:\n'))
     drive_list = []
     for key, account in account_store.get_all_accounts().items():
         account_id, account_type = key
@@ -178,30 +184,30 @@ def add_new_drive():
         drive_root = drive_store.get_drive_root(account_id, account_type)
         all_drives = drive_root.get_all_drives()
         saved_drives = drive_store.get_all_drives()
-        with indent(4):
-            puts(columns(
-                [(colored.green('Index')), 10],
-                [(colored.cyan('Drive ID')), 20],
-                [(colored.cyan('Type')), 10],
-                [(colored.cyan('Default?')), 10],
-                [(colored.cyan('State')), 10],
+        puts(columns(
+                [(colored.green('Index')), 5],
+                [(colored.cyan('Drive ID')), 18],
+                [(colored.cyan('Type')), 8],
+                [(colored.cyan('Default?')), 8],
+                [(colored.cyan('State')), 7],
                 [(colored.yellow('Total')), 10],
-                [(colored.yellow('Used')), 10],
+                [(colored.yellow('Used')), 8],
                 [(colored.yellow('Free')), 10]))
-            for id, drive in all_drives.items():
-                if drive_store.get_key(id, drive.root.account.profile.user_id, drive.root.account.TYPE) in saved_drives:
-                    continue
-                quota = drive.quota
-                puts(columns(
-                    [str(len(drive_list)), 10],
-                    [id, 20],
-                    [drive.type, 10],
-                    ['Yes' if drive.is_default else '', 10],
-                    [quota.state, 10],
+        for id, drive in all_drives.items():
+            if drive_store.get_key(id, drive.root.account.profile.user_id, drive.root.account.TYPE) in saved_drives:
+                continue
+            quota = drive.quota
+            puts(columns(
+                    [str(len(drive_list)), 5],
+                    [id, 18],
+                    [drive.type, 8],
+                    ['Yes' if drive.is_default else '', 8],
+                    [quota.state, 7],
                     [pretty_print_bytes(quota.total), 10],
-                    [pretty_print_bytes(quota.used), 10],
+                    [pretty_print_bytes(quota.used), 8],
                     [pretty_print_bytes(quota.remaining), 10]))
-                drive_list.append(drive)
+            drive_list.append(drive)
+        puts()
     if len(drive_list) == 0:
         puts()
         puts(colored.red('It seems there is no more Drive to add.'))
@@ -256,18 +262,18 @@ def list_existing_drives():
         drive_id, account_id, account_type = key
         with indent(4):
             puts(columns(
-                [(colored.green('Index')), 8],
-                [(colored.magenta('Drive ID')), 17],
-                [(colored.magenta('Drive Type')), 12],
-                [(colored.cyan('Account')), 20],
-                [(colored.yellow('Local Root')), None]))
+                    [(colored.green('Index')), 8],
+                    [(colored.magenta('Drive ID')), 17],
+                    [(colored.magenta('Drive Type')), 12],
+                    [(colored.cyan('Account')), 20],
+                    [(colored.yellow('Local Root')), None]))
             profile = drive.root.account.profile
             puts(columns(
-                [str(len(drive_list)), 8],
-                [drive_id, 17],
-                [drive.type, 12],
-                ["{} ({})".format(account_id, profile.name), 20],
-                [drive.config.local_root, None]))
+                    [str(len(drive_list)), 8],
+                    [drive_id, 17],
+                    [drive.type, 12],
+                    ["{} ({})".format(account_id, profile.name), 20],
+                    [drive.config.local_root, None]))
         drive_list.append(drive)
     prompt_edit_drive(drive_list)
 

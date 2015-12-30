@@ -1,2 +1,2 @@
-__all__ = ['rwlock']
+__all__ = ['rwlock', 'utils']
 __author__ = 'xb'

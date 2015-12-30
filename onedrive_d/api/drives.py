@@ -12,8 +12,8 @@ from onedrive_d.api import facets
 from onedrive_d.api import items
 from onedrive_d.api import options
 from onedrive_d.api import resources
-from onedrive_d.common import logger_factory
 from onedrive_d.common import drive_config
+from onedrive_d.common import logger_factory
 
 
 class DriveRoot:
@@ -24,7 +24,6 @@ class DriveRoot:
     def __init__(self, account):
         """
         :param onedrive_d.api.accounts.PersonalAccount | onedrive_d.api.accounts.BusinessAccount account:
-        :param dict[str, DriveObject] cached_drives:
         """
         self.account = account
         self._cached_drives = {}
@@ -59,6 +58,7 @@ class DriveRoot:
     def get_drive(self, drive_id=None, skip_cache=False):
         """
         :param str | None drive_id: (Optional) ID of the target Drive. Use None to get default Drive.
+        :param True | False skip_cache: If True, will read data from server rather than local cache.
         :return onedrive_d.api.drives.DriveObject:
         """
         if drive_id in self._cached_drives:
@@ -144,7 +144,7 @@ class DriveObject:
         uri = self.drive_uri
         if item_id is not None:
             uri += self.drive_path + '/items/' + item_id
-        elif item_path is not None and item_path != self.drive_path + '/root:':
+        elif item_path is not None:  # and item_path != self.drive_path + '/root:':
             uri += item_path
         else:
             uri += self.drive_path + '/root'

@@ -45,6 +45,8 @@ class TestItemStorage(unittest.TestCase):
             kwargs['item_name'] = item.name
         if 'parent_path' in kwargs:
             kwargs['parent_path'] = item.parent_reference.path
+        if 'local_parent_path' in kwargs:
+            kwargs['local_parent_path'] = self.drive.config.local_root + kwargs['local_parent_path']
 
     def assert_item_record(self, item, records, status=items_db.ItemRecordStatuses.OK):
         self.assertEqual(1, len(records))
@@ -131,7 +133,7 @@ class TestItemStorage(unittest.TestCase):
 
     def test_update_status(self):
         item = self.all_items[0]
-        q = {'item_name': item.name, 'local_parent_path': ''}
+        q = {'item_name': item.name, 'local_parent_path': self.drive.config.local_root}
         self.itemdb.update_status(items_db.ItemRecordStatuses.MOVING, **q)
         records = self.itemdb.get_items_by_id(**q)
         self.assert_item_record(item, records, items_db.ItemRecordStatuses.MOVING)

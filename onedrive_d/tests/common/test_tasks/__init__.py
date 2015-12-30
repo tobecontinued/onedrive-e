@@ -1,22 +1,26 @@
-__author__ = 'xb'
+import os
 
-from onedrive_d.common import drive_config
-from onedrive_d.common import tasks
-from onedrive_d.tests.api import drive_factory
-from onedrive_d.tests.mocks import mock_os
-from onedrive_d.tests.store import db_factory
+from onedrive_d.common.tasks import TaskBase
+from onedrive_d.tests.api.drive_factory import get_sample_drive_object
+from onedrive_d.tests.store.db_factory import get_sample_item_storage_manager
+from onedrive_d.tests.store.db_factory import get_sample_task_pool
 
 
-class BaseTestCase:
-    # noinspection PyAttributeOutsideInit
-    def setup_objects(self):
-        self.rename_records = []
-        self.utime_records = {}
-        self.drive = drive_factory.get_sample_drive_object()
-        self.drive.config = drive_config.DriveConfig({'local_root': '/foo'})
-        self.items_store_mgr = db_factory.get_sample_item_storage_manager()
-        self.items_store = self.items_store_mgr.get_item_storage(self.drive)
-        self.task_pool = db_factory.get_sample_task_pool()
-        self.task_base = tasks.TaskMixin(drive=self.drive, items_store=self.items_store, task_pool=self.task_pool)
-        mock_os.mock_rename(self.rename_records)
-        mock_os.mock_utime(self.utime_records)
+def setup_os_mock():
+    call_hist = {
+        'os.rename': [],
+        'os.utime': [],
+        'os.chown': []
+    }
+    os.rename = lambda old, new: call_hist['os.rename'].append((old, new))
+    os.utime = lambda fp, tt: call_hist['os.utime'].append((fp, tt))
+    os.chown = lambda fp, uid, gid: call_hist['os.chown'].append((fp, uid, gid))
+    return call_hist
+
+
+def get_sample_task_base():
+    t = TaskBase()
+    t.drive = get_sample_drive_object()
+    t.items_store = get_sample_item_storage_manager().get_item_storage(t.drive)
+    t.task_pool = get_sample_task_pool()
+    return t

@@ -47,10 +47,12 @@ def add_initial_tasks():
     for key, drive in all_drives.items():
         # root_item = drive.get_root_dir(list_children=False)
         # print(root_item._data)
-        task_base = tasks.TaskMixin(
-            drive=drive, items_store=item_store_mgr.get_item_storage(drive), task_pool=task_store)
-        task = tasks.SynchronizeDirTask(task_base, local_parent_path='', name='')
-        if not task_store.has_pending_task(task_store.get_task_path(task)):
+        task_base = tasks.TaskBase(None)
+        task_base.drive = drive
+        task_base.items_store = item_store_mgr.get_item_storage(drive)
+        task_base.task_pool = task_store
+        task = tasks.merge_task.MergeDirTask(task_base, '/', '')
+        if not task_store.has_pending_task(task.local_path):
             task_store.add_task(task)
 
 
