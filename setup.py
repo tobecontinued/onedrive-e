@@ -18,6 +18,10 @@ from setuptools import setup
 setup_requires = []
 
 install_requires = [
+    'setuptools'
+]
+
+requires = [
     'ciso8601>=1.0.1',
     'clint>=0.5.1',
     'requests>=2.0',
@@ -47,18 +51,10 @@ setup(
     license='GPL 3.0',
     long_description=open('README.md').read(),
     packages=[
-        'onedrive_d',
-        'onedrive_d.api',
-        'onedrive_d.cli',
-        'onedrive_d.common',
-        'onedrive_d.store',
-        'onedrive_d.tests',
-        'onedrive_d.tests.api',
-        'onedrive_d.tests.common',
+        'onedrive_d'
     ],
     package_data={
-        'onedrive_d': ['lang/*', 'data/*'],
-        'onedrive_d.tests': ['data/*.json']
+        'onedrive_d': ['lang/*', 'data/*']
     },
     entry_points={
         'console_scripts': [
@@ -68,9 +64,10 @@ setup(
     },
     setup_requires=setup_requires,
     install_requires=install_requires,
+        requires=requires,
     tests_require=test_requires,
-    test_suite='onedrive_d.tests',
+        test_suite='tests',
     include_package_data=True,
     url='https://github.com/xybu/onedrive-d',
-    zip_safe=False, requires=['send2trash', 'requests', 'requests', 'requests']
+        zip_safe=False
 )

@@ -134,5 +134,5 @@ __(12) You may want to have a look at the ignore list used for testing `onedrive
 ## License
 
 The source code locates at `onedrive_d.common.path_filter` and the unit test is in
-`onedrive_d.tests.common.test_path_filter`. It is based on
+`tests.common.test_path_filter`. It is based on
 [zgitignore](https://github.com/zb3/zgitignore) library under MIT license.
