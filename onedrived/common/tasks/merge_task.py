@@ -180,7 +180,7 @@ class MergeDirTask(TaskBase):
                     else:
                         # Examine file hash.
                         if _have_equal_hash(item_local_path, remote_item):
-                            # Same hash indicates that they are the same file. Update local timestamp and database record.
+                            # Same hash means that they are the same file. Update local timestamp and database record.
                             self._update_attr_when_hash_equal(item_local_path, remote_item)
                         else:
                             self.logger.info('Cannot determine file "%s". Rename and keep both.', item_local_path)

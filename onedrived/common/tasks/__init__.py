@@ -47,6 +47,7 @@ class TaskBase:
         """
         return self._task_pool
 
+    # noinspection PyAttributeOutsideInit
     @task_pool.setter
     def task_pool(self, p):
         self._task_pool = p
@@ -68,6 +69,7 @@ class TaskBase:
         """Relative parent path of the item referred to. Start with '/'."""
         return self._rel_parent_path
 
+    # noinspection PyAttributeOutsideInit
     @rel_parent_path.setter
     def rel_parent_path(self, v):
         self._rel_parent_path = v

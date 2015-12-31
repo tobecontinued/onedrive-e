@@ -52,8 +52,8 @@ def add_personal_account():
         except KeyboardInterrupt:
             puts(colored.red('Aborted.'))
             return
-        except Exception as e:
-            puts(colored.red('Error: ' + str(e)))
+        except Exception as ex:
+            puts(colored.red('Error: ' + str(ex)))
 
 
 def add_business_account():
@@ -136,8 +136,8 @@ def prompt_drive_config(drive):
                 drive_config_data['local_root'] = local_root
                 break
             raise ValueError('Invalid path "%s"' % local_root)
-        except Exception as e:
-            puts(colored.red('Error: ' + str(e)))
+        except Exception as ex:
+            puts(colored.red('Error: ' + str(ex)))
     drive_config_data['max_get_size_bytes'] = prompt.query('Maximum size, in KB, for a single download request?',
                                                            default=str(drive_config_data['max_get_size_bytes'] >> 10),
                                                            validators=[validators.IntegerValidator()]) * 1024
@@ -240,8 +240,8 @@ def prompt_edit_drive(drive_list):
                     prompt_drive_config(drive)
                     drive_store.add_record(drive)
                     puts(colored.green('Successfully edited Drive "%s"' % drive.drive_id))
-            except ValueError as e:
-                puts(colored.red('Error: ' + str(e)))
+            except ValueError as ex:
+                puts(colored.red('Error: ' + str(ex)))
     except KeyboardInterrupt:
         puts(colored.green('Aborted.'))
 
@@ -325,8 +325,8 @@ def edit_default_ignore_list():
                     puts(colored.green('Added path "%s" to list.' % command))
                 else:
                     raise ValueError('Path "%s" is not a file.' % command)
-            except ValueError as e:
-                puts(colored.red('Error: ' + str(e)))
+            except ValueError as ex:
+                puts(colored.red('Error: ' + str(ex)))
     except KeyboardInterrupt:
         puts(colored.green('Aborted.'))
 

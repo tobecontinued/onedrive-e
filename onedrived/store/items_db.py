@@ -191,6 +191,7 @@ class ItemStorage:
     def update_status(self, status, item_id=None, parent_path=None, item_name=None, local_parent_path=None):
         """
         Update the status tag of the target item.
+        :param str status:
         :param str item_id: ID of the target item.
         :param str parent_path: Path reference of the target item's parent. Used with item_name.
         :param str item_name: Name of the item. Used with parent_path or local_parent_path.

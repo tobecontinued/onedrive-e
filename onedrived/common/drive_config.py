@@ -1,5 +1,3 @@
-__author__ = 'xb'
-
 from copy import deepcopy
 
 from onedrived.common import logger_factory

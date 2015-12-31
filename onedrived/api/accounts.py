@@ -149,7 +149,7 @@ class PersonalAccount:
     def load(cls, client, s):
         """
         Load a previously serialized account object.
-        :param onedrived.api.clients.PersonalClient: The underlying client object.
+        :param onedrived.api.clients.PersonalClient client: The underlying client object.
         :param str s: A string returned by a dump() call.
         :return onedrived.api.accounts.PersonalAccount: A deserialized account object.
         """

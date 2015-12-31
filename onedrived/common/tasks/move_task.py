@@ -15,8 +15,6 @@ class MoveItemTask(TaskBase):
         super().__init__(parent_task)
         self.rel_parent_path = rel_parent_path
         self.item_name = item_name
-        move_from_task.set_handled()  # Immediately mark the old task as handled externally.
-        self.task_pool.delete_task(move_from_task)
         self._old_remote_item_path = move_from_task.remote_path
 
     def handle(self):
