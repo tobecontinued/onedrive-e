@@ -2,17 +2,17 @@
 
 """
 onedrive-d
-==========
-
 A Microsoft OneDrive client for Linux.
 
 :copyright: (c) Xiangyu Bu
-:license: GPL 3.0
+:license: GPLv3
 """
 
 import sys
 
 from setuptools import setup, find_packages
+
+from onedrived import __project__, __version__, __author__, __email__, __homepage__
 
 setup_requires = [
     'setuptools'
@@ -45,13 +45,13 @@ if python_version[0] == 3 and python_version[1] == 2:
     test_requires.append('mock>=1.3.0')
 
 setup(
-        name='onedrive-d',
-        version='2.0.0',
-        author='Xiangyu Bu',
-        author_email='xybu92@live.com',
-        url='https://github.com/xybu/onedrive-d',
+        name=__project__,
+        version=__version__,
+        author=__author__,
+        author_email=__email__,
+        url=__homepage__,
         description='A Microsoft OneDrive client for Linux',
-        license='GPL 3.0',
+        license='GPLv3',
         long_description=readme,
         packages=packages,
         include_package_data=True,

@@ -8,6 +8,12 @@ from pwd import getpwnam, getpwuid
 
 from iso8601 import parse_date
 
+__project__ = 'onedrived'
+__author__ = 'Xiangyu Bu'
+__email__ = 'xybu92@live.com'
+__version__ = '2.0.0'
+__homepage__ = 'https://github.com/xybu/onedrive-d'
+
 
 def get_current_os_user():
     """
