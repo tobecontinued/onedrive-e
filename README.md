@@ -85,7 +85,7 @@ You will need `pip3` to properly uninstall the package. Refer to Pre-requisites 
 `pip3`.
 
 ```
-$ sudo pip3 uninstall onedrive_d
+$ sudo pip3 uninstall onedrived
 ```
 
 ## Support

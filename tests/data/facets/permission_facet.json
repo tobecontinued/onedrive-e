@@ -1,0 +1,21 @@
+{
+  "id": "string",
+  "roles": [
+    "read",
+    "write"
+  ],
+  "link": {
+    "token": "aaa",
+    "type": "edit",
+    "webUrl": "http://share_url",
+    "application": {
+      "id": "123",
+      "displayName": "onedrive-d"
+    }
+  },
+  "inheritedFrom": {
+    "driveId": "aaa123",
+    "id": "aaa123!ddd",
+    "path": "foo/bar"
+  }
+}

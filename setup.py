@@ -12,7 +12,7 @@ A Microsoft OneDrive client for Linux.
 
 import sys
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 setup_requires = []
@@ -46,31 +46,30 @@ if python_version[0] == 3 and python_version[1] == 2:
     test_requires.append('mock>=1.3.0')
 
 setup(
-    name='onedrive_d',
+        name='onedrive-d',
     version='2.0.0',
     author='Xiangyu Bu',
     author_email='xybu92@live.com',
     description='A Microsoft OneDrive client for Linux',
     license='GPL 3.0',
     long_description=open('README.md').read(),
-    packages=[
-        'onedrive_d'
-    ],
+        packages=find_packages(exclude=['tests']),
+        include_package_data=True,
     package_data={
-        'onedrive_d': ['lang/*', 'data/*']
+        'onedrived': ['lang/*', 'data/*']
     },
     entry_points={
         'console_scripts': [
-            'onedrived = onedrive_d.cli.cli_main:main',
-            'onedrived-pref = onedrive_d.cli.pref_main:main'
-        ]
+            'onedrived = onedrived.cli.cli_main:main',
+            'onedrived-pref = onedrived.cli.pref_main:main'
+        ],
+        'gui_scripts': []
     },
     setup_requires=setup_requires,
     install_requires=install_requires,
         requires=requires,
     tests_require=test_requires,
         test_suite='tests',
-    include_package_data=True,
     url='https://github.com/xybu/onedrive-d',
         zip_safe=False
 )

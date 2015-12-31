@@ -1,0 +1,17 @@
+{
+  "id": "xybu_id",
+  "driveType": "personal",
+  "owner": {
+    "user": {
+      "id": "xybu_id",
+      "displayName": "Ryan Gregg"
+    }
+  },
+  "quota": {
+    "total": 1024000,
+    "used": 514000,
+    "remaining": 1010112,
+    "deleted": 0,
+    "state": "normal"
+  }
+}

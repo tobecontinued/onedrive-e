@@ -7,6 +7,7 @@ python:
   - 3.5
   - 3.5-dev
 
+cache: pip
 sudo: false
 
 # addons:
@@ -22,14 +23,13 @@ install:
   - pip3 install coveralls
 #  # Python 3.2 does not have mock library built-in.
 #  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then pip3 install mock; fi
-  - python3 setup.py develop
   - python3 setup.py install
 
 before_script:
   - python3 --version
 
 script:
-  - PYTHONPATH=. coverage3 run --branch --source=onedrive_d setup.py test
+  - coverage3 run --branch --source=onedrived setup.py test
 
 after_success:
   - coverage3 report -m
