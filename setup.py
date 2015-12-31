@@ -18,18 +18,21 @@ from setuptools import setup
 setup_requires = []
 
 install_requires = [
-    'setuptools'
-]
-
-requires = [
-    'ciso8601>=1.0.1',
-    'clint>=0.5.1',
-    'requests>=2.0',
-    'send2trash>=1.3.0',
+    'setuptools',
+    'requests>2.0.0',
     'zgitignore>=0.7.1'
 ]
 
+requires = [
+    'iso8601',
+    'clint',
+    'requests',
+    'send2trash',
+    'zgitignore'
+]
+
 test_requires = [
+    'python-dateutil',
     'requests-mock>=0.6',
     'coverage>=3.7.1'
 ]

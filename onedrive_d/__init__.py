@@ -22,7 +22,8 @@ import pkgutil
 from calendar import timegm
 from datetime import datetime
 from pwd import getpwnam, getpwuid
-from ciso8601 import parse_datetime
+
+from iso8601 import parse_date
 
 
 def get_current_os_user():
@@ -55,7 +56,7 @@ def datetime_to_str(d):
     :param datetime.datetime d:
     :return str:
     """
-    return d.isoformat() + 'Z'
+    return d.isoformat().replace('+00:00', 'Z', 1)
 
 
 def str_to_datetime(s):
@@ -63,7 +64,7 @@ def str_to_datetime(s):
     :param str s:
     :return datetime.datetime:
     """
-    return parse_datetime(s)
+    return parse_date(s)
 
 
 def datetime_to_timestamp(d):

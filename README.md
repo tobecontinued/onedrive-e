@@ -32,9 +32,9 @@ To check if you have the correct Python interpreter, run
 $ python3 --version
 ```
 
-Because the CLI runs as a Linux daemon and some dependency packages are written in CPython, some system-level packages
+~~Because the CLI runs as a Linux daemon and some dependency packages are written in CPython, some system-level packages
 are required: `python3-dev` (on Fedora / SUSE it is called `python3-devel`). If you do not have `gcc` installed, for
-example, on Debian 8, you may also need to install the package `gcc`.
+example, on Debian 8, you may also need to install the package `gcc`.~~
 
 A low-level package required is `inotify-tools` (for most Linux distributes).
 

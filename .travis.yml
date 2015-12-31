@@ -4,27 +4,29 @@ python:
 #  - 3.2
   - 3.3
   - 3.4
+  - 3.5
   - 3.5-dev
+  - 3.6-dev
 
 sudo: false
 
-addons:
-  apt:
-    packages:
-    - python3-dev
-    - gcc
+# addons:
+#  apt:
+#    packages:
+#    - python3-dev
+#    - gcc
 
 install:
   - pip install -U pip
   - pip3 install -U setuptools
   - pip3 install coverage
   - pip3 install coveralls
-  # Python 3.2 does not have mock library built-in.
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then pip3 install mock; fi
+#  # Python 3.2 does not have mock library built-in.
+#  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then pip3 install mock; fi
   - python3 setup.py install
 
-before_script:
-  - python3 --version
+# before_script:
+#  - python3 --version
 
 script:
   - coverage3 run --branch --source=onedrive_d setup.py test
