@@ -5,8 +5,8 @@ timestamp strings.
 https://github.com/OneDrive/onedrive-api-docs/tree/master/facets
 """
 
-from onedrived import datetime_to_str, str_to_datetime
 from onedrived.api import resources
+from onedrived.common.dateparser import datetime_to_str, str_to_datetime
 
 
 class FileSystemInfoFacet:

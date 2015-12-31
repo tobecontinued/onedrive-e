@@ -1,9 +1,9 @@
 import atexit
 import sqlite3
 
-from onedrived import datetime_to_str, str_to_datetime
 from onedrived import get_content
 from onedrived.common import logger_factory
+from onedrived.common.dateparser import datetime_to_str, str_to_datetime
 from onedrived.vendor.rwlock import ReadWriteLock
 
 

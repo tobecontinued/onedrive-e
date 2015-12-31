@@ -1,6 +1,6 @@
-from onedrived import str_to_datetime
 from onedrived.api import facets
 from onedrived.api import resources
+from onedrived.common.dateparser import str_to_datetime
 
 
 class OneDriveItemTypes:

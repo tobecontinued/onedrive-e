@@ -1,8 +1,8 @@
 import os
 
 from onedrived import OS_USER_ID, OS_USER_GID
-from onedrived import datetime_to_timestamp
 from onedrived.api import errors
+from onedrived.common.dateparser import datetime_to_timestamp
 from onedrived.common.tasks import TaskBase
 from onedrived.store.items_db import ItemRecordStatuses
 

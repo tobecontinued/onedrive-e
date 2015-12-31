@@ -3,8 +3,9 @@ import unittest
 from requests import codes
 from requests_mock import Mocker
 
-from onedrived import OS_USER_ID, OS_USER_GID, datetime_to_timestamp
+from onedrived import OS_USER_ID, OS_USER_GID
 from onedrived.api.items import OneDriveItem
+from onedrived.common.dateparser import datetime_to_timestamp
 from onedrived.common.tasks.down_task import get_tmp_filename, DownloadFileTask
 from tests import get_data
 from tests import mock

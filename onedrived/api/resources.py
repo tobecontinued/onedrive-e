@@ -1,7 +1,7 @@
 import json
 
-from onedrived import str_to_datetime
 from onedrived.api import options
+from onedrived.common.dateparser import str_to_datetime
 
 
 class UserProfile:

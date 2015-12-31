@@ -4,10 +4,10 @@ import unittest
 import requests
 import requests_mock
 
-from onedrived import str_to_datetime
 from onedrived.api import items
 from onedrived.api import options
 from onedrived.api import resources
+from onedrived.common.dateparser import str_to_datetime
 from tests import get_data
 from tests.factory import drive_factory
 

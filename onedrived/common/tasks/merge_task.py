@@ -2,11 +2,10 @@ import os
 
 from send2trash import send2trash
 
-from onedrived import compare_timestamps
-from onedrived import datetime_to_timestamp
 from onedrived import mkdir
 from onedrived.api import errors
 from onedrived.common import hasher
+from onedrived.common.dateparser import datetime_to_timestamp, compare_timestamps
 from onedrived.common.tasks import TaskBase
 from onedrived.common.tasks.delete_task import DeleteItemTask
 from onedrived.common.tasks.down_task import DownloadFileTask
