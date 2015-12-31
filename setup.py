@@ -34,7 +34,7 @@ test_requires = [
 
 readme = open('README.md').read()
 
-packages = find_packages(exclude=['tests'])
+packages = find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
 
 python_version = sys.version_info
 
@@ -46,28 +46,28 @@ if python_version[0] == 3 and python_version[1] == 2:
 
 setup(
         name='onedrive-d',
-    version='2.0.0',
-    author='Xiangyu Bu',
-    author_email='xybu92@live.com',
+        version='2.0.0',
+        author='Xiangyu Bu',
+        author_email='xybu92@live.com',
         url='https://github.com/xybu/onedrive-d',
-    description='A Microsoft OneDrive client for Linux',
-    license='GPL 3.0',
+        description='A Microsoft OneDrive client for Linux',
+        license='GPL 3.0',
         long_description=readme,
         packages=packages,
         include_package_data=True,
-    package_data={
-        'onedrived': ['lang/*', 'data/*']
-    },
-    entry_points={
-        'console_scripts': [
-            'onedrived = onedrived.cli.cli_main:main',
-            'onedrived-pref = onedrived.cli.pref_main:main'
-        ],
-        'gui_scripts': []
-    },
-    setup_requires=setup_requires,
-    install_requires=install_requires,
-    tests_require=test_requires,
+        package_data={
+            'onedrived': ['lang/*', 'data/*']
+        },
+        entry_points={
+            'console_scripts': [
+                'onedrived = onedrived.cli.cli_main:main',
+                'onedrived-pref = onedrived.cli.pref_main:main'
+            ],
+            'gui_scripts': []
+        },
+        setup_requires=setup_requires,
+        install_requires=install_requires,
+        tests_require=test_requires,
         test_suite='tests',
         zip_safe=False
 )
