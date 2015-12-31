@@ -5,6 +5,7 @@ import re
 try:
     from unittest import mock
 except:
+    # noinspection PyUnresolvedReferences
     import mock
 
 from onedrived import get_content as get_content_orig

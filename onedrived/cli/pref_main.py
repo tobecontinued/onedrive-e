@@ -1,5 +1,3 @@
-__author__ = 'xb'
-
 import os
 import sys
 

@@ -1,5 +1,3 @@
-__author__ = 'xb'
-
 from onedrived.api import drives
 from onedrived.common import drive_config
 from tests import get_data

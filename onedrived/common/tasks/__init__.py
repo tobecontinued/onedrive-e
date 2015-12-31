@@ -1,6 +1,6 @@
-__all__ = ['copy_task', 'delete_task', 'down_task', 'merge_task', 'move_task', 'up_task', 'utils']
-
 from onedrived.common import logger_factory
+
+__all__ = ['copy_task', 'delete_task', 'down_task', 'merge_task', 'move_task', 'up_task', 'utils']
 
 
 class TaskBase:

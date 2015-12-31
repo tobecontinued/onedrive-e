@@ -1,5 +1,3 @@
-__author__ = 'xb'
-
 import json
 
 from onedrived.common.drive_config import DriveConfig

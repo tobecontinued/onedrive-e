@@ -1,24 +1,16 @@
-__author__ = 'xb'
-
 import unittest
 from urllib.parse import parse_qs
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 
 import requests
 from requests_mock import Mocker
 
-from onedrived.api import errors
-from onedrived.api import restapi
-from tests import get_data
+from onedrived.api import errors, restapi
+from tests import get_data, mock
 from tests.factory import account_factory
 
 
 class TestManagedRESTClient(unittest.TestCase):
-    @patch('time.sleep', autospec=True)
+    @mock.patch('time.sleep', autospec=True)
     @Mocker()
     def request_status_code(self, mock_sleep, mock_request, status_code, retry_after_seconds=None):
         uri = 'https://foo/bar'

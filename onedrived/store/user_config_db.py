@@ -1,4 +1,3 @@
-__author__ = 'xb'
 
 from onedrived.common.user_config import UserConfig
 

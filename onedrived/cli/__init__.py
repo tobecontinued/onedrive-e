@@ -1,6 +1,3 @@
-__author__ = 'xb'
-__all__ = ['cli_main', 'cli_worker', 'pref_main']
-
 import atexit
 import os
 

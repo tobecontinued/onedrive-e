@@ -1,5 +1,3 @@
-__author__ = 'xb'
-
 import threading
 
 from onedrived.common import logger_factory

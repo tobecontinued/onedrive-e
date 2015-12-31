@@ -1,5 +1,3 @@
-__author__ = 'xb'
-
 import json
 
 from onedrived import str_to_datetime

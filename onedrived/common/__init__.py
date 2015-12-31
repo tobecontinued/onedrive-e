@@ -1,4 +1,3 @@
-__author__ = 'xb'
 __all__ = [
     'drive_config',
     'fsman',

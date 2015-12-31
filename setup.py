@@ -69,5 +69,6 @@ setup(
         install_requires=install_requires,
         tests_require=test_requires,
         test_suite='tests',
-        zip_safe=False
+        zip_safe=False,
+        requires=['clint', 'requests', 'iso8601', 'send2trash', 'zgitignore']
 )
