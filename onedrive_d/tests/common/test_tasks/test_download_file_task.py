@@ -11,7 +11,8 @@ from requests_mock import Mocker
 from onedrive_d.api.items import OneDriveItem
 from onedrive_d.common.tasks.down_task import get_tmp_filename, DownloadFileTask
 from onedrive_d.tests import get_data
-from onedrive_d.tests.common.test_tasks import get_sample_task_base, setup_os_mock
+from onedrive_d.tests.common.test_tasks import setup_os_mock
+from onedrive_d.tests.factory.tasks_factory import get_sample_task_base
 
 
 class TestDownloadFileTask(unittest.TestCase):
@@ -22,7 +23,7 @@ class TestDownloadFileTask(unittest.TestCase):
         self.data['size'] = 1
         self.parent_task = get_sample_task_base()
         self.item = OneDriveItem(drive=self.parent_task.drive, data=self.data)
-        self.task = DownloadFileTask(self.parent_task, rel_parent_path='/', item=self.item)
+        self.task = DownloadFileTask(self.parent_task, rel_parent_path='', item=self.item)
         self.calls_hist = setup_os_mock()
 
     @Mocker()

@@ -3,7 +3,7 @@ __author__ = 'xb'
 from onedrive_d.api import drives
 from onedrive_d.common import drive_config
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api import account_factory
+from tests.factory import account_factory
 
 
 def get_sample_drive_root():

@@ -5,9 +5,8 @@ from requests import codes
 
 from onedrive_d.api import drives
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api import account_factory
-from onedrive_d.tests.api import drive_factory
 from onedrive_d.tests.mocks import mock_logger
+from tests.factory import account_factory, drive_factory
 
 mock_logger.mock_loggers()
 

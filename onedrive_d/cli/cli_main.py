@@ -51,7 +51,7 @@ def add_initial_tasks():
         task_base.drive = drive
         task_base.items_store = item_store_mgr.get_item_storage(drive)
         task_base.task_pool = task_store
-        task = tasks.merge_task.MergeDirTask(task_base, '/', '')
+        task = tasks.merge_task.MergeDirTask(task_base, '', '')
         if not task_store.has_pending_task(task.local_path):
             task_store.add_task(task)
 

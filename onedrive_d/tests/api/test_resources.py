@@ -8,10 +8,10 @@ import requests_mock
 
 from onedrive_d import str_to_datetime
 from onedrive_d.api import items
-from onedrive_d.api import resources
 from onedrive_d.api import options
+from onedrive_d.api import resources
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api import drive_factory
+from tests.factory import drive_factory
 
 
 class TestUserProfile(unittest.TestCase):

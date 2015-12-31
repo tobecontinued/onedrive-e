@@ -8,7 +8,7 @@ from onedrive_d.store.account_db import AccountStorage
 from onedrive_d.tests import get_data
 from onedrive_d.tests.mocks import mock_atexit
 from onedrive_d.tests.mocks import mock_logger
-from onedrive_d.tests.api.account_factory import get_sample_personal_account
+from tests.factory.account_factory import get_sample_personal_account
 
 mock_atexit.mock_register()
 mock_logger.mock_loggers()

@@ -2,7 +2,6 @@ import io
 import unittest
 
 import requests_mock
-
 from requests import codes
 
 from onedrive_d import str_to_datetime
@@ -13,8 +12,8 @@ from onedrive_d.api import options
 from onedrive_d.api import resources
 from onedrive_d.common import drive_config
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api import drive_factory
 from onedrive_d.tests.mocks import mock_logger
+from tests.factory import drive_factory
 
 mock_logger.mock_loggers()
 

@@ -6,11 +6,11 @@ from onedrive_d.api import drives
 from onedrive_d.common.drive_config import DriveConfig
 from onedrive_d.store import drives_db
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api.account_factory import get_sample_personal_account
-from onedrive_d.tests.api.drive_factory import get_sample_drive_object
 from onedrive_d.tests.mocks import mock_atexit
 from onedrive_d.tests.mocks import mock_logger
 from onedrive_d.tests.store.test_account_db import get_sample_account_storage
+from tests.factory.account_factory import get_sample_personal_account
+from tests.factory.drive_factory import get_sample_drive_object
 
 mock_atexit.mock_register()
 mock_logger.mock_loggers()

@@ -2,7 +2,7 @@ __author__ = 'xb'
 
 import unittest
 
-from onedrive_d.tests.api import client_factory
+from tests.factory import client_factory
 
 
 class TestPersonalClient(unittest.TestCase):

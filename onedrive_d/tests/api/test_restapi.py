@@ -1,7 +1,7 @@
 __author__ = 'xb'
 
-from urllib.parse import parse_qs
 import unittest
+from urllib.parse import parse_qs
 
 try:
     from unittest.mock import patch
@@ -14,7 +14,7 @@ from requests_mock import Mocker
 from onedrive_d.api import errors
 from onedrive_d.api import restapi
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api import account_factory
+from tests.factory import account_factory
 
 
 class TestManagedRESTClient(unittest.TestCase):

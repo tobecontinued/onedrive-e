@@ -5,9 +5,8 @@ import unittest
 from onedrive_d.api import items
 from onedrive_d.store import items_db
 from onedrive_d.tests import get_data
-from onedrive_d.tests.api import drive_factory
 from onedrive_d.tests.mocks import mock_atexit
-from onedrive_d.tests.store import db_factory
+from tests.factory import drive_factory, db_factory
 
 mock_atexit.mock_register()
 

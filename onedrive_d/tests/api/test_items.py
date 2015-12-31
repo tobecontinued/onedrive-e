@@ -8,7 +8,7 @@ from onedrive_d.api import items
 from onedrive_d.api import resources
 from onedrive_d.tests import get_data
 from onedrive_d.tests import to_underscore_name
-from onedrive_d.tests.api.drive_factory import get_sample_drive_object
+from tests.factory.drive_factory import get_sample_drive_object
 
 
 class TestRootItem(unittest.TestCase):

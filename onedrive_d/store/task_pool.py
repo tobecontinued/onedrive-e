@@ -8,7 +8,7 @@ class TaskPool:
 
     @classmethod
     def get_instance(cls):
-        if cls._instance is None:
+        if not hasattr(cls, '_instance'):
             cls._instance = TaskPool()
         return cls._instance
 
@@ -59,11 +59,9 @@ class TaskPool:
         return ret
 
     def remove_children_tasks(self, local_parent_path):
-        to_be_deleted = []
         self._lock.acquire()
-        for t in self.queued_tasks:
+        for t in self.queued_tasks[:]:
             if t.local_path.startswith(local_parent_path):
-                to_be_deleted.append(t)
+                self.queued_tasks.remove(t)
                 del self.tasks_by_path[t.local_path]
-        self.queued_tasks -= to_be_deleted
         self._lock.release()
