@@ -6,7 +6,9 @@ import time
 
 from onedrived.api import clients
 from onedrived.cli import CONFIG_DIR, get_current_user_config
-from onedrived.common import logger_factory, netman, tasks, task_worker
+from onedrived.common import logger_factory, netman, task_worker
+from onedrived.common.tasks import TaskBase
+from onedrived.common.tasks.merge_task import MergeDirTask
 from onedrived.store import account_db, drives_db, items_db, task_pool
 
 logger = None
@@ -21,7 +23,7 @@ network_monitor = netman.NetworkMonitor()
 
 
 def parse_args():
-    argparser = argparse.ArgumentParser('onedrived-cli', description='CLI daemon of onedrive-d.')
+    argparser = argparse.ArgumentParser('onedrived', description='CLI daemon of onedrive-d.')
     argparser.add_argument('--log-level', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                            default='DEBUG', help='Set the minimum logging level.')
     argparser.add_argument('--log-file', default=None, required=False, help='Store program logs in the specified file.')
@@ -45,11 +47,11 @@ def add_initial_tasks():
     for key, drive in all_drives.items():
         # root_item = drive.get_root_dir(list_children=False)
         # print(root_item._data)
-        task_base = tasks.TaskBase(None)
-        task_base.drive = drive
-        task_base.items_store = item_store_mgr.get_item_storage(drive)
-        task_base.task_pool = task_store
-        task = tasks.merge_task.MergeDirTask(task_base, '', '')
+        base = TaskBase(None)
+        base.drive = drive
+        base.items_store = item_store_mgr.get_item_storage(drive)
+        base.task_pool = task_store
+        task = MergeDirTask(base, '', '')
         if not task_store.has_pending_task(task.local_path):
             task_store.add_task(task)
 
@@ -87,7 +89,7 @@ def check_config_dir():
 def start_task_workers():
     for i in range(user_conf.num_consumers):
         t = task_worker.TaskConsumer(task_pool=task_store)
-        t.name = 'Worker' + str(i)
+        t.name = 'W' + str(i)
         t.start()
 
 

@@ -9,7 +9,7 @@ class TaskBase:
     def __init__(self, parent_task=None):
         """
         Initialize basic properties from the task from the parent task.
-        :param TaskBase parent_task: The parent task. None for root task.
+        :param TaskBase | None parent_task: The parent task. None for root task.
         """
         if parent_task is not None:
             self.drive = parent_task.drive

@@ -23,7 +23,7 @@ class TaskConsumer(threading.Thread):
                 break
             task = self.task_pool.pop_task()
             self.logger.debug('Acquired task of type "%s" on parent "%s", name "%s".',
-                              task.__class__.__name__, task.local_parent_path, task.name)
+                              type(task).__name__, task.local_parent_path, task.item_name)
             task.handle()
         self.logger.debug('Stopped.')
 
