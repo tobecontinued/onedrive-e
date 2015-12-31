@@ -66,19 +66,23 @@ class TaskBase:
 
     @property
     def rel_parent_path(self):
-        """Relative parent path of the item referred to. Start with '/'."""
+        """Relative parent path of the item referred to."""
         return self._rel_parent_path
 
     # noinspection PyAttributeOutsideInit
     @rel_parent_path.setter
     def rel_parent_path(self, v):
+        """
+        Set path relative to the repository root.
+        :param str v: For root itself use ''; for item under root use '/' and always end with '/'.
+        """
         self._rel_parent_path = v
 
     @property
     def remote_parent_path(self):
-        p = self.drive.drive_path + '/root:'
-        if self.rel_parent_path != '/':
-            p += self.rel_parent_path
+        p = self.drive.drive_path + '/root:' + self.rel_parent_path
+        if p[-1] == '/':
+            p = p[:-1]
         return p
 
     @property
@@ -87,7 +91,7 @@ class TaskBase:
 
     @property
     def remote_path(self):
-        return self.remote_parent_path + self.item_name
+        return self.remote_parent_path + '/' + self.item_name
 
     @property
     def local_path(self):

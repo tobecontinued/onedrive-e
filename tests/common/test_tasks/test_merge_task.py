@@ -4,6 +4,7 @@ from onedrived.common.tasks import merge_task
 
 
 class TestMergeTaskHelperFunctions(unittest.TestCase):
+
     def test_unpack_first_item(self):
         d = {'key': 'val'}
         key, val = merge_task._unpack_first_item(d)

@@ -134,8 +134,8 @@ class ItemStorage:
     def update_item(self, item, status=ItemRecordStatuses.OK, parent_path=None):
         """
         :param onedrived.api.items.OneDriveItem item:
-        :param str status:
-        :return:
+        :param str status: One value of enum ItemRecordStatuses.
+        :param str parent_path: If item does not have a parent reference, fallback to this path.
         """
         if item.is_folder:
             crc32_hash = None
