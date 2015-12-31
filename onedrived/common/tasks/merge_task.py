@@ -12,8 +12,7 @@ from onedrived.common.tasks.delete_task import DeleteItemTask
 from onedrived.common.tasks.down_task import DownloadFileTask
 from onedrived.common.tasks.up_task import UpdateMetadataTask
 from onedrived.common.tasks.up_task import UploadFileTask
-from onedrived.common.tasks.utils import append_hostname
-from onedrived.common.tasks.utils import stat_file
+from onedrived.common.tasks.utils import append_hostname, stat_file
 from onedrived.store.items_db import ItemRecordStatuses
 
 
@@ -36,8 +35,8 @@ def _have_equal_hash(item_local_path, item):
     file_props = item.file_props
     hash_props = file_props.hashes if file_props is not None else None
     if hash_props is not None:
-        if hash_props.crc32 is not None and hash_props.crc32 == hasher.crc32_value(item_local_path) or \
-                                hash_props.sha1 is not None and hash_props.sha1 == hasher.hash_value(item_local_path):
+        if hash_props.crc32 is not None and hash_props.crc32 == hasher.crc32_value(item_local_path) \
+                or hash_props.sha1 is not None and hash_props.sha1 == hasher.hash_value(item_local_path):
             return True
     return False
 

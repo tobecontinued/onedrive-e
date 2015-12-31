@@ -35,8 +35,10 @@ class UploadFileTask(UpTaskBase):
                 item = self.drive.update_item(item_id=item.id, new_file_system_info=fs_info)
                 self.items_store.update_item(item, ItemRecordStatuses.OK)
                 self.logger.info('Uploaded file "%s".', self.local_path)
-        except Exception as e:
-            self.logger.error('Error occurred when uploading "%s": %s.', self.local_path, e)
+        except (IOError, OSError) as e:
+            self.logger.error('IO error when uploading "%s": %s.', self.local_path, e)
+        except errors.OneDriveError as e:
+            self.logger.error('API error when uploading "%s": %s.', self.local_path, e)
 
 
 class UpdateMetadataTask(UpTaskBase):
