@@ -77,7 +77,7 @@ class MergeDirTask(TaskBase):
             if ent_lower in ent_count:
                 ent_count[ent_lower] += 1
                 try:
-                    ent = filename + ' (case conflict ' + str(ent_count[ent_lower]) + ')' + ext
+                    ent = filename + ' ' + str(ent_count[ent_lower]) + ' (case conflict)' + ext
                     os.rename(ent_path, self.local_path + '/' + ent)
                     ent_count[ent.lower()] = 0
                 except (IOError, OSError) as e:
