@@ -27,3 +27,13 @@ def stat_file(filepath):
     :rtype: (int, int)
     """
     return os.path.getsize(filepath), os.path.getmtime(filepath)
+
+
+def unpack_first_item(q):
+    """
+    :param dict[str, onedrived.api.items.OneDriveItem] q: Item dictionary returned by items_db.
+    :return:
+    """
+    key, item = q.popitem()
+    q[key] = item
+    return key, item

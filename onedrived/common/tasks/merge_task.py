@@ -12,17 +12,8 @@ from onedrived.common.tasks.down_task import DownloadFileTask
 from onedrived.common.tasks.up_task import UpdateMetadataTask
 from onedrived.common.tasks.up_task import UploadFileTask
 from onedrived.common.tasks.utils import append_hostname, stat_file
+from onedrived.common.tasks.utils import unpack_first_item as _unpack_first_item
 from onedrived.store.items_db import ItemRecordStatuses
-
-
-def _unpack_first_item(q):
-    """
-    :param dict[str, onedrived.api.items.OneDriveItem] q: Item dictionary returned by items_db.
-    :return:
-    """
-    key, item = q.popitem()
-    q[key] = item
-    return key, item
 
 
 def _have_equal_hash(item_local_path, item):
