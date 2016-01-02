@@ -135,12 +135,13 @@ class TestAsyncCopySession(unittest.TestCase):
             if self.data['percentageComplete'] == 100:
                 self.data['status'] = options.AsyncOperationStatuses.COMPLETED
                 context.status_code = requests.codes.see_other
+                context.headers['location'] = 'https://bar'
             else:
                 self.data['status'] = options.AsyncOperationStatuses.IN_PROGRESS
                 context.status_code = requests.codes.accepted
             return self.data
 
-        mock_request.get('https://foo', json=callback, headers={'location': 'https://bar'})
+        mock_request.get('https://foo', json=callback)
         mock_request.get('https://bar', json=get_data('image_item.json'))
         expects = [(50, options.AsyncOperationStatuses.IN_PROGRESS),
                    (100, options.AsyncOperationStatuses.COMPLETED)]

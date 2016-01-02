@@ -159,22 +159,28 @@ class AsyncCopySession:
     ACCEPTABLE_STATUS_CODES = {200, 202, 303}
 
     def __init__(self, drive, headers):
+        """
+        :param onedrived.api.drives.DriveObject drive:
+        :param dict[str, str] headers:
+        :return:
+        """
         self.drive = drive
         self.url = headers['Location']
         self._status = options.AsyncOperationStatuses.NOT_STARTED
 
     # noinspection PyAttributeOutsideInit
     def update_status(self):
-        request = self.drive.root.account.session.get(self.url, ok_status_code=self.ACCEPTABLE_STATUS_CODES)
+        session = self.drive.root.account.session
+        request = session.get(self.url, ok_status_code=self.ACCEPTABLE_STATUS_CODES)
+        data = request.json()
         if request.status_code == 202:
-            data = request.json()
             self._operation = data['operation']
             self._percentage_complete = data['percentageComplete']
             self._status = data['status']
-        elif request.status_code == 200:
+        else:
             self._percentage_complete = 100
             self._status = options.AsyncOperationStatuses.COMPLETED
-            self._item = self.drive.build_item(request.json())
+            self._item = self.drive.build_item(data)
 
     @property
     def operation(self):

@@ -390,7 +390,8 @@ class DriveObject:
         if new_name is not None:
             data['name'] = new_name
         headers = {'Prefer': 'respond-async'}
-        request = self.root.account.session.post(uri, json=data, headers=headers)
+        request = self.root.account.session.post(uri, json=data, headers=headers,
+                                                 ok_status_code=requests.codes.accepted)
         return resources.AsyncCopySession(self, request.headers)
 
     def get_thumbnail(self):

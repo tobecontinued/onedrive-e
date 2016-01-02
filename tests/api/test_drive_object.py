@@ -246,7 +246,7 @@ class TestDriveObject(unittest.TestCase):
                 self.assertEqual(new_name, body['name'])
                 self.assertDictEqual(new_parent.data, body['parentReference'])
                 # Set response.
-                context.status_code = codes.ok
+                context.status_code = codes.accepted
                 context.headers['Location'] = 'https://foo.bar/monitor'
                 return None
 
