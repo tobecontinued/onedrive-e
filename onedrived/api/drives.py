@@ -89,7 +89,7 @@ class DriveObject:
         """
         :param onedrived.api.drives.OneDriveRoot root: The parent root object.
         :param dict[str, str | int | dict] data: The deserialized Drive dictionary.
-        :param onedrived.api.common.drive_config.DriveConfig config: Drive configuration.
+        :param onedrived.common.drive_config.DriveConfig config: Drive configuration.
         """
         self._data = data
         self.config = config

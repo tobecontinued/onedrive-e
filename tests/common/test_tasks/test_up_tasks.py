@@ -5,6 +5,7 @@ import unittest
 from onedrived.api.errors import OneDriveError
 from onedrived.api.items import OneDriveItem
 from onedrived.common.dateparser import timestamp_to_datetime
+from onedrived.common.tasks.up_task import CreateDirTask
 from onedrived.common.tasks.up_task import UpdateMetadataTask
 from onedrived.common.tasks.up_task import UploadFileTask
 from tests import get_data, mock
@@ -16,7 +17,31 @@ class TestUpTaskBase(unittest.TestCase):
         self.data = get_data('image_item.json')
         self.parent_task = get_sample_task_base()
         self.item = OneDriveItem(drive=self.parent_task.drive, data=self.data)
-        self.parent_task.drive.update_item = mock.MagicMock(return_value=self.item)
+        self.parent_task.drive.update_item = mock.Mock(return_value=self.item)
+
+
+class TestCreateDirTask(unittest.TestCase):
+    def setUp(self):
+        self.data = get_data('folder_item.json')
+        parent_task = get_sample_task_base()
+        self.task = CreateDirTask(parent_task, '/', self.data['name'])
+        self.mock_call = mock.Mock(return_value=OneDriveItem(drive=self.task.drive, data=self.data))
+        self.task.drive.create_dir = self.mock_call
+
+    def test_handle(self):
+        os.path.isdir = lambda p: True
+        self.task.handle()
+        self.mock_call.assert_called_once_with(name=self.data['name'], parent_path=self.data['parentReference']['path'])
+        self.assertEqual(1, len(self.task.items_store.get_items_by_id(item_id=self.data['id'])))
+
+    def test_handle_OSError(self):
+        os.path.isdir = mock.Mock(side_effect=OSError())
+        self.task.handle()
+
+    def test_handle_APIError(self):
+        os.path.isdir = lambda p: True
+        self.task.drive.create_dir = mock.Mock(side_effect=OneDriveError(get_data('error_type1.json')))
+        self.task.handle()
 
 
 class TestUploadFileTask(TestUpTaskBase):

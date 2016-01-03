@@ -19,6 +19,24 @@ class UpTaskBase(TaskBase):
         raise NotImplementedError()
 
 
+class CreateDirTask(UpTaskBase):
+    def __init__(self, parent_task, rel_parent_path, item_name, conflict_behavior=NameConflictBehavior.FAIL):
+        super().__init__(parent_task, rel_parent_path, item_name, conflict_behavior)
+        self.should_sync_parent = False
+
+    def handle(self):
+        try:
+            if os.path.isdir(self.local_path):
+                item = self.drive.create_dir(name=self.item_name, parent_path=self.remote_parent_path)
+                self.items_store.update_item(item, ItemRecordStatuses.OK)
+                self.logger.info('Created remote mapping for "%s".', self.local_path)
+        except (IOError, OSError) as e:
+            self.logger.error('IO error creating remote dir for "%s": %s.', self.local_path, e)
+        except errors.OneDriveError as e:
+            self.logger.error('API error creating remote dir for "%s": %s.', self.local_path, e)
+            self.should_sync_parent = True
+
+
 class UploadFileTask(UpTaskBase):
     def __init__(self, parent_task, rel_parent_path, item_name, conflict_behavior=NameConflictBehavior.REPLACE):
         super().__init__(parent_task, rel_parent_path, item_name, conflict_behavior)
