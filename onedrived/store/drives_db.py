@@ -48,6 +48,9 @@ class DriveStorage:
         return self._drive_roots[key]
 
     def get_all_drives(self):
+        """
+        :rtype: dict[(str, str, str), onedrived.api.drives.DriveObject]
+        """
         self._conn.commit()
         q = self._cursor.execute('SELECT drive_id, account_id, account_type, drive_dump FROM drives')
         for row in q.fetchall():
