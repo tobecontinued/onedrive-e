@@ -100,7 +100,7 @@ class OneDriveItem:
         """
         :rtype: str
         """
-        return self._data['cTag'] if 'eTag' in self._data else None
+        return self._data['cTag'] if 'cTag' in self._data else None
 
     @property
     def created_by(self):
