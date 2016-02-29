@@ -10,11 +10,12 @@ python:
 cache: pip
 sudo: false
 
-# addons:
-#  apt:
-#    packages:
-#    - python3-dev
-#    - gcc
+addons:
+  apt:
+    packages:
+      - inotify-tools
+#     - python3-dev
+#     - gcc
 
 install:
   - pip install -U pip

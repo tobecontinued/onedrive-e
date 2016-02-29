@@ -34,6 +34,10 @@ class ItemStorageManager:
         self.item_storages = {}
 
     def get_item_storage(self, drive):
+        """
+        :param onedrived.api.drives.DriveObject drive:
+        :return onedrived.store.items_db.ItemStorage: Item manager for the given drive.
+        """
         if drive not in self.item_storages:
             if self.item_storage_dir == ':memory:':
                 db_path = ':memory:'
@@ -69,7 +73,7 @@ class ItemStorage:
         self._cursor.close()
         self._conn.close()
 
-    def _local_path_to_remote_path(self, path):
+    def local_path_to_remote_path(self, path):
         return path.replace(self.drive.config.local_root, self.drive.drive_path + '/root:', 1)
 
     def get_items_by_id(self, item_id=None, parent_path=None, item_name=None, local_parent_path=None):
@@ -82,7 +86,7 @@ class ItemStorage:
         :return dict[str, onedrived.store.items_db.ItemRecord]: All qualified records index by item ID.
         """
         if local_parent_path is not None:
-            parent_path = self._local_path_to_remote_path(local_parent_path)
+            parent_path = self.local_path_to_remote_path(local_parent_path)
         args = {'item_id': item_id, 'parent_path': parent_path, 'item_name': item_name}
         return self.get_items(args)
 
@@ -147,7 +151,7 @@ class ItemStorage:
         parent_ref = item.parent_reference
         try:
             parent_path = parent_ref.path
-        except:
+        except Exception:
             pass
         created_time_str = datetime_to_str(item.created_time)
         modified_time_str = datetime_to_str(item.modified_time)
@@ -171,7 +175,7 @@ class ItemStorage:
         :param True | False is_folder: True to indicate that the item is a folder (delete all children).
         """
         if local_parent_path is not None:
-            parent_path = self._local_path_to_remote_path(local_parent_path)
+            parent_path = self.local_path_to_remote_path(local_parent_path)
         where, values = self._get_where_clause({'item_id': item_id, 'parent_path': parent_path, 'item_name': item_name})
         self.lock.acquire_write()
         if is_folder:
@@ -198,7 +202,7 @@ class ItemStorage:
         :param str local_parent_path: Path relative to drive's local root. If at root, use ''.
         """
         if local_parent_path is not None:
-            parent_path = self._local_path_to_remote_path(local_parent_path)
+            parent_path = self.local_path_to_remote_path(local_parent_path)
         where, values = self._get_where_clause({'item_id': item_id, 'parent_path': parent_path, 'item_name': item_name})
         values = (status,) + values
         self.lock.acquire_write()

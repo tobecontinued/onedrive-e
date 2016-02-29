@@ -11,6 +11,8 @@ class TaskBase:
         Initialize basic properties from the task from the parent task.
         :param TaskBase | None parent_task: The parent task. None for root task.
         """
+        self._hold = False
+        self._item = None
         if parent_task is not None:
             self.drive = parent_task.drive
             self.items_store = parent_task.items_store
@@ -109,6 +111,21 @@ class TaskBase:
     @item_obj.setter
     def item_obj(self, n):
         self._item = n
+
+    @property
+    def should_hold(self):
+        """
+        :rtype: True | False
+        """
+        return self._hold
+
+    @should_hold.setter
+    def should_hold(self, v):
+        """
+        If set True, this task will hold the path it works on. It's then the task's responsibility to unhold the path.
+        :param True | False v:
+        """
+        self._hold = v
 
     def handle(self):
         raise NotImplementedError('Subclass should override this stub.')

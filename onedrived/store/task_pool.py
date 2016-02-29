@@ -20,10 +20,13 @@ class TaskPool:
 
     def add_task(self, task):
         """
-        Add a task to internal storage.
+        Add a task to internal storage. It will not add if there is already a task on the path.
         :param onedrived.common.tasks.TaskBase task: The task to add.
         """
         self._lock.acquire()
+        if task.local_path in self.tasks_by_path:
+            self._lock.release()
+            return
         self.queued_tasks.append(task)
         self.tasks_by_path[task.local_path] = task
         self._lock.release()
@@ -46,22 +49,23 @@ class TaskPool:
                         ret = t
                         self.queued_tasks.remove(t)
                         break
-        if ret is not None:
+        if ret is not None and not ret.should_hold:
             del self.tasks_by_path[ret.local_path]
         self._lock.release()
         return ret
 
     def has_pending_task(self, local_path):
-        # FIXME: this function should have been atomic with any subsequent add / pop call.
-        self._lock.acquire()
-        ret = local_path in self.tasks_by_path
-        self._lock.release()
-        return ret
+        with self._lock:
+            return local_path in self.tasks_by_path
+
+    def clear_hold(self, task):
+        if task.local_path in self.tasks_by_path and self.tasks_by_path[task.local_path] is task:
+            with self._lock:
+                del self.tasks_by_path[task.local_path]
 
     def remove_children_tasks(self, local_parent_path):
-        self._lock.acquire()
-        for t in self.queued_tasks[:]:
-            if t.local_path.startswith(local_parent_path):
-                self.queued_tasks.remove(t)
-                del self.tasks_by_path[t.local_path]
-        self._lock.release()
+        with self._lock:
+            for t in self.queued_tasks[:]:
+                if t.local_path.startswith(local_parent_path):
+                    self.queued_tasks.remove(t)
+                    del self.tasks_by_path[t.local_path]

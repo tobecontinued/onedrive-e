@@ -40,6 +40,7 @@ class CreateDirTask(UpTaskBase):
 class UploadFileTask(UpTaskBase):
     def __init__(self, parent_task, rel_parent_path, item_name, conflict_behavior=NameConflictBehavior.REPLACE):
         super().__init__(parent_task, rel_parent_path, item_name, conflict_behavior)
+        self.should_hold = True
 
     def handle(self):
         try:
@@ -57,6 +58,7 @@ class UploadFileTask(UpTaskBase):
             self.logger.error('IO error when uploading "%s": %s.', self.local_path, e)
         except errors.OneDriveError as e:
             self.logger.error('API error when uploading "%s": %s.', self.local_path, e)
+        self.task_pool.clear_hold(self)
 
 
 class UpdateMetadataTask(UpTaskBase):
