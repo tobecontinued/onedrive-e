@@ -9,7 +9,10 @@ def datetime_to_str(d):
     :param datetime.datetime d:
     :return str:
     """
-    return d.isoformat().replace('+00:00', 'Z', 1)
+    datetime_str = d.isoformat()
+    if '+' in datetime_str:
+        datetime_str = datetime_str[: datetime_str.index('+')]
+    return datetime_str + 'Z'
 
 
 def str_to_datetime(s):
