@@ -131,6 +131,9 @@ class MergeDirTask(TaskBase):
                     self.items_store.update_item(remote_item, ItemRecordStatuses.OK)
                 else:
                     self.logger.debug('Directory "%s" has intact record.', item_local_path)
+                # add a MergeDirTask for the dir item
+                self.logger.info('Add a MergeDirTask for girectory "%s"', item_local_path)
+                self._create_merge_dir_task(remote_item.name, remote_item)
             else:
                 # Both sides are files. Examine file attributes.
                 file_size, file_mtime = stat_file(item_local_path)
