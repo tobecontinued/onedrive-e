@@ -1,8 +1,10 @@
 # onedrive-d
 
-__The previous version has been moved to https://github.com/xybu/onedrive-d-old.__
+__Since the origin author has not updated his repository for more than 5 months, I decide to modify the code in my dev branch.__
 
-__This repository is still under active development and the program is not yet usable.__
+__You can try it, and give me feedback.__
+
+__I will also try to pull requests to origin repository.__
 
 <a href="https://travis-ci.org/xybu/onedrive-d" target="_blank">
     ![Travis CI](https://img.shields.io/travis/xybu/onedrive-d.svg "Travis CI")
@@ -93,5 +95,3 @@ $ sudo pip3 uninstall onedrived
 Please beware that the program comes with absolutely NO WARRANTY, and resources for tech support are extremely limited.
 
 To report a bug or ask a question, create an issue on the repository.
-
-You can also contact @xybu by messages or email.
