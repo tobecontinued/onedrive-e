@@ -244,16 +244,20 @@ class MergeDirTask(TaskBase):
         if len(q) > 0:
             # The item was on the server before, but now seems gone.
             item_id, item = _unpack_first_item(q)
-            if item.is_folder and is_dir:
-                # Type matched. Delete local entry.
-                self._send_path_to_trash(local_item_name, p)
-            else:
+            item_is_folder = item.crc32_hash == None
+            if item.is_folder != is_dir:
                 # The record is obsolete. Upload local entry.
+                self.logger.info('The database record for %s is obsolete. Upload local entry "%s".', local_item_name, p)
                 self.items_store.delete_item(item_name=local_item_name, parent_path=self.remote_path)
                 self._create_upload_task(local_item_name, is_dir)
+            else:
+                # Type matched. Delete local entry.
+                self.logger.info('The entry has been removed in remote. Delete the local one "%s".', p)
+                self._send_path_to_trash(local_item_name, p)
         else:
             # The item has no record before. Probably new so upload it.
             # TODO: This can be made a little smarter by examining hash.
+            self.logger.info('The item %s has no database record. Upload local entry "%s".', local_item_name, p)
             self._create_upload_task(local_item_name, is_dir)
 
     def _send_path_to_trash(self, local_item_name, local_path):

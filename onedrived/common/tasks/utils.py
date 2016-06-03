@@ -31,7 +31,7 @@ def stat_file(filepath):
 
 def unpack_first_item(q):
     """
-    :param dict[str, onedrived.api.items.OneDriveItem] q: Item dictionary returned by items_db.
+    :param dict[str, onedrived.store.items_db.ItemRecord] q: Item dictionary returned by items_db.
     :return:
     """
     key, item = q.popitem()
