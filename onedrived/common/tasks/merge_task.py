@@ -242,7 +242,7 @@ class MergeDirTask(TaskBase):
             # The item was on the server before, but now seems gone.
             item_id, item = _unpack_first_item(q)
             item_is_folder = item.crc32_hash == None
-            if item.is_folder != is_dir:
+            if item_is_folder != is_dir:
                 # The record is obsolete. Upload local entry.
                 self.logger.info('The database record for %s is obsolete. Upload local entry "%s".', local_item_name, p)
                 self.items_store.delete_item(item_name=local_item_name, parent_path=self.remote_path)
