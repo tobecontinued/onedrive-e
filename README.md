@@ -4,7 +4,8 @@ __Since the origin author has not updated his repository for more than 5 months,
 
 __You can try it, and give me feedback.__
 
-__I will also try to pull requests to origin repository.__
+__~~I will also try to pull requests to origin repository~~.__
+__(origin repository was deleted)__
 
 <a href="https://travis-ci.org/xybu/onedrive-d" target="_blank">
     ![Travis CI](https://img.shields.io/travis/xybu/onedrive-d.svg "Travis CI")
