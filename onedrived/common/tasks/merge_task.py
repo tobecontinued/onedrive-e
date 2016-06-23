@@ -154,8 +154,8 @@ class MergeDirTask(TaskBase):
                 else:
                     if has_record:
                         item_id, item_record = _unpack_first_item(q)
-                        if item_id == remote_item.id and item_record.c_tag == remote_item.c_tag \
-                                or item_record.e_tag == remote_item.e_tag:
+                        if item_id == remote_item.id and (item_record.c_tag == remote_item.c_tag \
+                                or item_record.e_tag == remote_item.e_tag):
                             # The remote item did not change since last update, but LOCAL file changed since then.
                             self.logger.info('File "%s" changed locally since last sync. Upload.', item_local_path)
                             self._create_upload_task(local_item_name=remote_item.name, is_dir=False)
