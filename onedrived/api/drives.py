@@ -280,7 +280,8 @@ class DriveObject:
         uri = self.get_item_uri(parent_id, parent_path) + '/' + filename + ':/content'
         if conflict_behavior != options.NameConflictBehavior.REPLACE:
             uri += '?@name.conflictBehavior=' + conflict_behavior
-        request = self.root.account.session.put(uri, data=data, ok_status_code=requests.codes.created)
+        request = self.root.account.session.put(uri, data=data, ok_status_code=(requests.codes.created,
+                                                                                requests.codes.ok))
         return items.OneDriveItem(self, request.json())
 
     def download_file(self, file, size, item_id=None, item_path=None):
