@@ -128,11 +128,11 @@ class MergeDirTask(TaskBase):
                     has_record = item_id == remote_item.id
                 if not has_record:
                     self.logger.info('Fix database record for directory "%s".', item_local_path)
-                    self.items_store.update_item(remote_item, ItemRecordStatuses.OK)
+                    self.items_store.update_item(remote_item, ItemRecordStatuses.OK, self.local_path)
                 else:
                     self.logger.debug('Directory "%s" has intact record.', item_local_path)
                 # add a MergeDirTask for the dir item
-                self.logger.info('Add a MergeDirTask for girectory "%s"', item_local_path)
+                self.logger.info('Add a MergeDirTask for directory "%s"', item_local_path)
                 self._create_merge_dir_task(remote_item.name, remote_item)
             else:
                 # Both sides are files. Examine file attributes.
@@ -148,7 +148,7 @@ class MergeDirTask(TaskBase):
                     if need_update:
                         self.logger.info('Fix database record for file "%s" based on file size and mtime.',
                                          item_local_path)
-                        self.items_store.update_item(remote_item, ItemRecordStatuses.OK)
+                        self.items_store.update_item(remote_item, ItemRecordStatuses.OK, self.local_path)
                     else:
                         self.logger.debug('File "%s" seems fine.', item_local_path)
                 else:
@@ -201,7 +201,7 @@ class MergeDirTask(TaskBase):
             self.logger.info('Updating timestamp for file "%s" to "%s".', item_local_path,
                              str(item.modified_time))
             os.utime(item_local_path, (t, t))
-            self.items_store.update_item(item, ItemRecordStatuses.OK)
+            self.items_store.update_item(item, ItemRecordStatuses.OK, self.local_path)
         except (IOError, OSError) as e:
             self.logger.error('IO error when updating timestamp for file "%s": %s', item_local_path, e)
             if not self.task_pool.has_pending_task(item_local_path):
@@ -224,7 +224,7 @@ class MergeDirTask(TaskBase):
             try:
                 self.logger.info('Creating directory "%s".', item_local_path)
                 mkdir(item_local_path)
-                self.items_store.update_item(item, ItemRecordStatuses.OK)
+                self.items_store.update_item(item, ItemRecordStatuses.OK, self.local_path)
                 self._create_merge_dir_task(item.name, item)
             except (OSError, IOError) as e:
                 self.logger.error('Error creating directory "%s": %s.', item_local_path, e)
@@ -284,7 +284,7 @@ class MergeDirTask(TaskBase):
     def _create_remote_dir(self, name):
         try:
             new_item = self.drive.create_dir(name=name, parent_path=self.remote_path)
-            self.items_store.update_item(new_item, ItemRecordStatuses.OK)
+            self.items_store.update_item(new_item, ItemRecordStatuses.OK, self.local_path)
             self.logger.info('Created remote directory "%s".', self.local_path)
             self._create_merge_dir_task(name, new_item)
         except errors.OneDriveError as e:

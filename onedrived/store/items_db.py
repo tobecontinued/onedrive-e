@@ -3,6 +3,7 @@ import sqlite3
 
 from onedrived import get_content
 from onedrived.common import logger_factory
+from onedrived.common import hasher 
 from onedrived.common.dateparser import datetime_to_str, str_to_datetime
 from onedrived.vendor.rwlock import ReadWriteLock
 
@@ -146,13 +147,20 @@ class ItemStorage:
             sha1_hash = None
         else:
             file_facet = item.file_props
-            crc32_hash = file_facet.hashes.crc32
-            sha1_hash = file_facet.hashes.sha1
+            #it seems some json response objects don't hava hash metadata
+            if file_facet.hashes is not None:
+                crc32_hash = file_facet.hashes.crc32
+                sha1_hash = file_facet.hashes.sha1
+            else:
+                item_local_path = parent_path + "/" + item.name
+                crc32_hash = hasher.crc32_value(item_local_path)
+                sha1_hash = hasher.hash_value(item_local_path)
         parent_ref = item.parent_reference
         try:
             parent_path = parent_ref.path
         except Exception:
             pass
+
         created_time_str = datetime_to_str(item.created_time)
         modified_time_str = datetime_to_str(item.modified_time)
         self.lock.acquire_write()
