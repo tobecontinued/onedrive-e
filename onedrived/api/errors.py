@@ -12,7 +12,7 @@ class OneDriveError(Exception):
             elif self.errno == 'server_internal_error':
                 self.__class__ = OneDriveServerInternalError
         else:
-            raise ValueError('Unknown OneDrive error format - ' + str(error_with_description))
+            raise OneDriveInvaildRepsonseFormat()
 
     def __str__(self):
         return self.strerror + ' (' + self.errno + ')'
@@ -25,6 +25,10 @@ class OneDriveTokenExpiredError(OneDriveError):
 class OneDriveServerInternalError(OneDriveError):
     pass
 
+class OneDriveInvaildRepsonseFormat(OneDriveError):
+    def __init__(self):
+        error_with_description = {'error' : 'Unknown Error', 'error_description' : 'Invaild Repsonse Format'}
+        super().__init__(error_with_description)
 
 class OneDriveRecoverableError(Exception):
     def __init__(self, retry_after_seconds):

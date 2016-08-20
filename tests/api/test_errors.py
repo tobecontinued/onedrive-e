@@ -17,8 +17,8 @@ class TestOneDriveError(unittest.TestCase):
         self.assertEqual(data['error'], error.errno)
         self.assertEqual(data['error_description'], error.strerror)
 
-    def test_unknown_format(self):
-        self.assertRaises(ValueError, errors.OneDriveError, {})
+    def test_invaild_format(self):
+        self.assertRaises(errors.OneDriveInvaildRepsonseFormat, errors.OneDriveError, {})
 
 
 class TestOneDriveTokenErrorConversion(unittest.TestCase):
