@@ -93,7 +93,11 @@ class TaskBase:
 
     @property
     def remote_path(self):
-        return self.remote_parent_path + '/' + self.item_name
+        if self.item_name == '':
+        #root dir is '/drive/root:' without '/' in the tail
+            return self.remote_parent_path        
+        else:
+            return self.remote_parent_path + '/' + self.item_name
 
     @property
     def local_path(self):

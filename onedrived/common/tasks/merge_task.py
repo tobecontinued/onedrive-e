@@ -97,7 +97,7 @@ class MergeDirTask(TaskBase):
         :param [str] all_local_items: All remaining untouched local items.
         """
         item_local_path = self.local_path + '/' + remote_item.name
-        q = self.items_store.get_items_by_id(parent_path=self.remote_parent_path, item_name=remote_item.name)
+        q = self.items_store.get_items_by_id(parent_path=self.remote_path, item_name=remote_item.name)
         exists = os.path.exists(item_local_path)
         has_record = len(q) > 0
         if not has_record and not exists:
