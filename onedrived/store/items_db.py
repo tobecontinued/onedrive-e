@@ -1,5 +1,6 @@
 import atexit
 import sqlite3
+from urllib import parse as url_parse
 
 from onedrived import get_content
 from onedrived.common import logger_factory
@@ -157,7 +158,9 @@ class ItemStorage:
                 sha1_hash = hasher.hash_value(item_local_path)
         parent_ref = item.parent_reference
         try:
-            parent_path = parent_ref.path
+            # the remote url is encoding with ASCII, we should convert to unicode
+            # note: item needs encoded url to download file content
+            parent_path = url_parse.unquote(parent_ref.path)
         except Exception:
             pass
 
