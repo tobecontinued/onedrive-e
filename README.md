@@ -1,32 +1,16 @@
-# onedrive-d
-
-__Since the origin author has not updated his repository for more than 5 months, I decide to modify the code in my dev branch.__
-
-__You can try it, and give me feedback.__
-
-__~~I will also try to pull requests to origin repository~~.__
-__(origin repository was deleted)__
-
-<a href="https://travis-ci.org/xybu/onedrive-d" target="_blank">
-    ![Travis CI](https://img.shields.io/travis/xybu/onedrive-d.svg "Travis CI")
-</a>
-[![License](https://img.shields.io/github/license/xybu/onedrive-d.svg "GNU GPL v3.0")](LICENSE)
-<a href="https://coveralls.io/github/xybu/onedrive-d" target="_blank">
-    ![Coverage Status](https://coveralls.io/repos/xybu/onedrive-d/badge.svg?service=github "Coveralls Status")
-</a>
-<a href="https://codeclimate.com/github/xybu/onedrive-d" target="_blank">
-    ![Code Climate](https://img.shields.io/codeclimate/github/xybu/onedrive-d.svg "Code Climate GPA")
-</a>
+# onedrive-e
 
 ## Overview
 
-`onedrive-d` is a Microsoft OneDrive client on Linux platforms. It allows a Linux user to sync with one or more
+`onedrive-e` is a Microsoft OneDrive client on Linux platforms. It allows a Linux user to sync with one or more
 OneDrive Personal account by synchronizing each remote OneDrive repository with a designated local directory. __Note
-that OneDrive for Business is not supported (see issue #1).__
+that OneDrive for Business is not supported. __
+
+This project is forked from `onedrive-d` that dropped by origin author.
 
 ## Pre-requisites
 
-`onedrive-d` is written in Python 3 and does ___NOT___ run under Python 2.x. The package is tested for the following
+`onedrive-e` is written in Python 3 and does ___NOT___ run under Python 2.x. The package is tested for the following
 Python versions: `3.2`, `3.3`, `3.4`, `3.5-dev`.
 
 To check if you have the correct Python interpreter, run
@@ -34,10 +18,6 @@ To check if you have the correct Python interpreter, run
 ```bash
 $ python3 --version
 ```
-
-~~Because the CLI runs as a Linux daemon and some dependency packages are written in CPython, some system-level packages
-are required: `python3-dev` (on Fedora / SUSE it is called `python3-devel`). If you do not have `gcc` installed, for
-example, on Debian 8, you may also need to install the package `gcc`.~~
 
 A low-level package required is `inotify-tools` (for most Linux distributes).
 
@@ -62,22 +42,6 @@ $ python3 setup.py build
 $ sudo python3 setup.py install
 ```
 
-Note: GUI will be implemented in a separate package as an `onedrive-d` extension.
-
-## Configure
-
-### Authenticate OneDrive accounts
-
-TBA.
-
-### Link local directories
-
-TBA.
-
-### Setup preferemces
-
-TBA.
-
 ### Use ignore list
 
 [Refer to this document.](doc/ignore_list.md)
@@ -95,4 +59,8 @@ $ sudo pip3 uninstall onedrived
 
 Please beware that the program comes with absolutely NO WARRANTY, and resources for tech support are extremely limited.
 
-To report a bug or ask a question, create an issue on the repository.
+To report a bug or ask a question, create an issue on the repository. Code Contribution is also wellcome. 
+
+## Roadmap
+
+Currently, main work is to make the application stable and new feature is limited consider.
