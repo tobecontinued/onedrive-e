@@ -143,6 +143,15 @@ class ItemStorage:
         :param str status: One value of enum ItemRecordStatuses.
         :param str parent_path: If item does not have a parent reference, fallback to this path.
         """
+
+        parent_ref = item.parent_reference
+        try:
+            # the remote url is encoding with ASCII, we should convert to unicode
+            # note: item needs encoded url to download file content
+            parent_path = url_parse.unquote(parent_ref.path)
+        except Exception:
+            pass
+
         if item.is_folder:
             crc32_hash = None
             sha1_hash = None
@@ -156,14 +165,7 @@ class ItemStorage:
                 item_local_path = parent_path + "/" + item.name
                 crc32_hash = hasher.crc32_value(item_local_path)
                 sha1_hash = hasher.hash_value(item_local_path)
-        parent_ref = item.parent_reference
-        try:
-            # the remote url is encoding with ASCII, we should convert to unicode
-            # note: item needs encoded url to download file content
-            parent_path = url_parse.unquote(parent_ref.path)
-        except Exception:
-            pass
-
+        
         created_time_str = datetime_to_str(item.created_time)
         modified_time_str = datetime_to_str(item.modified_time)
         self.lock.acquire_write()

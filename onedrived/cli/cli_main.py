@@ -25,7 +25,7 @@ network_monitor = netman.NetworkMonitor()
 def parse_args():
     argparser = argparse.ArgumentParser('onedrived', description='CLI daemon of onedrive-d.')
     argparser.add_argument('--log-level', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                           default='DEBUG', help='Set the minimum logging level.')
+                           default='ERROR', help='Set the minimum logging level.')
     argparser.add_argument('--log-file', default=None, required=False, help='Store program logs in the specified file.')
     return argparser.parse_args()
 
