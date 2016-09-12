@@ -1,5 +1,6 @@
 import os
 import threading
+import traceback
 from time import sleep
 
 from onedrived.api import errors
@@ -30,7 +31,7 @@ class AsyncCopyItemTask(TaskBase):
                                                 new_name=self.item_name)
             self.task_pool.add_task(AsyncCopyMonitorTask(self, async_status))
         except errors.OneDriveError as e:
-            self.logger.error('API error copying item "%s" to "%s": %s.', self._from_item.id, self.remote_path, e)
+            self.logger.error('API error copying item "%s" to "%s":\n%s.', self._from_item.id, self.remote_path, traceback.format_exc())
 
 
 class AsyncCopyMonitorTask(TaskBase):
@@ -75,4 +76,4 @@ class AsyncCopyMonitorTask(TaskBase):
                 th.daemon = True
                 th.start()
         except errors.OneDriveError as e:
-            self.logger.error('API error when polling copy status for file "%s": %s.', self.local_path, e)
+            self.logger.error('API error when polling copy status for file "%s":\n%s.', self.local_path, traceback.format_exc())

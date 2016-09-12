@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from onedrived import OS_USER_ID, OS_USER_GID
 from onedrived.api import errors
@@ -34,6 +35,6 @@ class DownloadFileTask(TaskBase):
             os.chown(self.local_path, OS_USER_ID, OS_USER_GID)
             self.items_store.update_item(self._item, ItemRecordStatuses.DOWNLOADED)
         except (IOError, OSError) as e:
-            self.logger.error('An IO error occurred when downloading "%s": %s.', self.local_path, e)
+            self.logger.error('An IO error occurred when downloading "%s":\n%s.', self.local_path, traceback.format_exc())
         except errors.OneDriveError as e:
-            self.logger.error('An API error occurred when downloading "%s": %s.', self.local_path, e)
+            self.logger.error('An API error occurred when downloading "%s":\n%s.', self.local_path, traceback.format_exc())

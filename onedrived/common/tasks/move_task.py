@@ -1,3 +1,4 @@
+import traceback
 from onedrived.api import errors
 from onedrived.api import resources
 from onedrived.common.tasks import TaskBase
@@ -24,4 +25,4 @@ class MoveItemTask(TaskBase):
                                           new_parent_reference=new_parent_reference)
             self.items_store.update_item(item, ItemRecordStatuses.OK)
         except errors.OneDriveError as e:
-            self.logger.error('API error moving "%s" to "%s": %s.', self._old_remote_item_path, self.remote_path, e)
+            self.logger.error('API error moving "%s" to "%s":\n%s.', self._old_remote_item_path, self.remote_path, traceback.format_exc())

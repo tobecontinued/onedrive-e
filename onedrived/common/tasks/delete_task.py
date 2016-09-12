@@ -1,3 +1,5 @@
+import traceback
+
 from onedrived.api import errors
 from onedrived.common.tasks import TaskBase
 
@@ -25,4 +27,4 @@ class DeleteItemTask(TaskBase):
                 # Remove pending tasks of all its children
                 self.task_pool.remove_children_tasks(self.local_path)
         except errors.OneDriveError as e:
-            self.logger.error('An API error occurred when deleting "%s": %s.', self.local_path, e)
+            self.logger.error('An API error occurred when deleting "%s":\n%s.', self.local_path, traceback.format_exc())

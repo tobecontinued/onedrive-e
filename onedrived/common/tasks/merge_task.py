@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from send2trash import send2trash
 
@@ -49,7 +50,7 @@ class MergeDirTask(TaskBase):
             all_local_items = self._list_local_items()
             all_remote_items = self.drive.get_children(item_path=self.remote_path)
         except (IOError, OSError) as e:
-            self.logger.error('Error occurred when synchronizing "%s": %s.', self.local_path, e)
+            self.logger.error('Error occurred when synchronizing "%s":\n%s.', self.local_path, traceback.format_exc())
             return
         while all_remote_items.has_next:
             for remote_item in all_remote_items.get_next():
@@ -81,8 +82,8 @@ class MergeDirTask(TaskBase):
                     os.rename(ent_path, self.local_path + '/' + ent)
                     ent_count[ent.lower()] = 0
                 except (IOError, OSError) as e:
-                    self.logger.error('An error occurred when solving name conflict on "%s": %s.',
-                                      self.local_path + '/' + ent, e)
+                    self.logger.error('An error occurred when solving name conflict on "%s":\n%s.',
+                                      self.local_path + '/' + ent, traceback.format_exc())
                     continue
             else:
                 ent_count[ent_lower] = 0
@@ -193,7 +194,7 @@ class MergeDirTask(TaskBase):
                 self.items_store.delete_item(parent_path=self.remote_path, item_name=remote_item.name)
             self._create_download_task(item_local_path, remote_item)
         except (IOError, OSError) as e:
-            self.logger.error('IO error when renaming renaming "%s": %s.', item_local_path, e)
+            self.logger.error('IO error when renaming renaming "%s":\n%s.', item_local_path, traceback.format_exc())
 
     def _update_attr_when_hash_equal(self, item_local_path, item):
         t = datetime_to_timestamp(item.modified_time)
@@ -227,7 +228,7 @@ class MergeDirTask(TaskBase):
                 self.items_store.update_item(item, ItemRecordStatuses.OK, self.local_path)
                 self._create_merge_dir_task(item.name, item)
             except (OSError, IOError) as e:
-                self.logger.error('Error creating directory "%s": %s.', item_local_path, e)
+                self.logger.error('Error creating directory "%s":\n%s.', item_local_path, traceback.format_exc())
         else:
             if not self.task_pool.has_pending_task(item_local_path):
                 self.logger.info('Will download file "%s".', item_local_path)
@@ -266,7 +267,7 @@ class MergeDirTask(TaskBase):
             self.items_store.delete_item(item_name=local_item_name, parent_path=self.remote_path)
             self.logger.debug('Delete untouched local item "%s" as it seems deleted remotely.', local_path)
         except (IOError, OSError) as e:
-            self.logger.error('An error occurred when deleting untouched local item "%s": %s.', local_path, e)
+            self.logger.error('An error occurred when deleting untouched local item "%s":\n%s.', local_path, traceback.format_exc())
 
     def _create_upload_task(self, local_item_name, is_dir):
         if is_dir:
@@ -288,4 +289,4 @@ class MergeDirTask(TaskBase):
             self.logger.info('Created remote directory "%s".', self.local_path)
             self._create_merge_dir_task(name, new_item)
         except errors.OneDriveError as e:
-            self.logger.error('An API error occurred creating remote dir "%s/%s": %s.', self.rel_path, name, e)
+            self.logger.error('An API error occurred creating remote dir "%s/%s":\n%s.', self.rel_path, name, traceback.format_exc())

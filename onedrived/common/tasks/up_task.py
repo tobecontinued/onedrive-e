@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from onedrived.api import errors
 from onedrived.api import facets
@@ -31,9 +32,9 @@ class CreateDirTask(UpTaskBase):
                 self.items_store.update_item(item, ItemRecordStatuses.OK)
                 self.logger.info('Created remote mapping for "%s".', self.local_path)
         except (IOError, OSError) as e:
-            self.logger.error('IO error creating remote dir for "%s": %s.', self.local_path, e)
+            self.logger.error('IO error creating remote dir for "%s":\n%s.', self.local_path, traceback.format_exc())
         except errors.OneDriveError as e:
-            self.logger.error('API error creating remote dir for "%s": %s.', self.local_path, e)
+            self.logger.error('API error creating remote dir for "%s":\n%s.', self.local_path, traceback.format_exc())
             self.should_sync_parent = True
 
 
@@ -55,9 +56,9 @@ class UploadFileTask(UpTaskBase):
                 self.items_store.update_item(item, ItemRecordStatuses.OK)
                 self.logger.info('Uploaded file "%s".', self.local_path)
         except (IOError, OSError) as e:
-            self.logger.error('IO error when uploading "%s": %s.', self.local_path, e)
+            self.logger.error('IO error when uploading "%s":\n%s.', self.local_path, traceback.format_exc())
         except errors.OneDriveError as e:
-            self.logger.error('API error when uploading "%s": %s.', self.local_path, e)
+            self.logger.error('API error when uploading "%s":\n%s.', self.local_path, traceback.format_exc())
         self.task_pool.clear_hold(self)
 
 
@@ -74,4 +75,4 @@ class UpdateMetadataTask(UpTaskBase):
             new_item = self.drive.update_item(item_path=self.remote_path, new_file_system_info=fs_info)
             self.items_store.update_item(new_item, ItemRecordStatuses.OK)
         except errors.OneDriveError as e:
-            self.logger.error('Error occurred updating server mtime for entry "%s": %s', self.local_path, e)
+            self.logger.error('Error occurred updating server mtime for entry "%s":\n%s', self.local_path, traceback.format_exc())
