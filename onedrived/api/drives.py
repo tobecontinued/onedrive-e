@@ -183,13 +183,11 @@ class DriveObject:
         request = self.root.account.session.get(uri)
         return items.ItemCollection(self, request.json())
 
-    def create_dir(self, name, parent_id=None, parent_path=None,
-                   conflict_behavior=options.NameConflictBehavior.DEFAULT):
+    def create_dir(self, name, parent_id=None, conflict_behavior=options.NameConflictBehavior.DEFAULT):
         """
         Create a new directory under the specified parent directory.
         :param str name: Name of the new directory.
         :param str | None parent_id: (Optional) ID of the parent directory item.
-        :param str | None parent_path: (Optional) Path to the parent directory item.
         :param str conflict_behavior: (Optional) What to do if name exists. One value from options.nameConflictBehavior.
         :rtype: onedrived.api.items.OneDriveItem
         """
@@ -198,7 +196,7 @@ class DriveObject:
             'folder': {},
             '@name.conflictBehavior': conflict_behavior
         }
-        uri = self.get_item_uri(parent_id, parent_path) + '/children'
+        uri = self.get_item_uri(parent_id) + '/children'
         request = self.root.account.session.post(uri, json=data, ok_status_code=requests.codes.created)
         return items.OneDriveItem(self, request.json())
 

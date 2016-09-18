@@ -78,6 +78,9 @@ class ItemStorage:
     def local_path_to_remote_path(self, path):
         return path.replace(self.drive.config.local_root, self.drive.drive_path + '/root:', 1)
 
+    def remote_path_to_local_path(self, path):
+        return path.replace(self.drive.drive_path + '/root:', self.drive.config.local_root,  1)
+
     def get_items_by_id(self, item_id=None, parent_path=None, item_name=None, local_parent_path=None):
         """
         FInd all qualified records from database by ID or path.
@@ -162,7 +165,7 @@ class ItemStorage:
                 crc32_hash = file_facet.hashes.crc32
                 sha1_hash = file_facet.hashes.sha1
             else:
-                item_local_path = parent_path + "/" + item.name
+                item_local_path = self.remote_path_to_local_path(parent_path + "/" + item.name)
                 crc32_hash = hasher.crc32_value(item_local_path)
                 sha1_hash = hasher.hash_value(item_local_path)
         

@@ -284,7 +284,7 @@ class MergeDirTask(TaskBase):
 
     def _create_remote_dir(self, name):
         try:
-            new_item = self.drive.create_dir(name=name, parent_path=self.remote_path)
+            new_item = self.drive.create_dir(name=name, parent_id=self.item_obj.id)
             self.items_store.update_item(new_item, ItemRecordStatuses.OK, self.local_path)
             self.logger.info('Created remote directory "%s".', self.local_path)
             self._create_merge_dir_task(name, new_item)

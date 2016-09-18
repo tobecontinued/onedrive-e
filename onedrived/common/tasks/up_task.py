@@ -28,7 +28,7 @@ class CreateDirTask(UpTaskBase):
     def handle(self):
         try:
             if os.path.isdir(self.local_path):
-                item = self.drive.create_dir(name=self.item_name, parent_path=self.remote_parent_path)
+                item = self.drive.create_dir(name=self.item_name, parent_id=self.item_obj.id)
                 self.items_store.update_item(item, ItemRecordStatuses.OK)
                 self.logger.info('Created remote mapping for "%s".', self.local_path)
         except (IOError, OSError) as e:
