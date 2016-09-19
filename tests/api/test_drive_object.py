@@ -72,7 +72,7 @@ class TestDriveObject(unittest.TestCase):
                                  self.drive.get_item_uri(None, 'foo/bar') + '/view.search?q=try&select=name,size',
                                  {'item_path': 'foo/bar', 'keyword': 'try', 'select': ['name', 'size']})
 
-    def assert_create_dir(self, url, parent_id=None, parent_path=None):
+    def assert_create_dir(self, should_request_url, parent_id=None):
         """
         https://github.com/OneDrive/onedrive-api-docs/blob/master/items/create.md
         """
@@ -87,17 +87,16 @@ class TestDriveObject(unittest.TestCase):
                 context.status_code = codes.created
                 return get_data('new_dir_item.json')
 
-            mock.post(url, json=callback)
-            item = self.drive.create_dir(name=folder_name, parent_path=parent_path, parent_id=parent_id,
-                                         conflict_behavior=conflict_behavior)
+            mock.post(should_request_url, json=callback)
+            item = self.drive.create_dir(name=folder_name, parent_id=parent_id, conflict_behavior=conflict_behavior)
             self.assertIsInstance(item, items.OneDriveItem)
 
     def test_create_dir_in_root(self):
         self.assert_create_dir(self.drive.drive_uri + self.drive.drive_path + '/root/children')
 
     def test_create_subdir(self):
-        self.assert_create_dir(self.drive.drive_uri + self.drive.drive_path + '/root:/bar/children',
-                               parent_path=self.drive.drive_path + '/root:/bar')
+        self.assert_create_dir(self.drive.drive_uri + self.drive.drive_path + '/items/parent_id/children',
+                               parent_id='parent_id')
 
     def assert_delete_item(self, url_part, **kwargs):
         with requests_mock.Mocker() as mock:

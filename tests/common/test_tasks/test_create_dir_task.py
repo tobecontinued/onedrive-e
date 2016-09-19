@@ -13,6 +13,7 @@ class TestCreateDirTask(unittest.TestCase):
         self.data = get_data('folder_item.json')
         parent_task = get_sample_task_base()
         self.task = CreateDirTask(parent_task, '/', self.data['name'])
+        self.task.item_obj =  OneDriveItem(self.task.drive, self.data['parentReference'])
         self.mock_call = mock.Mock(return_value=OneDriveItem(drive=self.task.drive, data=self.data))
         self.task.drive.create_dir = self.mock_call
         self._backup_isdir = os.path.isdir
@@ -23,7 +24,7 @@ class TestCreateDirTask(unittest.TestCase):
     def test_handle(self):
         os.path.isdir = lambda p: True
         self.task.handle()
-        self.mock_call.assert_called_once_with(name=self.data['name'], parent_path=self.data['parentReference']['path'])
+        self.mock_call.assert_called_once_with(name=self.data['name'], parent_id=self.data['parentReference']['id'])
         self.assertEqual(1, len(self.task.items_store.get_items_by_id(item_id=self.data['id'])))
 
     def test_handle_OSError(self):
