@@ -58,7 +58,7 @@ class ManagedRESTClient:
                     try:
                         raise errors.OneDriveError(request.json())
                     except ValueError as e:
-                        raise errors.OneDriveInvaildRepsonseFormat()
+                        raise errors.OneDriveInvaildRepsonseFormat(str(request.headers) + ' ' + request.text)
                 return request
             except requests.ConnectionError:
                 self.net_mon.suspend_caller()
