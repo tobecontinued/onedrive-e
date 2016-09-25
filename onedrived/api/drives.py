@@ -254,7 +254,8 @@ class DriveObject:
             data.seek(f)
             chunk = data.read(t - f + 1)
             headers = {
-                'Content-Range': str(f) + '-' + str(t) + '/' + size_str
+                'Content-Length' : str(t -f + 1),
+                'Content-Range': 'bytes ' +  str(f) + '-' + str(t) + '/' + size_str
             }
             request = self.root.account.session.put(current_session.upload_url, data=chunk, headers=headers,
                                                     ok_status_code=requests.codes.accepted)
