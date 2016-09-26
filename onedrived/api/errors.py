@@ -26,8 +26,14 @@ class OneDriveServerInternalError(OneDriveError):
     pass
 
 class OneDriveInvaildRepsonseFormat(OneDriveError):
-    def __init__(self, error_msg = ''):
-        error_with_description = {'error' : 'Unknown Error:\n' + error_msg, 'error_description' : 'Invaild Repsonse Format'}
+    def __init__(self, bad_request= None):
+        if bad_request is not None :
+            error_msg = str(bad_request.headers) + ' ' + bad_request.text
+            error_with_description = {'error' : error_msg, 
+            'error_description' : 'status code:' + str(bad_request.status_code)}
+        else:
+            error_with_description = {'error' : 'Unknown Error', 
+            'error_description' : 'Invaild Repsonse Format'}
         super().__init__(error_with_description)
 
 class OneDriveRecoverableError(Exception):

@@ -36,7 +36,7 @@ class ManagedRESTClient:
         :param str method: One of {GET, POST, PATCH, PUT, DELETE}.
         :param str url: URL of the HTTP request.
         :param dict[str, str | dict | bytes] params: Params to send to the request call.
-        :param int ok_status_code: Expected status code for HTTP response.
+        :param int,list[int] or tuple(int) ok_status_code: Expected status code for HTTP response.
         :param True | False auto_renew: If True, auto recover the expired token.
         :rtype: requests.Response
         :raise errors.OneDriveError:
@@ -58,7 +58,7 @@ class ManagedRESTClient:
                     try:
                         raise errors.OneDriveError(request.json())
                     except ValueError as e:
-                        raise errors.OneDriveInvaildRepsonseFormat(str(request.headers) + ' ' + request.text)
+                        raise errors.OneDriveInvaildRepsonseFormat(request)
                 return request
             except requests.ConnectionError:
                 self.net_mon.suspend_caller()
