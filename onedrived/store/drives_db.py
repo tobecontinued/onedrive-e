@@ -44,7 +44,7 @@ class DriveStorage:
     def get_drive_root(self, account_id, account_type):
         key = (account_id, account_type)
         if key not in self._drive_roots:
-            self._drive_roots[key] = drives.DriveRoot(self.account_store.get_account(account_id, account_type))
+            self._drive_roots[key] = drives.OneDriveRoot(self.account_store.get_account(account_id, account_type))
         return self._drive_roots[key]
 
     def get_all_drives(self):

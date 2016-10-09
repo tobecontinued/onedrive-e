@@ -16,7 +16,7 @@ from onedrived.common import drive_config
 from onedrived.common import logger_factory
 
 
-class DriveRoot:
+class OneDriveRoot:
     """
     An entry point to get associated drives.
     """
