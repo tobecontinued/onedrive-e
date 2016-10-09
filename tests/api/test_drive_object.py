@@ -201,7 +201,7 @@ class TestDriveObject(unittest.TestCase):
         session_url = 'https://foo/bar/accept_data'
         input = io.BytesIO(b'12345')
         output = io.BytesIO()
-        expected_ranges = ['0-1/5', '2-3/5', '4-4/5']
+        expected_ranges = ['bytes 0-1/5', 'bytes 2-3/5', 'bytes 4-4/5']
         response_dict = {
             'uploadUrl': session_url,
             'expirationDateTime': '2020-01-01T00:00:00.0Z',

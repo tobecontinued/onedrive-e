@@ -22,7 +22,7 @@ class TestDriveStorage(unittest.TestCase):
                 self.personal_account.profile.user_id, self.personal_account.TYPE)
 
     def test_get_drive_root(self):
-        self.assertIsInstance(self.drive_root, drives.DriveRoot)
+        self.assertIsInstance(self.drive_root, drives.OneDriveRoot)
         self.assertIs(self.drive_root.account, self.personal_account)
 
     def test_get_all_drives(self):

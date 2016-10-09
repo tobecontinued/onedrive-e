@@ -55,7 +55,7 @@ class TestDriveRoot(unittest.TestCase):
 
     def test_add_cached_drive_errors(self):
         account = account_factory.get_sample_personal_account()
-        drive_root = drives.DriveRoot(account)
+        drive_root = drives.OneDriveRoot(account)
         self.assertNotEqual('123', account.profile.user_id)
         self.assertRaises(ValueError, drive_root.add_cached_drive,
                           account_id='123', account_type=account.TYPE, drive=None)
