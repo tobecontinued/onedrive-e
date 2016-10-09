@@ -28,7 +28,7 @@ class OneDriveServerInternalError(OneDriveError):
 class OneDriveInvaildRepsonseFormat(OneDriveError):
     def __init__(self, bad_request= None):
         if bad_request is not None :
-            error_msg = str(bad_request.headers) + ' ' + bad_request.text
+            error_msg = 'url:' + bad_request.url + ' ' + str(bad_request.headers) + ' ' + bad_request.text
             error_with_description = {'error' : error_msg, 
             'error_description' : 'status code:' + str(bad_request.status_code)}
         else:
