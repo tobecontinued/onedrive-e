@@ -29,12 +29,14 @@ def get_personal_account(client, code=None, uri=None):
         raise ValueError("Authorization code is not found.")
     params = {
         'client_id': client.client_id,
-        'client_secret': client.client_secret,
+        # Public clients can't send a client secret.
+        #'client_secret': client.client_secret,
         'redirect_uri': client.redirect_uri,
         'grant_type': 'authorization_code',
         'code': code,
     }
-    response = requests.post(client.OAUTH_TOKEN_URI, data=params, proxies=client.proxies)
+    headers = {'content-type':'application/x-www-form-urlencoded'}
+    response = requests.post(client.OAUTH_TOKEN_URI, data=params, headers=headers, proxies=client.proxies)
     if response.status_code != requests.codes.ok:
         raise ValueError('The authentication code is not valid.')
     account = PersonalAccount(client, response.json())
@@ -106,7 +108,7 @@ class PersonalAccount:
     def renew_tokens(self):
         params = {
             'client_id': self.client.client_id,
-            'client_secret': self.client.client_secret,
+        #    'client_secret': self.client.client_secret,
             'redirect_uri': self.client.redirect_uri,
             'refresh_token': self.refresh_token,
             'grant_type': 'refresh_token'

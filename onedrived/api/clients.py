@@ -11,8 +11,8 @@ class PersonalClient:
     OAUTH_TOKEN_URI = 'https://login.live.com/oauth20_token.srf'
     OAUTH_SIGN_OUT_URI = 'https://login.live.com/oauth20_logout.srf'
     API_URI = 'https://api.onedrive.com/v1.0'
-    DEFAULT_CLIENT_ID = '000000004010C916'
-    DEFAULT_CLIENT_SECRET = 'PimIrUibJfsKsMcd0SqwPBwMTV7NDgYi'
+    DEFAULT_CLIENT_ID = 'fc646afa-b525-4bdc-8094-e3318a78cb5d'
+    DEFAULT_CLIENT_SECRET = 'gin6MjuyTEHZxT8aEKFJYtN'
     DEFAULT_REDIRECT_URI = 'https://login.live.com/oauth20_desktop.srf'
     DEFAULT_CLIENT_SCOPE = ['wl.signin', 'wl.offline_access', 'onedrive.readwrite']
 

@@ -67,7 +67,7 @@ class TestManagedRESTClient(unittest.TestCase):
             for k, v in body.items():
                 self.assertEqual(1, len(v))
                 body[k] = v.pop()
-            self.assert_compare(self.assertEqual, account.client, body, ['client_id', 'client_secret', 'redirect_uri'])
+            self.assert_compare(self.assertEqual, account.client, body, ['client_id', 'redirect_uri'])
             self.assertEqual(account.refresh_token, body['refresh_token'])
             self.assertEqual('refresh_token', body['grant_type'])
             context.status_code = requests.codes.ok
