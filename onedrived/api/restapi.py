@@ -55,10 +55,7 @@ class ManagedRESTClient:
                         self.logger.info('Server returned code %d which is assumed recoverable. Retry in %d seconds',
                                          request.status_code, retry_after_seconds)
                         raise errors.OneDriveRecoverableError(retry_after_seconds)
-                    try:
-                        raise errors.OneDriveError(request.json())
-                    except ValueError as e:
-                        raise errors.OneDriveInvaildRepsonseFormat(request)
+                    raise errors.OneDriveError(request)
                 return request
             except requests.ConnectionError:
                 self.net_mon.suspend_caller()
