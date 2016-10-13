@@ -64,7 +64,7 @@ class ManagedRESTClient:
                 self.net_mon.suspend_caller()
             except errors.OneDriveRecoverableError as e:
                 time.sleep(e.retry_after_seconds)
-            except errors.OneDriveTokenExpiredError as e:
+            except (errors.OneDriveTokenExpiredError, errors.OneDriveUnauthorizedError) as e:
                 if auto_renew:
                     self.logger.info('Access token expired. Try refreshing...')
                     self.account.renew_tokens()

@@ -13,6 +13,8 @@ class OneDriveError(Exception):
                 self.__class__ = OneDriveServerInternalError
         else:
             raise OneDriveInvaildRepsonseFormat()
+        if self.errno == 'unauthenticated':
+            self.__class__ = OneDriveUnauthorizedError
 
     def __str__(self):
         return self.strerror + ' (' + self.errno + ')'
@@ -23,6 +25,9 @@ class OneDriveTokenExpiredError(OneDriveError):
 
 
 class OneDriveServerInternalError(OneDriveError):
+    pass
+
+class OneDriveUnauthorizedError(OneDriveError):
     pass
 
 class OneDriveInvaildRepsonseFormat(OneDriveError):
