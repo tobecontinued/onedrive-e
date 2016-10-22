@@ -55,6 +55,7 @@ class ItemStorage:
     """
 
     logger = logger_factory.get_logger('ItemStorage')
+    create_table_sql_content = get_content('onedrive_items.sql')
 
     def __init__(self, db_path, drive):
         """
@@ -67,9 +68,12 @@ class ItemStorage:
         self._conn = sqlite3.connect(db_path, isolation_level=None, check_same_thread=False)
         self.drive = drive
         self._cursor = self._conn.cursor()
+        self._cursor.execute(ItemStorage.create_table_sql_content)
         self._cursor.execute(get_content('onedrive_items.sql'))
         self._conn.commit()
-        atexit.register(self.close)
+
+    def __del__(self):
+        self.close()
 
     def close(self):
         self._cursor.close()
