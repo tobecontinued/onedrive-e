@@ -5,6 +5,7 @@ https://github.com/OneDrive/onedrive-api-docs#root-resources
 """
 
 import json
+import random
 
 import requests
 
@@ -13,6 +14,7 @@ from onedrived.api import items
 from onedrived.api import options
 from onedrived.api import resources
 from onedrived.common import drive_config
+from onedrived.api import errors
 from onedrived.common import logger_factory
 
 
@@ -230,6 +232,7 @@ class DriveObject:
         :param str conflict_behavior: (Optional) Specify the behavior to use if the file already exists.
         :rtype: onedrived.api.items.OneDriveItem
         """
+        BACK_OFF_UNIT = 5
         # Create an upload session.
         if parent_id is not None:
             parent_id += ':'
@@ -253,15 +256,35 @@ class DriveObject:
                 t = next_cursor - 1
             data.seek(f)
             chunk = data.read(t - f + 1)
-            headers = {
-                'Content-Length' : str(t -f + 1),
-                'Content-Range': 'bytes ' +  str(f) + '-' + str(t) + '/' + size_str
-            }
-            request = self.root.account.session.put(current_session.upload_url, data=chunk, headers=headers,
-                                                    ok_status_code=requests.codes.accepted)
-            current_session.update(request.json())
-            # TODO: handle timeout error
-            # https://github.com/OneDrive/onedrive-api-docs/blob/master/items/upload_large_files.md#request-upload-status
+
+            #https://dev.onedrive.com/items/upload_large_files.htm#best-practices
+            #use Binary Exponential Back off
+            for times in range(1, 16):
+                request = self._put_file_fragment(current_session, chunk, f, t, size)
+                if request.status_code in (requests.codes.internal_server_error, requests.codes.bad_gateway,
+                        requests.codes.service_unavailable, requests.codes.gateway_timeout):
+                    self.logger.info('Server returned code %d which is assumed recoverable when upload file %s. Retry in %d seconds',
+                                         request.status_code, filename, retry_after_seconds)
+                    sleep_time = random.randrange(2**times) * BACK_OFF_UNIT 
+                    time.sleep(sleep_time)
+                    self.account.renew_tokens()
+                else:
+                    break
+            else:
+                raise errors.OneDriveError(request)
+
+
+    def _put_file_fragment(self, current_session, chunk, start, end, size):
+        headers = {
+            'Content-Length' : str(end -start + 1),
+            'Content-Range': 'bytes ' +  str(start) + '-' + str(end) + '/' + str(size)
+        }
+        request = self.root.account.session.put(current_session.upload_url, data=chunk, headers=headers,
+                ok_status_code=(requests.codes.accepted, requests.codes.ok, requests.codes.created,
+                                requests.codes.internal_server_error, requests.codes.bad_gateway,
+                                requests.codes.service_unavailable, requests.codes.gateway_timeout))
+        current_session.update(request.json())
+        return request
 
     def put_file(self, filename, data, parent_id=None, parent_path=None,
                  conflict_behavior=options.NameConflictBehavior.REPLACE):
@@ -279,8 +302,7 @@ class DriveObject:
         uri = self.get_item_uri(parent_id, parent_path) + '/' + filename + ':/content'
         if conflict_behavior != options.NameConflictBehavior.REPLACE:
             uri += '?@name.conflictBehavior=' + conflict_behavior
-        request = self.root.account.session.put(uri, data=data, ok_status_code=(requests.codes.created,
-                                                                                requests.codes.ok))
+        request = self.root.account.session.put(uri, data=data, ok_status_code=(requests.codes.created, requests.codes.ok))
         return items.OneDriveItem(self, request.json())
 
     def download_file(self, file, size, item_id=None, item_path=None):
