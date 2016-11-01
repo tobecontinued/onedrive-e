@@ -62,6 +62,7 @@ class NetworkMonitor(threading.Thread):
         while True:
             th = self.queue.get()  # blocking call
             while not self.is_connected():
+                self.logger.info('Can not connect to server, wait %ds.', self.retry_delay)
                 time.sleep(self.retry_delay)
             self.conditions[th.ident].acquire()
             self.conditions[th.ident].notify()

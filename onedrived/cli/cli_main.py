@@ -20,6 +20,7 @@ drive_store = None
 task_store = None
 item_store_mgr = None
 network_monitor = netman.NetworkMonitor()
+task_worker_list = []
 
 
 def parse_args():
@@ -90,6 +91,7 @@ def start_task_workers():
     for i in range(user_conf.num_consumers):
         t = task_worker.TaskConsumer(task_pool=task_store)
         t.name = 'W' + str(i)
+        task_worker_list.append(t)
         t.start()
 
 
@@ -98,10 +100,21 @@ def refill_tasks():
         while True:
             logger.info('Refilling initial tasks...')
             add_initial_tasks()
+            renew_task_worker_if_need()
             time.sleep(5 * 60)
     except (KeyboardInterrupt, InterruptedError):
         logger.info('Exiting...')
         sys.exit(0)
+
+
+def renew_task_worker_if_need():
+    for i in range(len(task_worker_list)):
+        if not task_worker_list[i].is_alive():
+            t = task_worker.TaskConsumer(task_pool=task_store)
+            t.name = task_worker_list[i].name
+            task_worker_list[i] = t 
+            t.start()
+            logger.info('Renew task work %s.', t.name)
 
 
 def main():
