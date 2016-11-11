@@ -15,6 +15,7 @@ from onedrived.common import logger_factory
 class ManagedRESTClient:
     AUTO_RETRY_SECONDS = 30
     RECOVERABLE_STATUS_CODES = {requests.codes.too_many, 500, 502, 503, 504}
+    REQUEST_TIMEOUT_SEC = 60
     logger = logger_factory.get_logger(__name__)
 
     def __init__(self, session, net_mon, account, proxies=None):
@@ -43,7 +44,7 @@ class ManagedRESTClient:
         """
         while True:
             try:
-                request = getattr(self.session, method)(url, **params)
+                request = getattr(self.session, method)(url, timeout = self.REQUEST_TIMEOUT_SEC, **params)
                 bad_status = request.status_code != ok_status_code if isinstance(ok_status_code, int) \
                     else request.status_code not in ok_status_code
                 if bad_status:
@@ -58,7 +59,11 @@ class ManagedRESTClient:
                     raise errors.OneDriveError(request)
                 return request
             except requests.ConnectionError:
+                self.logger.info('Connection Error, sleep until network is ok') 
                 self.net_mon.suspend_caller()
+            except requests.exceptions.Timeout as e:
+                self.logger.info('request timeout, sleep %d seconds, then try agrain', self.AUTO_RETRY_SECONDS) 
+                time.sleep(self.AUTO_RETRY_SECONDS)
             except errors.OneDriveRecoverableError as e:
                 time.sleep(e.retry_after_seconds)
             except (errors.OneDriveTokenExpiredError, errors.OneDriveUnauthorizedError) as e:
