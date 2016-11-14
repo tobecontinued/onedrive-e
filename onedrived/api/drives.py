@@ -263,15 +263,16 @@ class DriveObject:
                 request = self._put_file_fragment(current_session, chunk, f, t, size)
                 if request.status_code in (requests.codes.internal_server_error, requests.codes.bad_gateway,
                         requests.codes.service_unavailable, requests.codes.gateway_timeout):
-                    self.logger.info('Server returned code %d which is assumed recoverable when upload file %s. Retry in %d seconds',
-                                         request.status_code, filename, retry_after_seconds)
                     sleep_time = random.randrange(2**times) * BACK_OFF_UNIT 
+                    self.logger.info('Server returned code %d which is assumed recoverable when upload file %s fragment. Retry in %d seconds',
+                                         request.status_code, filename, sleep_time)
                     time.sleep(sleep_time)
                     self.account.renew_tokens()
                 else:
                     break
             else:
                 raise errors.OneDriveError(request)
+        return items.OneDriveItem(self, request.json())
 
 
     def _put_file_fragment(self, current_session, chunk, start, end, size):
@@ -302,8 +303,25 @@ class DriveObject:
         uri = self.get_item_uri(parent_id, parent_path) + '/' + filename + ':/content'
         if conflict_behavior != options.NameConflictBehavior.REPLACE:
             uri += '?@name.conflictBehavior=' + conflict_behavior
-        request = self.root.account.session.put(uri, data=data, ok_status_code=(requests.codes.created, requests.codes.ok))
-        return items.OneDriveItem(self, request.json())
+
+        #XXX:reduce similar code in put_large_file
+        #FIXME:we should not handle length_required error,
+        #we need recreate request when issue netowrk error.
+        for times in range(1, 16):
+            request = self.root.account.session.put(uri, data=data, ok_status_code=(requests.codes.created, requests.codes.ok,
+                  requests.codes.internal_server_error, requests.codes.bad_gateway, requests.codes.service_unavailable,
+                  requests.codes.gateway_timeout, requests.codes.length_required))
+            if request.status_code in (requests.codes.internal_server_error, requests.codes.bad_gateway,
+                    requests.codes.service_unavailable, requests.codes.gateway_timeout,requests.codes.length_required):
+                sleep_time = random.randrange(2**times) * BACK_OFF_UNIT 
+                self.logger.info('Server returned code %d which is assumed recoverable when upload file %s. Retry in %d seconds',
+                                     request.status_code, filename, sleep_time)
+                time.sleep(sleep_time)
+                self.account.renew_tokens()
+            else:
+                return items.OneDriveItem(self, request.json())
+        else:
+            raise errors.OneDriveError(request)
 
     def download_file(self, file, size, item_id=None, item_path=None):
         """
