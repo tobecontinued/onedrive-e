@@ -6,6 +6,7 @@ https://github.com/OneDrive/onedrive-api-docs#root-resources
 
 import json
 import random
+import time
 
 import requests
 
@@ -84,6 +85,7 @@ class DriveObject:
 
     VERSION_KEY = '@version'
     VERSION_VALUE = 0
+    BACK_OFF_UNIT = 5
 
     logger = logger_factory.get_logger('DriveObject')
 
@@ -232,7 +234,6 @@ class DriveObject:
         :param str conflict_behavior: (Optional) Specify the behavior to use if the file already exists.
         :rtype: onedrived.api.items.OneDriveItem
         """
-        BACK_OFF_UNIT = 5
         # Create an upload session.
         if parent_id is not None:
             parent_id += ':'
@@ -263,7 +264,7 @@ class DriveObject:
                 request = self._put_file_fragment(current_session, chunk, f, t, size)
                 if request.status_code in (requests.codes.internal_server_error, requests.codes.bad_gateway,
                         requests.codes.service_unavailable, requests.codes.gateway_timeout):
-                    sleep_time = random.randrange(2**times) * BACK_OFF_UNIT 
+                    sleep_time = random.randrange(2**times) * self.BACK_OFF_UNIT 
                     self.logger.info('Server returned code %d which is assumed recoverable when upload file %s fragment. Retry in %d seconds',
                                          request.status_code, filename, sleep_time)
                     time.sleep(sleep_time)
@@ -313,7 +314,7 @@ class DriveObject:
                   requests.codes.gateway_timeout, requests.codes.length_required))
             if request.status_code in (requests.codes.internal_server_error, requests.codes.bad_gateway,
                     requests.codes.service_unavailable, requests.codes.gateway_timeout,requests.codes.length_required):
-                sleep_time = random.randrange(2**times) * BACK_OFF_UNIT 
+                sleep_time = random.randrange(2**times) * self.BACK_OFF_UNIT 
                 self.logger.info('Server returned code %d which is assumed recoverable when upload file %s. Retry in %d seconds',
                                      request.status_code, filename, sleep_time)
                 time.sleep(sleep_time)
