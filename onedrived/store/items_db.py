@@ -31,6 +31,7 @@ class ItemRecord:
 
 
 class ItemStorageManager:
+    logger = logger_factory.get_logger('ItemStorageManager')
     def __init__(self, item_storage_dir):
         self.item_storage_dir = item_storage_dir
         self.item_storages = {}
@@ -40,13 +41,13 @@ class ItemStorageManager:
         :param onedrived.api.drives.DriveObject drive:
         :return onedrived.store.items_db.ItemStorage: Item manager for the given drive.
         """
-        if drive not in self.item_storages:
+        if drive.drive_id not in self.item_storages:
             if self.item_storage_dir == ':memory:':
                 db_path = ':memory:'
             else:
                 db_path = self.item_storage_dir + '/' + create_item_db_name(drive)
-            self.item_storages[drive] = ItemStorage(db_path, drive)
-        return self.item_storages[drive]
+            self.item_storages[drive.drive_id] = ItemStorage(db_path, drive)
+        return self.item_storages[drive.drive_id]
 
 
 class ItemStorage:
