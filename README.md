@@ -8,8 +8,7 @@ that OneDrive for Business is not supported. __
 
 This project is forked from `onedrive-d` that dropped by origin author.
 
-The current stable version is 0.1.1.
-
+[Get current stable version](https://github.com/tobecontinued/onedrive-e/releases/latest)
 ## Pre-requisites
 
 `onedrive-e` is written in Python 3 and does ___NOT___ run under Python 2.x. The package is tested for the following
