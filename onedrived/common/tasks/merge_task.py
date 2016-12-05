@@ -17,20 +17,6 @@ from onedrived.common.tasks.utils import unpack_first_item as _unpack_first_item
 from onedrived.store.items_db import ItemRecordStatuses
 
 
-def _have_equal_hash(item_local_path, item):
-    """
-    :param str item_local_path:
-    :param onedrived.api.items.OneDriveItem item:
-    :return True | False:
-    """
-    file_props = item.file_props
-    hash_props = file_props.hashes if file_props is not None else None
-    if hash_props is not None:
-        if hash_props.crc32 is not None and hash_props.crc32 == hasher.crc32_value(item_local_path) \
-                or hash_props.sha1 is not None and hash_props.sha1 == hasher.hash_value(item_local_path):
-            return True
-    return False
-
 
 class MergeDirTask(TaskBase):
     def __init__(self, parent_task, rel_parent_path, item_name):
@@ -93,7 +79,7 @@ class MergeDirTask(TaskBase):
     def _analyze_remote_item(self, remote_item, all_local_items):
         """
         Analyze what to do with a remote item. Assume that this item passes ignore list.
-        This function is the core algorithm and probably the ugliest code I've written so far.
+        This function is the core algorithm. 
         :param onedrived.api.items.OneDriveItem remote_item: The remote item object.
         :param [str] all_local_items: All remaining untouched local items.
         """
@@ -101,6 +87,9 @@ class MergeDirTask(TaskBase):
         q = self.items_store.get_items_by_id(parent_path=self.remote_path, item_name=remote_item.name)
         exists = os.path.exists(item_local_path)
         has_record = len(q) > 0
+        if has_record:
+          item_id, item_record = _unpack_first_item(q)
+          has_record = item_id == remote_item.id
         if not has_record and not exists:
             # There is no record in database. The item is not present. Probably a new file.
             self._create_download_task(item_local_path, remote_item)
@@ -124,9 +113,6 @@ class MergeDirTask(TaskBase):
                 self._move_existing_and_download(item_local_path, remote_item, all_local_items, q)
             elif is_dir:
                 # Both sides are directories. Just update the record and sync if needed.
-                if has_record:
-                    item_id, item_record = _unpack_first_item(q)
-                    has_record = item_id == remote_item.id
                 if not has_record:
                     self.logger.info('Fix database record for directory "%s".', item_local_path)
                     self.items_store.update_item(remote_item, ItemRecordStatuses.OK, self.local_path)
@@ -137,47 +123,34 @@ class MergeDirTask(TaskBase):
                 self._create_merge_dir_task(remote_item.name, remote_item)
             else:
                 # Both sides are files. Examine file attributes.
+                need_update = not has_record
+                if has_record:
+                    item_id, item_record = _unpack_first_item(q)
+                    need_update = item_record.c_tag != remote_item.c_tag or item_record.e_tag != remote_item.e_tag
+                if need_update:
+                    self.logger.info('Fix database record for file "%s".',
+                                     item_local_path)
+                    self.items_store.update_item(remote_item, ItemRecordStatuses.OK, self.local_path)
                 file_size, file_mtime = stat_file(item_local_path)
-                if file_size == remote_item.size \
-                        and compare_timestamps(file_mtime, datetime_to_timestamp(remote_item.modified_time)) == 0:
+                if self._have_equal_hash(item_local_path, remote_item):
                     # Same file name. Same size. Same mtime. Guess they are the same for laziness.
-                    # Just update the record.
-                    need_update = not has_record
-                    if has_record:
-                        item_id, item_record = _unpack_first_item(q)
-                        need_update = item_record.c_tag != remote_item.c_tag or item_record.e_tag != remote_item.e_tag
-                    if need_update:
-                        self.logger.info('Fix database record for file "%s" based on file size and mtime.',
-                                         item_local_path)
-                        self.items_store.update_item(remote_item, ItemRecordStatuses.OK, self.local_path)
-                    else:
-                        self.logger.debug('File "%s" seems fine.', item_local_path)
+                    self.logger.info('File "%s" seems fine.', item_local_path)
                 else:
-                    if has_record:
-                        item_id, item_record = _unpack_first_item(q)
-                        if item_id == remote_item.id and (item_record.c_tag == remote_item.c_tag \
-                                or item_record.e_tag == remote_item.e_tag):
-                            # The remote item did not change since last update, but LOCAL file changed since then.
-                            self.logger.info('File "%s" changed locally since last sync. Upload.', item_local_path)
-                            self._create_upload_task(local_item_name=remote_item.name, is_dir=False)
-                        elif file_size == item_record.size and compare_timestamps(
-                                file_mtime, datetime_to_timestamp(item_record.modified_time)) == 0:
-                            # The local item did not change since last update, but REMOTE file changed since then.
-                            self.logger.info('File "%s" changed remotely since last sync. Download.', item_local_path)
-                            self._create_download_task(item_local_path, remote_item)
-                        else:
-                            # Three ends mismatch. Keep both.
-                            self.logger.info('Cannot determine file "%s". All information differ. Keep both.',
-                                             item_local_path)
-                            self._move_existing_and_download(item_local_path, remote_item, all_local_items, q)
+                    remote_item_modified_timestamp = datetime_to_timestamp(remote_item.modified_time)
+                    if compare_timestamps(file_mtime, remote_item_modified_timestamp) > 0:
+                        # The remote item did not change since last update, but LOCAL file changed since then.
+                        self.logger.info('File "%s" changed locally since last sync. Upload.', item_local_path)
+                        # TODO: it will update remote itme's modified time?
+                        self._create_upload_task(local_item_name=remote_item.name, is_dir=False)
+                    elif compare_timestamps(file_mtime, remote_item_modified_timestamp) <  0:
+                        # The local item did not change since last update, but REMOTE file changed since then.
+                        self.logger.info('File "%s" changed remotely since last sync. Download.', item_local_path)
+                        self._create_download_task(item_local_path, remote_item)
                     else:
-                        # Examine file hash.
-                        if _have_equal_hash(item_local_path, remote_item):
-                            # Same hash means that they are the same file. Update local timestamp and database record.
-                            self._update_attr_when_hash_equal(item_local_path, remote_item)
-                        else:
-                            self.logger.info('Cannot determine file "%s". Rename and keep both.', item_local_path)
-                            self._move_existing_and_download(item_local_path, remote_item, all_local_items, q)
+                        # Three ends mismatch. Keep both.
+                        self.logger.info('Cannot determine file "%s". All information differ. Keep both.',
+                                         item_local_path)
+                        self._move_existing_and_download(item_local_path, remote_item, all_local_items, q)
 
     def _move_existing_and_download(self, item_local_path, remote_item, all_local_items, q):
         """
@@ -284,9 +257,59 @@ class MergeDirTask(TaskBase):
 
     def _create_remote_dir(self, name):
         try:
-            new_item = self.drive.create_dir(name=name, parent_id=self.item_obj.id)
+            # FIXME: if self is root, self.item_obj is None:
+            if self.item_obj is not None:
+                new_item = self.drive.create_dir(name=name, parent_id=self.item_obj.id)
+            else:
+                new_item = self.drive.create_dir(name=name)
             self.items_store.update_item(new_item, ItemRecordStatuses.OK, self.local_path)
-            self.logger.info('Created remote directory "%s".', self.local_path)
+            self.logger.info('Created remote directory "%s".', self.local_path + '/' + name)
             self._create_merge_dir_task(name, new_item)
         except errors.OneDriveError as e:
             self.logger.error('An API error occurred creating remote dir "%s/%s":\n%s.', self.rel_path, name, traceback.format_exc())
+
+    def _have_equal_hash(self, item_local_path, item):
+        """
+        :param str item_local_path:
+        :param onedrived.api.items.OneDriveItem item:
+        :return True | False:
+        """
+        # TODO: use db to cache recent remote and local hash
+        if item.file_props is not None and item.file_props.hashes is not None:
+            # itme_sha may be None here.
+            item_sha1 = item.file_props.hashes.sha1
+            item_crc32 = item.file_props.hashes.crc32
+        else:
+            item_sha1 = None
+            item_crc32 = None
+        if item_sha1 is None:
+            item_sha1 = self._computing_remote_hash_locally(item)
+        local_sha1 = hasher.hash_value(item_local_path)
+
+        self.logger.debug('File %s: remote: %s,%d, local: %s,%d', item_local_path, item_sha1, item.size, local_sha1,
+            os.path.getsize(item_local_path))
+
+        if item_crc32 is not None:
+            self.logger.debug('Crc32 of file %s: remote:%s, local:%s', item_local_path, item_crc32,
+                hasher.crc32_value(item_local_path))
+        return  item_sha1 == local_sha1
+
+    def _computing_remote_hash_locally(self, item):
+        """
+        we download it as a temp file and compute its hash
+        then upload the hash value
+        :param onedrived.api.items.OneDriveItem item:
+        :return remote file's hash value
+        """
+        local_item_tmp_path = self.local_parent_path + '.' + item.name + '.!od.hash'
+        try:
+            self.logger.debug('Compite hash value of remote file "%s" locally.', item.name)
+            with open(local_item_tmp_path, 'wb') as f:
+                self.drive.download_file(file=f, size=item.size, item_id=item.id)
+                item_sha1 =  hasher.hash_value(local_item_tmp_path)
+                os.remove(local_item_tmp_path)
+                return item_sha1
+        except (IOError, OSError) as e:
+            self.logger.error('An IO error occurred when updating remote item hash "%s":\n%s.', local_item_tmp_path, traceback.format_exc())
+        except errors.OneDriveError as e:
+            self.logger.error('An API error occurred when updating remote item hash "%s":\n%s.', local_item_tmp_path, traceback.format_exc())
