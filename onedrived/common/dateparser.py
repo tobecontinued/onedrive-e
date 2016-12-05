@@ -43,9 +43,4 @@ def timestamp_to_datetime(t):
 def compare_timestamps(t1, t2):
     t1_appro = round(t1, 2)
     t2_apro = round(t2, 2)
-    if t1_appro > t2_apro:
-        return 1
-    elif t2_apro > t1_appro:
-        return -1
-    else:
-        return 0
+    return t1_appro - t2_apro
