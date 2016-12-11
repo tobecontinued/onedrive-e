@@ -1,9 +1,9 @@
 import unittest
 
-from onedrived.api import facets
-from onedrived.api import items
-from onedrived.api import resources
-from onedrived.common.dateparser import str_to_datetime
+from onedrivee.api import facets
+from onedrivee.api import items
+from onedrivee.api import resources
+from onedrivee.common.dateparser import str_to_datetime
 from tests import get_data
 from tests import to_underscore_name
 from tests.factory.drive_factory import get_sample_drive_object
@@ -48,7 +48,7 @@ class TestOneDriveItem(unittest.TestCase):
 
     def assert_identity_facet(self, f, d):
         """
-        :param onedrived.api.resources.IdentitySet f:
+        :param onedrivee.api.resources.IdentitySet f:
         :param dict[str, dict[str, str]] d: Source data dictionary.
         """
         self.assertIsInstance(f, resources.IdentitySet)

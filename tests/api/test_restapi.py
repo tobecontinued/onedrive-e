@@ -4,7 +4,7 @@ from urllib.parse import parse_qs
 import requests
 from requests_mock import Mocker
 
-from onedrived.api import errors, restapi
+from onedrivee.api import errors, restapi
 from tests import get_data, mock
 from tests.factory import account_factory
 

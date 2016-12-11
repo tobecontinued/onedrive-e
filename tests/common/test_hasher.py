@@ -1,7 +1,7 @@
 import io
 import unittest
 
-from onedrived.common import hasher
+from onedrivee.common import hasher
 from tests import mock
 
 

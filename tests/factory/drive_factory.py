@@ -1,5 +1,5 @@
-from onedrived.api import drives
-from onedrived.common import drive_config
+from onedrivee.api import drives
+from onedrivee.common import drive_config
 from tests import get_data
 from tests.factory import account_factory
 

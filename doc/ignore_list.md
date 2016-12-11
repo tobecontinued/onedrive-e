@@ -129,10 +129,10 @@ aaa{#[0-9a-f]{3,6\}}888
 Read [this document](https://github.com/zb3/zgitignore) for more about this feature.
 
 __(12) You may want to have a look at the ignore list used for testing `onedrive-d`, which is at
-`onedrived/tests/data/ignore_list.txt`.__
+`onedrivee/tests/data/ignore_list.txt`.__
 
 ## License
 
-The source code locates at `onedrived.common.path_filter` and the unit test is in
+The source code locates at `onedrivee.common.path_filter` and the unit test is in
 `tests.common.test_path_filter`. It is based on
 [zgitignore](https://github.com/zb3/zgitignore) library under MIT license.

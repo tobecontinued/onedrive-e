@@ -1,8 +1,8 @@
 import unittest
 
-from onedrived.api import facets
-from onedrived.api import resources
-from onedrived.common.dateparser import str_to_datetime
+from onedrivee.api import facets
+from onedrivee.api import resources
+from onedrivee.common.dateparser import str_to_datetime
 from tests import get_data
 from tests import to_underscore_name
 

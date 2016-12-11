@@ -1,8 +1,8 @@
 import unittest
 
-from onedrived.api.errors import OneDriveError
-from onedrived.api.items import OneDriveItem
-from onedrived.common.tasks.delete_task import DeleteItemTask
+from onedrivee.api.errors import OneDriveError
+from onedrivee.api.items import OneDriveItem
+from onedrivee.common.tasks.delete_task import DeleteItemTask
 from tests import get_data
 from tests import mock
 from tests.factory.tasks_factory import get_sample_task_base

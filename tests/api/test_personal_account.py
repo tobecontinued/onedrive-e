@@ -6,9 +6,9 @@ import unittest
 import requests
 import requests_mock
 
-from onedrived.api import accounts
-from onedrived.api import errors
-from onedrived.api import resources
+from onedrivee.api import accounts
+from onedrivee.api import errors
+from onedrivee.api import resources
 from tests import get_data
 from tests.factory.account_factory import PERSONAL_ACCOUNT_DATA
 from tests.factory.account_factory import get_sample_personal_account as get_sample_account
@@ -30,7 +30,7 @@ class TestPersonalAccount(unittest.TestCase):
 
     def assert_account(self, account):
         """
-        :param onedrived.api.accounts.PersonalAccount account:
+        :param onedrivee.api.accounts.PersonalAccount account:
         """
         self.assertIsInstance(account, accounts.PersonalAccount)
         self.assertEqual(PERSONAL_ACCOUNT_DATA['access_token'], account.access_token)

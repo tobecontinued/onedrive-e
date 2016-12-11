@@ -1,5 +1,5 @@
-from onedrived.api import accounts
-from onedrived.api import resources
+from onedrivee.api import accounts
+from onedrivee.api import resources
 from tests import get_data
 
 PERSONAL_ACCOUNT_DATA = get_data('personal_access_token.json')

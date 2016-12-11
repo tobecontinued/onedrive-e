@@ -1,6 +1,6 @@
 import unittest
 
-from onedrived.vendor import utils
+from onedrivee.vendor import utils
 
 
 class TestVendorUtils(unittest.TestCase):

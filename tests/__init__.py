@@ -8,7 +8,7 @@ except:
     # noinspection PyUnresolvedReferences
     import mock
 
-from onedrived import get_content as get_content_orig
+from onedrivee import get_content as get_content_orig
 
 logging.disable(logging.CRITICAL)
 camel_to_underscore = re.compile('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))')

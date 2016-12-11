@@ -3,12 +3,13 @@
 ## Overview
 
 `onedrive-e` is a Microsoft OneDrive client on Linux platforms. It allows a Linux user to sync with one or more
-OneDrive Personal account by synchronizing each remote OneDrive repository with a designated local directory. __Note
-that OneDrive for Business is not supported. __
+OneDrive Personal account by synchronizing each remote OneDrive repository with a designated local directory. 
+
+__Note that OneDrive for Business is not supported. __
 
 This project is forked from `onedrive-d` that dropped by origin author.
 
-[Get current stable version](https://github.com/tobecontinued/onedrive-e/releases/latest)
+[latest version](https://github.com/tobecontinued/onedrive-e/releases/latest)
 ## Pre-requisites
 
 `onedrive-e` is written in Python 3 and does ___NOT___ run under Python 2.x. The package is tested for the following
@@ -53,7 +54,7 @@ You will need `pip3` to properly uninstall the package. Refer to Pre-requisites 
 `pip3`.
 
 ```
-$ sudo pip3 uninstall onedrived
+$ sudo pip3 uninstall onedrivee
 ```
 
 ## Support
@@ -64,4 +65,8 @@ To report a bug or ask a question, create an issue on the repository. Code Contr
 
 ## Roadmap
 
-Currently, main work is to make the application stable and new feature is limited consider.
+1. simpily the code.
+
+2. try to supprot differetn cloud paltfors
+
+3. GUI

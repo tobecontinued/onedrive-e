@@ -3,8 +3,8 @@ import unittest
 from requests import codes
 from requests_mock import Mocker
 
-from onedrived.api import accounts
-from onedrived.store.account_db import AccountStorage
+from onedrivee.api import accounts
+from onedrivee.store.account_db import AccountStorage
 from tests import get_data
 from tests.factory import mock_factory
 from tests.factory.account_factory import get_sample_personal_account

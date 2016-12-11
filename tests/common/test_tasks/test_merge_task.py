@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from onedrived.common.tasks.merge_task import MergeDirTask
+from onedrivee.common.tasks.merge_task import MergeDirTask
 from tests import mock
 from tests.factory.tasks_factory import get_sample_task_base
 

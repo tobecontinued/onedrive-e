@@ -1,8 +1,8 @@
 import os
 import unittest
 
-from onedrived import OS_HOSTNAME
-from onedrived.common.tasks import utils
+from onedrivee import OS_HOSTNAME
+from onedrivee.common.tasks import utils
 from tests import mock
 
 

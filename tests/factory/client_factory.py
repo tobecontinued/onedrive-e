@@ -1,4 +1,4 @@
-from onedrived.api import clients
+from onedrivee.api import clients
 
 
 def get_sample_personal_client():

@@ -1,7 +1,7 @@
 import unittest
 
-from onedrived.common import user_config
-from onedrived.common.drive_config import DriveConfig
+from onedrivee.common import user_config
+from onedrivee.common.drive_config import DriveConfig
 from tests import get_data
 from tests.factory import assert_factory
 

@@ -1,9 +1,9 @@
 import os
 import unittest
 
-from onedrived.api.errors import OneDriveError
-from onedrived.api.items import OneDriveItem
-from onedrived.common.tasks.up_task import CreateDirTask
+from onedrivee.api.errors import OneDriveError
+from onedrivee.api.items import OneDriveItem
+from onedrivee.common.tasks.up_task import CreateDirTask
 from tests import get_data, mock
 from tests.factory.tasks_factory import get_sample_task_base
 

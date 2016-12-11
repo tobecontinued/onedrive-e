@@ -1,6 +1,6 @@
 import unittest
 
-from onedrived.store import task_pool
+from onedrivee.store import task_pool
 from tests.factory.tasks_factory import get_sample_task_base
 
 

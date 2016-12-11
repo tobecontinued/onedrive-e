@@ -3,7 +3,7 @@ import unittest
 import requests_mock
 from requests import codes
 
-from onedrived.api import drives
+from onedrivee.api import drives
 from tests import get_data
 from tests.factory import account_factory, drive_factory
 

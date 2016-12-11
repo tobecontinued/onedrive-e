@@ -3,7 +3,7 @@ import unittest
 
 from dateutil import tz
 
-from onedrived.common import dateparser
+from onedrivee.common import dateparser
 
 
 class TestTimeConversion(unittest.TestCase):
@@ -15,4 +15,4 @@ class TestTimeConversion(unittest.TestCase):
         self.assertEqual(self.d, dateparser.str_to_datetime(self.s))
         self.assertEqual(self.s, dateparser.datetime_to_str(self.d))
         self.assertEqual(self.t, dateparser.datetime_to_timestamp(self.d))
-        # self.assertEqual(self.d, onedrived.timestamp_to_datetime(self.t))
+        # self.assertEqual(self.d, onedrivee.timestamp_to_datetime(self.t))

@@ -1,8 +1,8 @@
 import time
 import unittest
 
-from onedrived.common.task_worker import TaskConsumer
-from onedrived.common.tasks import TaskBase
+from onedrivee.common.task_worker import TaskConsumer
+from onedrivee.common.tasks import TaskBase
 from tests import mock
 from tests.factory.db_factory import get_sample_task_pool
 from tests.factory.drive_factory import get_sample_drive_object

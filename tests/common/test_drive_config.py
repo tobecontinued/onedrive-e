@@ -2,8 +2,8 @@ import os
 import sys
 import unittest
 
-from onedrived.common import drive_config
-from onedrived.common import path_filter
+from onedrivee.common import drive_config
+from onedrivee.common import path_filter
 from tests import get_data
 from tests.factory import assert_factory
 

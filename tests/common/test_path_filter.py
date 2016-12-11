@@ -1,6 +1,6 @@
 import unittest
 
-from onedrived.common import path_filter
+from onedrivee.common import path_filter
 from tests import get_content
 
 

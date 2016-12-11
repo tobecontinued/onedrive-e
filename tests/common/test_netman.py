@@ -4,8 +4,8 @@ import unittest
 import requests
 import requests_mock
 
-from onedrived.api import restapi
-from onedrived.common import netman
+from onedrivee.api import restapi
+from onedrivee.common import netman
 from tests import mock
 
 

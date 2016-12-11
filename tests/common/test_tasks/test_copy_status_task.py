@@ -5,9 +5,9 @@ import unittest
 import requests
 from requests_mock import Mocker
 
-from onedrived.api.errors import OneDriveError
-from onedrived.api.resources import AsyncCopySession
-from onedrived.common.tasks import copy_task, up_task
+from onedrivee.api.errors import OneDriveError
+from onedrivee.api.resources import AsyncCopySession
+from onedrivee.common.tasks import copy_task, up_task
 from tests import get_data, mock
 from tests.common.test_tasks.test_copy_task import LOCATION_STR
 from tests.factory.tasks_factory import get_sample_task_base

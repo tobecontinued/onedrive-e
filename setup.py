@@ -12,7 +12,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-from onedrived import __project__, __version__, __author__, __email__, __homepage__
+from onedrivee import __project__, __version__, __author__, __email__, __homepage__
 
 setup_requires = [
     'setuptools'
@@ -56,12 +56,12 @@ setup(
         packages=packages,
         include_package_data=True,
         package_data={
-            'onedrived': ['lang/*', 'data/*']
+            'onedrivee': ['lang/*', 'data/*']
         },
         entry_points={
             'console_scripts': [
-                'onedrived = onedrived.cli.cli_main:main',
-                'onedrived-pref = onedrived.cli.pref_main:main'
+                'onedrivee = onedrivee.cli.cli_main:main',
+                'onedrivee-pref = onedrivee.cli.pref_main:main'
             ],
             'gui_scripts': []
         },

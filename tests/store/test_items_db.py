@@ -1,7 +1,7 @@
 import unittest
 
-from onedrived.api import items
-from onedrived.store import items_db
+from onedrivee.api import items
+from onedrivee.store import items_db
 from tests import get_data
 from tests.factory import drive_factory, db_factory, mock_factory
 

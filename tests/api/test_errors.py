@@ -1,6 +1,6 @@
 import unittest
 
-from onedrived.api import errors
+from onedrivee.api import errors
 from tests import get_data
 
 

@@ -1,6 +1,6 @@
 import unittest
 
-from onedrived.api import options
+from onedrivee.api import options
 
 
 class TestNameConflictBehavior(unittest.TestCase):

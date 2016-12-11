@@ -1,8 +1,8 @@
 import unittest
 
-from onedrived.api import drives
-from onedrived.common.drive_config import DriveConfig
-from onedrived.store import drives_db
+from onedrivee.api import drives
+from onedrivee.common.drive_config import DriveConfig
+from onedrivee.store import drives_db
 from tests import get_data
 from tests.factory import mock_factory
 from tests.factory.account_factory import get_sample_personal_account

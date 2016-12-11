@@ -3,9 +3,9 @@ import unittest
 import requests
 from requests_mock import Mocker
 
-from onedrived.api.errors import OneDriveError
-from onedrived.api.items import OneDriveItem
-from onedrived.common.tasks import copy_task
+from onedrivee.api.errors import OneDriveError
+from onedrivee.api.items import OneDriveItem
+from onedrivee.common.tasks import copy_task
 from tests import get_data, mock
 from tests.factory.tasks_factory import get_sample_task_base
 

@@ -1,12 +1,12 @@
 import os
 import unittest
 
-import onedrived
+import onedrivee
 
 
 class TestGetCurrentOsUser(unittest.TestCase):
     def assert_values(self):
-        user_id, user_name, user_home, user_gid = onedrived.get_current_os_user()
+        user_id, user_name, user_home, user_gid = onedrivee.get_current_os_user()
         self.assertIsInstance(user_id, int)
         self.assertIsInstance(user_name, str)
         self.assertIsInstance(user_home, str)

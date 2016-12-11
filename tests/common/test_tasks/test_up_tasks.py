@@ -2,11 +2,11 @@ import io
 import os
 import unittest
 
-from onedrived.api.errors import OneDriveError
-from onedrived.api.items import OneDriveItem
-from onedrived.common.dateparser import timestamp_to_datetime
-from onedrived.common.tasks.up_task import UpdateMetadataTask
-from onedrived.common.tasks.up_task import UploadFileTask
+from onedrivee.api.errors import OneDriveError
+from onedrivee.api.items import OneDriveItem
+from onedrivee.common.dateparser import timestamp_to_datetime
+from onedrivee.common.tasks.up_task import UpdateMetadataTask
+from onedrivee.common.tasks.up_task import UploadFileTask
 from tests import get_data, mock
 from tests.factory.tasks_factory import get_sample_task_base
 
@@ -52,7 +52,7 @@ class TestUpdateMetadataTask(TestUpTaskBase):
         self.task = UpdateMetadataTask(self.parent_task, '/', 'foo.txt', self.new_mtime)
 
     def test_handle(self):
-        with mock.patch('onedrived.api.facets.FileSystemInfoFacet') as mock_class:
+        with mock.patch('onedrivee.api.facets.FileSystemInfoFacet') as mock_class:
             self.task.handle()
             mock_class.assert_called_once_with(modified_time=timestamp_to_datetime(self.new_mtime))
         self.assertEqual(1, len(self.task.items_store.get_items_by_id(item_id=self.item.id)))
