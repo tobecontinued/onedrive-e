@@ -55,13 +55,13 @@ setup(
         long_description=readme,
         packages=packages,
         include_package_data=True,
-        package_data={
-            'onedrivee': ['lang/*', 'data/*']
-        },
+        #package_data={
+        #    'onedrivee': ['lang/*', 'data/*']
+        #},
         entry_points={
             'console_scripts': [
-                'onedrivee = onedrivee.cli.cli_main:main',
-                'onedrivee-pref = onedrivee.cli.pref_main:main'
+                'onedrivee = onedrivee.main.cli_main:main',
+                'onedrivee-pref = onedrivee.main.pref_main:main'
             ],
             'gui_scripts': []
         },
