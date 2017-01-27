@@ -2,7 +2,6 @@ import atexit
 import sqlite3
 from urllib import parse as url_parse
 
-from onedrivee.common.utils  import get_content
 from onedrivee.common import logger_factory
 from onedrivee.common import hasher 
 from onedrivee.common.dateparser import datetime_to_str, str_to_datetime
@@ -56,7 +55,23 @@ class ItemStorage:
     """
 
     logger = logger_factory.get_logger('ItemStorage')
-    create_table_sql_content = get_content('onedrive_items.sql')
+    create_table_sql_content = '''
+      CREATE TABLE IF NOT EXISTS items (
+        item_id       TEXT UNIQUE PRIMARY KEY ON CONFLICT REPLACE,
+        type          TEXT,
+        item_name     TEXT,
+        parent_id     TEXT,
+        parent_path   TEXT,
+        etag          TEXT,
+        ctag          TEXT,
+        size          INT,
+        created_time  TEXT,
+        modified_time TEXT,
+        status        TEXT,
+        crc32_hash    TEXT,
+        sha1_hash     TEXT
+      );
+    '''
 
     def __init__(self, db_path, drive):
         """
@@ -70,7 +85,6 @@ class ItemStorage:
         self.drive = drive
         self._cursor = self._conn.cursor()
         self._cursor.execute(ItemStorage.create_table_sql_content)
-        self._cursor.execute(get_content('onedrive_items.sql'))
         self._conn.commit()
 
     def __del__(self):

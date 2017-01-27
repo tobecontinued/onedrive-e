@@ -13,6 +13,16 @@ class AccountStorage:
     """
 
     logger = logger_factory.get_logger('AccountStorage')
+    create_table_sql_content = '''
+      CREATE TABLE IF NOT EXISTS accounts (
+        account_id   TEXT PRIMARY KEY,
+        account_type TEXT,
+        account_dump TEXT,
+        profile_dump TEXT,
+        UNIQUE (account_id, account_type)
+          ON CONFLICT REPLACE
+      );
+    '''
 
     def __init__(self, db_path, personal_client=None, business_client=None):
         self._conn = sqlite3.connect(db_path, isolation_level=None)

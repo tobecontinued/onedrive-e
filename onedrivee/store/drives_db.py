@@ -8,6 +8,17 @@ from onedrivee.common import logger_factory
 
 class DriveStorage:
     logger = logger_factory.get_logger('DriveStorage')
+    create_table_sql_content = '''
+      CREATE TABLE IF NOT EXISTS drives (
+        drive_id     TEXT PRIMARY KEY,
+        account_id   TEXT,
+        account_type TEXT,
+        local_root TEXT UNIQUE NOT NULL,
+        drive_dump   TEXT,
+        UNIQUE (account_id, account_type, drive_id)
+          ON CONFLICT REPLACE
+      );
+    '''
 
     def __init__(self, db_path, account_store):
         """
@@ -16,7 +27,7 @@ class DriveStorage:
         """
         self._conn = sqlite3.connect(db_path, isolation_level=None)
         self._cursor = self._conn.cursor()
-        self._cursor.execute(get_content('onedrive_drives.sql'))
+        self._cursor.execute(DriveStorage.create_table_sql_content)
         self._conn.commit()
         self._all_drives = {}
         self._drive_roots = {}
