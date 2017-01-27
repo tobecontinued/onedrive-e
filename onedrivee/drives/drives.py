@@ -10,12 +10,12 @@ import time
 
 import requests
 
-from onedrivee.api import facets
-from onedrivee.api import items
-from onedrivee.api import options
-from onedrivee.api import resources
-from onedrivee.common import drive_config
-from onedrivee.api import errors
+from onedrivee.drives import facets
+from onedrivee.drives import items
+from onedrivee.drives import options
+from onedrivee.drives import resources
+from onedrivee.conf import drive_config
+from onedrivee.drives import errors
 from onedrivee.common import logger_factory
 
 

@@ -5,12 +5,14 @@ import sys
 import time
 import psutil#debug
 
-from onedrivee.api import clients
-from onedrivee.cli import CONFIG_DIR, get_current_user_config
-from onedrivee.common import logger_factory, netman, task_worker
-from onedrivee.common.tasks import TaskBase
-from onedrivee.common.tasks.merge_task import MergeDirTask
-from onedrivee.store import account_db, drives_db, items_db, task_pool
+from onedrivee.drives import clients
+from onedrivee.tools import CONFIG_DIR, get_current_user_config
+from onedrivee.common import logger_factory
+from onedrivee.workers import netman, task_worker
+from onedrivee.workers.tasks.task_base import TaskBase
+from onedrivee.workers.tasks.merge_task import MergeDirTask
+from onedrivee.store import account_db, drives_db, items_db
+from onedrivee.workers import task_pool
 
 logger = None
 user_conf = None

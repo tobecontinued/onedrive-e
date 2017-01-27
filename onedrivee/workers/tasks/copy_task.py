@@ -3,11 +3,11 @@ import threading
 import traceback
 from time import sleep
 
-from onedrivee.api import errors
-from onedrivee.api import options
-from onedrivee.api import resources
-from onedrivee.common.tasks import TaskBase
-from onedrivee.common.tasks.up_task import UploadFileTask
+from onedrivee.drives import errors
+from onedrivee.drives import options
+from onedrivee.drives import resources
+from onedrivee.wokers.tasks.task_base import TaskBase
+from onedrivee.wokers.tasks.up_task import UploadFileTask
 from onedrivee.store.items_db import ItemRecordStatuses
 
 

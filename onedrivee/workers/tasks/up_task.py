@@ -1,11 +1,11 @@
 import os
 import traceback
 
-from onedrivee.api import errors
-from onedrivee.api import facets
-from onedrivee.api.options import NameConflictBehavior
+from onedrivee.drives import errors
+from onedrivee.drives import facets
+from onedrivee.drives.options import NameConflictBehavior
 from onedrivee.common.dateparser import timestamp_to_datetime
-from onedrivee.common.tasks import TaskBase
+from onedrivee.workers.tasks.task_base import TaskBase
 from onedrivee.store.items_db import ItemRecordStatuses
 
 

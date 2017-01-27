@@ -1,6 +1,6 @@
 import json
 
-from onedrivee.common.drive_config import DriveConfig
+from onedrivee.conf.drive_config import DriveConfig
 
 
 class UserConfig:

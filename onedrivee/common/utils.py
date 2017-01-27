@@ -43,7 +43,7 @@ def get_content(file_name, pkg_name='onedrivee', is_text=True):
     :param True | False is_text: True to indicate the text is UTF-8 encoded.
     :return str | bytes: Content of the file.
     """
-    content = pkgutil.get_data(pkg_name, 'data/' + file_name)
+    content = pkgutil.get_data(pkg_name, 'store/' + file_name)
     if is_text:
         content = content.decode('utf-8')
     return content

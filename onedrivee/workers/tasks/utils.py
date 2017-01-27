@@ -1,6 +1,6 @@
 import os
 
-from onedrivee import OS_HOSTNAME
+from onedrivee.common.utils import OS_HOSTNAME
 
 
 def append_hostname(path):

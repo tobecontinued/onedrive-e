@@ -1,4 +1,4 @@
-from onedrivee.common.user_config import UserConfig
+from onedrivee.conf.user_config import UserConfig
 
 
 def save_user_config(path, user_conf):

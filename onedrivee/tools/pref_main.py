@@ -3,12 +3,13 @@ import sys
 
 from clint.textui import colored, columns, indent, prompt, puts, validators
 
-from onedrivee import OS_USER_NAME, OS_USER_HOME, mkdir, get_content
-from onedrivee.api import accounts, clients
-from onedrivee.cli import CONFIG_DIR, get_current_user_config
-from onedrivee.common import drive_config, netman
+from onedrivee.common.utils import OS_USER_NAME, OS_USER_HOME, mkdir, get_content
+from onedrivee.drives import accounts, clients
+from onedrivee.tools import CONFIG_DIR, get_current_user_config
+from onedrivee.conf import drive_config
+from onedrivee.workers import netman
 from onedrivee.store import account_db, drives_db
-from onedrivee.vendor.utils import pretty_print_bytes
+from onedrivee.common.utils import pretty_print_bytes
 
 try:
     if not os.path.exists(CONFIG_DIR):

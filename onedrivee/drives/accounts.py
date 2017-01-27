@@ -8,8 +8,8 @@ from urllib import parse
 
 import requests
 
-from onedrivee.api import resources
-from onedrivee.api import restapi
+from onedrivee.drives import resources
+from onedrivee.drives import restapi
 
 
 def get_personal_account(client, code=None, uri=None):

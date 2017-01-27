@@ -1,6 +1,6 @@
 import json
 
-from onedrivee.api import options
+from onedrivee.drives import options
 from onedrivee.common.dateparser import str_to_datetime
 
 

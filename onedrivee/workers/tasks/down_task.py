@@ -1,11 +1,11 @@
 import os
 import traceback
 
-from onedrivee import OS_USER_ID, OS_USER_GID
-from onedrivee.api import errors
+from onedrivee.common.utils import OS_USER_ID, OS_USER_GID
+from onedrivee.drives import errors
 from onedrivee.common import hasher
 from onedrivee.common.dateparser import datetime_to_timestamp
-from onedrivee.common.tasks import TaskBase
+from onedrivee.workers.tasks.task_base import TaskBase
 from onedrivee.store.items_db import ItemRecordStatuses
 
 

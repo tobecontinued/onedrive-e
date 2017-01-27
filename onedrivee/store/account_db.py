@@ -1,9 +1,9 @@
 import atexit
 import sqlite3
 
-from onedrivee import get_content
-from onedrivee.api import accounts
-from onedrivee.api import resources
+from onedrivee.common.utils import get_content
+from onedrivee.drives import accounts
+from onedrivee.drives import resources
 from onedrivee.common import logger_factory
 
 

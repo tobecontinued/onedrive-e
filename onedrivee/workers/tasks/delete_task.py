@@ -1,7 +1,7 @@
 import traceback
 
-from onedrivee.api import errors
-from onedrivee.common.tasks import TaskBase
+from onedrivee.drives import errors
+from onedrivee.workers.tasks.task_base import TaskBase
 
 
 class DeleteItemTask(TaskBase):

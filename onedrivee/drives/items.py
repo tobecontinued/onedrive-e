@@ -1,5 +1,5 @@
-from onedrivee.api import facets
-from onedrivee.api import resources
+from onedrivee.drives import facets
+from onedrivee.drives import resources
 from onedrivee.common.dateparser import str_to_datetime
 
 

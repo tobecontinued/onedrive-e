@@ -2,11 +2,11 @@ import atexit
 import sqlite3
 from urllib import parse as url_parse
 
-from onedrivee import get_content
+from onedrivee.common.utils  import get_content
 from onedrivee.common import logger_factory
 from onedrivee.common import hasher 
 from onedrivee.common.dateparser import datetime_to_str, str_to_datetime
-from onedrivee.vendor.rwlock import ReadWriteLock
+from onedrivee.common.rwlock import ReadWriteLock
 
 
 def create_item_db_name(drive):

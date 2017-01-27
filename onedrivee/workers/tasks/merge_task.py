@@ -3,17 +3,17 @@ import traceback
 
 from send2trash import send2trash
 
-from onedrivee import mkdir
-from onedrivee.api import errors
+from onedrivee.common.utils import mkdir
+from onedrivee.drives import errors
 from onedrivee.common import hasher
 from onedrivee.common.dateparser import datetime_to_timestamp, compare_timestamps
-from onedrivee.common.tasks import TaskBase
-from onedrivee.common.tasks.delete_task import DeleteItemTask
-from onedrivee.common.tasks.down_task import DownloadFileTask
-from onedrivee.common.tasks.up_task import UpdateMetadataTask
-from onedrivee.common.tasks.up_task import UploadFileTask
-from onedrivee.common.tasks.utils import append_hostname, stat_file
-from onedrivee.common.tasks.utils import unpack_first_item as _unpack_first_item
+from onedrivee.workers.tasks.task_base import TaskBase
+from onedrivee.workers.tasks.delete_task import DeleteItemTask
+from onedrivee.workers.tasks.down_task import DownloadFileTask
+from onedrivee.workers.tasks.up_task import UpdateMetadataTask
+from onedrivee.workers.tasks.up_task import UploadFileTask
+from onedrivee.workers.tasks.utils import append_hostname, stat_file
+from onedrivee.workers.tasks.utils import unpack_first_item as _unpack_first_item
 from onedrivee.store.items_db import ItemRecordStatuses
 
 

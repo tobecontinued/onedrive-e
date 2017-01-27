@@ -8,7 +8,7 @@ import time
 
 import requests
 
-from onedrivee.api import errors
+from onedrivee.drives import errors
 from onedrivee.common import logger_factory
 
 

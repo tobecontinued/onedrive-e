@@ -1,9 +1,9 @@
 import atexit
 import os
 
-from onedrivee import OS_USER_HOME
-from onedrivee.common import user_config
-from onedrivee.store import user_config_db
+from onedrivee.common.utils import OS_USER_HOME
+from onedrivee.conf import user_config
+from onedrivee.conf import user_config_db
 
 CONFIG_DIR = OS_USER_HOME + '/.onedrivee'
 USER_CONF_PATH = CONFIG_DIR + '/user_config.json'

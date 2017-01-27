@@ -1,8 +1,8 @@
 import traceback
 
-from onedrivee.api import errors
-from onedrivee.api import resources
-from onedrivee.common.tasks import TaskBase
+from onedrivee.drives import errors
+from onedrivee.drives import resources
+from onedrivee.workers.tasks.task_base import TaskBase
 from onedrivee.store.items_db import ItemRecordStatuses
 
 

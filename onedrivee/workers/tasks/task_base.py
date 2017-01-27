@@ -1,4 +1,6 @@
 from onedrivee.common import logger_factory
+
+
 class TaskBase:
     logger = logger_factory.get_logger('Tasks')
 
